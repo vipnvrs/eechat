@@ -72,7 +72,13 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+#app {
+  height: 100vh;
+  width: 100vw;
 }
