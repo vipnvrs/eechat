@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import CodeCopy from './CodeCopy.vue'
+import 'highlight.js/styles/atom-one-dark.css'
+import markdownItDeflist from 'markdown-it-deflist'
+import { ref } from 'vue'
 
 interface Props {
   message: string
@@ -7,11 +13,54 @@ interface Props {
 }
 
 defineProps<Props>()
+
+// 修改 markdown-it 配置
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  breaks: true,
+  typographer: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return '<pre><code class="hljs w-[660px] text-[13px] leading-[1.6] rounded">' +
+               hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
+               '</code></pre>';
+      } catch (__) {}
+    }
+    return '<pre><code class="hljs">' + md.utils.escapeHtml(str) + '</code></pre>';
+  }
+}).use(markdownItDeflist)  // 使用 ES 模块方式
+
+const renderMarkdown = (message: string) => {
+  // 正则匹配提取 <think></think> 标签中的内容
+  const thinkReg = /<think>(.*?)<\/think>/gs
+  const parts = message.split(thinkReg)
+
+  // 处理每个部分
+  const htmlParts = parts.map((part, index) => {
+    if (index % 2 === 1) {
+      // 奇数索引部分是 <think> 标签中的内容
+      const content = part.trim()
+      if (content) {
+        return `<details><summary>思考过程</summary><div class="think">${content}</div></details>`
+      } else {
+        return ''
+      }
+    } else {
+      // 偶数索引部分是普通 Markdown 内容
+      return md.render(part)
+    }
+  })
+
+  // 合并所有部分
+  return htmlParts.join('')
+}
 </script>
 
 <template>
   <div class="flex gap-3" :class="role === 'user' ? 'flex-row-reverse' : ''">
-    <Avatar>
+    <!-- <Avatar>
       <AvatarImage 
         :src="role === 'user' 
           ? 'https://github.com/shadcn.png' 
@@ -19,18 +68,83 @@ defineProps<Props>()
         :alt="role === 'user' ? '@user' : '@ai'" 
       />
       <AvatarFallback>{{ role === 'user' ? 'U' : 'AI' }}</AvatarFallback>
-    </Avatar>
+    </Avatar> -->
     
-    <div class="flex flex-col gap-2 max-w-[80%]">
-      <div class="text-sm text-muted-foreground">
+    <div class="flex flex-col gap-2 max-w-[100%]">
+      <!-- <div class="text-sm text-muted-foreground">
         {{ role === 'user' ? '用户' : 'AI助手' }}
-      </div>
-      <div class="rounded-lg p-3" 
+      </div> -->
+      <div class="rounded-lg p-3 list-disc"
         :class="role === 'user' 
           ? 'bg-primary text-primary-foreground' 
-          : 'bg-muted'">
-        {{ message }}
+          : 'bg-muted'"
+        v-html="renderMarkdown(message)">
       </div>
     </div>
   </div>
 </template>
+
+<style>
+.think {
+  font-style: italic;
+  color: #555;
+  font-size: 14px;
+}
+details {
+  /* margin-top: 1em; */
+}
+summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 添加有序列表样式 */
+ol {
+  counter-reset: item;
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ol li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 2.5em;
+  margin: 0.5em 0;
+}
+
+ol li:before {
+  content: counter(item) ".";
+  position: absolute;
+  left: 0.8em;
+  color: #666;
+  font-weight: 500;
+}
+
+/* 支持多级有序列表 */
+ol ol {
+  margin-left: 1em;
+}
+
+ol ol li:before {
+  content: counter(item, lower-alpha) ".";
+}
+
+ol ol ol li:before {
+  content: counter(item, lower-roman) ".";
+}
+
+/* 暗黑模式支持 */
+:root[class~="dark"] ol li:before {
+  color: #999;
+}
+
+/* 调整列表项间距 */
+li p {
+  margin: 0.3em 0;
+}
+
+/* 确保列表内的代码块正确对齐 */
+li pre {
+  margin: 1em 0;
+}
+</style>

@@ -4,6 +4,7 @@ interface LocalAIConfig {
   baseURL?: string
   apiKey?: string
   model?: string
+  onMessage?: (content: string) => void // 添加回调函数类型
 }
 
 interface Message {
@@ -15,6 +16,7 @@ const defaultConfig: Required<LocalAIConfig> = {
   baseURL: 'http://localhost:11434/v1',
   apiKey: 'dummy', // Local setups often don't require a real API key
   model: 'deepseek-r1',
+  onMessage: () => {}, // 默认空函数
 }
 
 class LocalAI {
@@ -32,7 +34,7 @@ class LocalAI {
 
   async createChatCompletion(
     messages: Message[],
-    streaming: boolean = false,
+    streaming: boolean = true,
   ): Promise<OpenAI.Chat.Completions.ChatCompletion | void> {
     const params: OpenAI.Chat.Completions.ChatCompletionCreateParams = {
       model: this.config.model,
@@ -57,7 +59,7 @@ class LocalAI {
     )
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || ''
-      process.stdout.write(content)
+      this.config.onMessage(content) // 使用回调函数替代 process.stdout.write
     }
     console.log('\n\nStream finished.')
   }
