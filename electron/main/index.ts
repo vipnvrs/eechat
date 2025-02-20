@@ -58,6 +58,9 @@ async function createWindow() {
     },
   })
 
+  // 隐藏菜单栏
+  win.setMenuBarVisibility(false)
+
   if (VITE_DEV_SERVER_URL) {
     // #298
     win.loadURL(VITE_DEV_SERVER_URL)
@@ -120,4 +123,28 @@ ipcMain.handle('open-win', (_, arg) => {
   } else {
     childWindow.loadFile(indexHtml, { hash: arg })
   }
+})
+
+// 添加 ipcMain handler 来处理系统平台查询
+ipcMain.handle('get-platform', () => {
+  return process.platform
+})
+
+// 添加执行命令的 handler
+ipcMain.handle('exec', async (_, command) => {
+  const { exec } = require('child_process')
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(error)
+        return
+      }
+      resolve(stdout)
+    })
+  })
+})
+
+// 添加打开外部链接的 handler
+ipcMain.handle('open-external', (_, url) => {
+  shell.openExternal(url)
 })

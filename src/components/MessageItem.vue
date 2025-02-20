@@ -77,7 +77,7 @@ const renderMarkdown = (message: string) => {
       <div class="rounded-lg p-3 list-disc"
         :class="role === 'user' 
           ? 'bg-primary text-primary-foreground' 
-          : 'bg-muted'"
+          : 'bg-white'"
         v-html="renderMarkdown(message)">
       </div>
     </div>

@@ -1,30 +1,37 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import Message from '@/components/Message.vue'
 import ChatInput from '@/components/ChatInput.vue'
+import ModelSelect from '@/components/ModelSelect.vue'
+import Ollama from '@/components/Ollama.vue'
 import LocalAI from '@/api/request'
 
 const chatHistory = ref<Array<{ role: string; content: string }>>([])
 const currentAssistantMessage = ref('')
+const selectedModel = ref('') // 添加选中模型的状态
 
-// 初始化 LocalAI 实例，配置消息处理回调
-const localAI = new LocalAI({
+// 更新 LocalAI 实例创建
+const localAI = computed(() => new LocalAI({
+  model: selectedModel.value || 'deepseek-r1', // 使用选中的模型,如果没有则使用默认值
   onMessage: (content: string) => {
     if (!currentAssistantMessage.value) {
-      // 首次收到消息，创建新的助手消息
       chatHistory.value.push({
         role: 'assistant',
         content: content,
       })
     } else {
-      // 更新最后一条助手消息
-      chatHistory.value[chatHistory.value.length - 1].content =
+      chatHistory.value[chatHistory.value.length - 1].content = 
         currentAssistantMessage.value + content
     }
     currentAssistantMessage.value += content
   },
-})
+}))
+
+// 处理模型选择
+const handleModelSelect = (modelId: string) => {
+  selectedModel.value = modelId
+}
 
 const sendMsg = async (msg: string) => {
   // 重置当前助手消息
@@ -34,7 +41,7 @@ const sendMsg = async (msg: string) => {
   chatHistory.value.push({ role: 'user', content: msg })
 
   try {
-    await localAI.createChatCompletion([
+    await localAI.value.createChatCompletion([
       { role: 'system', content: '你是一个AI助手' },
       ...chatHistory.value, // 包含完整对话历史
     ])
@@ -47,11 +54,14 @@ const sendMsg = async (msg: string) => {
 
 <template>
   <div class="w-[700px] mx-auto h-full flex p-2">
-    <div class="flex flex-col flex-grow align-bottom">
+    <div class="flex flex-col flex-grow align-bottom w-[700px]">
       <div class="fixed bg-white content-center top-0 pt-1">
-        <div class="py-4 border-b w-[700px]">Deepseek R1</div>
+        <div class="py-4 border-b w-[700px] px-2 flex justify-between">
+          <ModelSelect @update:modelId="handleModelSelect"></ModelSelect>
+          <Ollama></Ollama>
+        </div>
       </div>
-      <div class="pt-[100px] pb-[300px] max-w-[100vw]">
+      <div class="pt-[100px] pb-[300px]">
         <Message :messages="chatHistory"></Message>
       </div>
       <div class="fixed  bg-white content-center bottom-0 pb-2">
