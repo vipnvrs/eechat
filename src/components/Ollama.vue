@@ -164,11 +164,11 @@ const downloadOllama = () => {
 
 // 状态文本映射
 const statusText = {
-  [OllamaStatus.CHECKING]: '检查中...',
-  [OllamaStatus.NOT_INSTALLED]: '未安装',
-  [OllamaStatus.STOPPED]: '未运行',
-  [OllamaStatus.RUNNING]: '运行中',
-  [OllamaStatus.ERROR]: errorMessage.value || '错误',
+  [OllamaStatus.CHECKING]: 'Ollama 检查中...',
+  [OllamaStatus.NOT_INSTALLED]: 'Ollama 未安装',
+  [OllamaStatus.STOPPED]: 'Ollama 未运行',
+  [OllamaStatus.RUNNING]: 'Ollama 运行中',
+  [OllamaStatus.ERROR]: errorMessage.value || 'Ollama 错误',
 }
 
 // 状态图标映射

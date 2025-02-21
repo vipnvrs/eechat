@@ -26,10 +26,10 @@ initEvent()
 </script>
 
 <template>
-  <div class="relative w-[700px]">
+  <div class="relative">
     <Textarea
       v-model="msg"
-      class="h-[100px]"
+      class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
       placeholder="输入您要发送的消息"
     ></Textarea>
     <!-- <Button @click="handleSendMsg" class="absolute bottom-2 right-2" variant="" size="icon">

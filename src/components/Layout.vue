@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Button } from '@/components/ui/button'
+import AppSidebar from '@/components/Sidebar.vue'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import { Separator } from '@/components/ui/separator'
+
 import Message from '@/components/Message.vue'
 import ChatInput from '@/components/ChatInput.vue'
 import ModelSelect from '@/components/ModelSelect.vue'
@@ -53,20 +65,38 @@ const sendMsg = async (msg: string) => {
 </script>
 
 <template>
-  <div class="w-[700px] mx-auto h-full flex p-2">
-    <div class="flex flex-col flex-grow align-bottom w-[700px]">
-      <div class="fixed bg-white content-center top-0 pt-1">
-        <div class="py-4 border-b w-[700px] px-2 flex justify-between">
-          <ModelSelect @update:modelId="handleModelSelect"></ModelSelect>
-          <Ollama></Ollama>
-        </div>
+  <SidebarProvider
+    :style="{
+      '--sidebar-width': '300px',
+    }"
+  >
+    <AppSidebar />
+    <SidebarInset class="">
+      <div class="w-full h-full overflow-y-hidden max-h-[100vh] flex flex-col">
+      <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
+        <SidebarTrigger class="-ml-1" />
+        <Separator orientation="vertical" class="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem class="hidden md:block">
+              <BreadcrumbLink href="#">
+                对话
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator class="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>新对话</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
+      <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
+        <Message :messages="chatHistory" class=""></Message>
       </div>
-      <div class="pt-[100px] pb-[300px]">
-        <Message :messages="chatHistory"></Message>
-      </div>
-      <div class="fixed  bg-white content-center bottom-0 pb-2">
+      <div class="sticky bottom-0  content-center shrink-0 items-center gap-2 border-b bg-background">
         <ChatInput @sendMsg="sendMsg"></ChatInput>
       </div>
     </div>
-  </div>
+    </SidebarInset>
+  </SidebarProvider>
 </template>

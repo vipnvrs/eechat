@@ -59,7 +59,7 @@ const renderMarkdown = (message: string) => {
 </script>
 
 <template>
-  <div class="flex gap-3" :class="role === 'user' ? 'flex-row-reverse' : ''">
+  <div class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
     <!-- <Avatar>
       <AvatarImage 
         :src="role === 'user' 
@@ -70,11 +70,11 @@ const renderMarkdown = (message: string) => {
       <AvatarFallback>{{ role === 'user' ? 'U' : 'AI' }}</AvatarFallback>
     </Avatar> -->
     
-    <div class="flex flex-col gap-2 max-w-[100%]">
+    <div class="flex flex-col max-w-[80%]">
       <!-- <div class="text-sm text-muted-foreground">
         {{ role === 'user' ? '用户' : 'AI助手' }}
       </div> -->
-      <div class="rounded-lg p-3 list-disc"
+      <div class="rounded-lg px-4 py-2 list-disc text-[14px]"
         :class="role === 'user' 
           ? 'bg-primary text-primary-foreground' 
           : 'bg-white'"
@@ -84,7 +84,7 @@ const renderMarkdown = (message: string) => {
   </div>
 </template>
 
-<style>
+<style scoped>
 .think {
   font-style: italic;
   color: #555;

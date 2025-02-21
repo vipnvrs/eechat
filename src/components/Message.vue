@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
     <div class="h-full flex flex-col">
-      <div class="flex-1 py-4 space-y-4 overflow-x-hidden leading-8">
+      <div class="flex-1 leading-8">
         <!-- <ScrollArea class="h-full"> -->
         <MessageItem v-for="(message, index) in messages" :key="index" :message="message.content"
           :role="message.role" />
