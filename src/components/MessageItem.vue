@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+// @ts-ignore
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import CodeCopy from './CodeCopy.vue'
 import 'highlight.js/styles/atom-one-dark.css'
+// @ts-ignore
 import markdownItDeflist from 'markdown-it-deflist'
 import { ref } from 'vue'
 
@@ -20,7 +22,7 @@ const md = new MarkdownIt({
   linkify: true,
   breaks: true,
   typographer: true,
-  highlight: function (str, lang) {
+  highlight: function (str:string, lang:string) {
     if (lang && hljs.getLanguage(lang)) {
       try {
         return '<pre><code class="hljs w-[660px] text-[13px] leading-[1.6] rounded">' +
@@ -90,9 +92,7 @@ const renderMarkdown = (message: string) => {
   color: #555;
   font-size: 14px;
 }
-details {
-  /* margin-top: 1em; */
-}
+
 summary {
   cursor: pointer;
   font-weight: bold;

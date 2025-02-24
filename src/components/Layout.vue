@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import AppSidebar from '@/components/Sidebar.vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
@@ -15,88 +15,83 @@ import { Separator } from '@/components/ui/separator'
 
 import Message from '@/components/Message.vue'
 import ChatInput from '@/components/ChatInput.vue'
-import ModelSelect from '@/components/ModelSelect.vue'
-import Ollama from '@/components/Ollama.vue'
-import LocalAI from '@/api/request'
+import { chatApi } from '@/api/request'
 
-const chatHistory = ref<Array<{ role: string; content: string }>>([])
-const currentAssistantMessage = ref('')
-const selectedModel = ref('') // 添加选中模型的状态
-
-// 更新 LocalAI 实例创建
-const localAI = computed(() => new LocalAI({
-  model: selectedModel.value || 'deepseek-r1', // 使用选中的模型,如果没有则使用默认值
-  onMessage: (content: string) => {
-    if (!currentAssistantMessage.value) {
-      chatHistory.value.push({
-        role: 'assistant',
-        content: content,
-      })
-    } else {
-      chatHistory.value[chatHistory.value.length - 1].content = 
-        currentAssistantMessage.value + content
-    }
-    currentAssistantMessage.value += content
-  },
-}))
-
-// 处理模型选择
-const handleModelSelect = (modelId: string) => {
-  selectedModel.value = modelId
+interface Message {
+  role: 'system' | 'user' | 'assistant'
+  content: string
 }
 
-const sendMsg = async (msg: string) => {
-  // 重置当前助手消息
-  currentAssistantMessage.value = ''
+const chatHistory = ref<Message[]>([])
+const loading = ref(false)
+const currentAssistantMessage = ref('')
 
-  // 添加用户消息到历史记录
-  chatHistory.value.push({ role: 'user', content: msg })
+const sendMsg = async (msg: string) => {
+  if (loading.value) return
+  loading.value = true
 
   try {
-    await localAI.value.createChatCompletion([
-      { role: 'system', content: '你是一个AI助手' },
-      ...chatHistory.value, // 包含完整对话历史
-    ])
+    // 添加用户消息到历史记录
+    chatHistory.value.push({ role: 'user', content: msg })
+
+    // 添加空的助手消息
+    chatHistory.value.push({
+      role: 'assistant',
+      content: ''
+    })
+
+    // 发送消息并处理流式响应
+    await chatApi.sendMessage(
+      [
+        { role: 'system', content: '你是一个AI助手' },
+        ...chatHistory.value.slice(0, -1) // 不包含空的助手消息
+      ],
+      (content: string) => {
+        // 更新最后一条消息的内容
+        const lastMessage = chatHistory.value[chatHistory.value.length - 1]
+        lastMessage.content += content
+      }
+    )
+
   } catch (error) {
-    console.error('Error during chat completion:', error)
-    // 可以在这里添加错误处理的UI反馈
+    console.error('Error during chat:', error)
+    // 移除失败的助手消息
+    chatHistory.value.pop()
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <SidebarProvider
-    :style="{
-      '--sidebar-width': '300px',
-    }"
-  >
+  <SidebarProvider :style="{ '--sidebar-width': '300px' }">
     <AppSidebar />
     <SidebarInset class="">
       <div class="w-full h-full overflow-y-hidden max-h-[100vh] flex flex-col">
-      <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
-        <SidebarTrigger class="-ml-1" />
-        <Separator orientation="vertical" class="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem class="hidden md:block">
-              <BreadcrumbLink href="#">
-                对话
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator class="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>新对话</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
-      <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
-        <Message :messages="chatHistory" class=""></Message>
+        <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
+          <SidebarTrigger class="-ml-1" />
+          <Separator orientation="vertical" class="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem class="hidden md:block">
+                <BreadcrumbLink href="#">
+                  对话
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator class="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>新对话</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
+          <Message :messages="chatHistory" />
+        </div>
+        <div class="sticky bottom-0 content-center shrink-0 items-center gap-2 border-b bg-background">
+          <ChatInput @sendMsg="sendMsg" :disabled="loading" />
+        </div>
       </div>
-      <div class="sticky bottom-0  content-center shrink-0 items-center gap-2 border-b bg-background">
-        <ChatInput @sendMsg="sendMsg"></ChatInput>
-      </div>
-    </div>
     </SidebarInset>
   </SidebarProvider>
 </template>

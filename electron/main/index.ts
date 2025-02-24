@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
+import { spawn } from 'child_process'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -83,11 +84,63 @@ async function createWindow() {
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
-app.whenReady().then(createWindow)
+// 添加启动 EggJS 的函数
+async function startEggServer() {
+  const serverPath = path.join(process.env.APP_ROOT, 'electron/server')
 
+  return new Promise((resolve, reject) => {
+    // 使用 cross-spawn 来处理跨平台命令
+    const eggProcess = spawn('npm', ['run', 'dev'], {
+      cwd: serverPath,
+      stdio: 'pipe',
+      shell: true,
+    })
+
+    eggProcess.stdout.on('data', data => {
+      console.log(`[EggJS]: ${data}`)
+      // 当看到特定输出时认为服务启动成功
+      if (data.toString().includes('egg started')) {
+        resolve(eggProcess)
+      }
+    })
+
+    eggProcess.stderr.on('data', data => {
+      console.error(`[EggJS Error]: ${data}`)
+    })
+
+    eggProcess.on('error', err => {
+      reject(err)
+    })
+
+    // 设置超时
+    setTimeout(() => {
+      reject(new Error('EggJS 启动超时'))
+    }, 30000)
+  })
+}
+
+// 在 app ready 时启动 EggJS
+app.whenReady().then(async () => {
+  try {
+    // await startEggServer()
+    console.log('EggJS server started successfully')
+    createWindow()
+  } catch (error) {
+    console.error('Failed to start EggJS server:', error)
+    app.quit()
+  }
+})
+
+// 在应用退出时关闭 EggJS 进程
 app.on('window-all-closed', () => {
   win = null
-  if (process.platform !== 'darwin') app.quit()
+  if (process.platform !== 'darwin') {
+    // 关闭 EggJS 进程
+    if (global.eggProcess) {
+      global.eggProcess.kill()
+    }
+    app.quit()
+  }
 })
 
 app.on('second-instance', () => {

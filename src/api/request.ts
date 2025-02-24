@@ -1,77 +1,165 @@
-import OpenAI from 'openai'
+import axios from 'axios'
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
-interface LocalAIConfig {
-  baseURL?: string
-  apiKey?: string
-  model?: string
-  onMessage?: (content: string) => void // 添加回调函数类型
+export const API_BASE_URL =
+  process.env.NODE_ENV === 'production'
+    ? 'http://your-server.com:7001' // 生产环境服务器地址
+    : 'http://localhost:7002' // 开发环境地址
+
+// 请求配置接口
+interface RequestConfig extends AxiosRequestConfig {
+  loading?: boolean
 }
 
-interface Message {
-  role: 'system' | 'user' | 'assistant'
-  content: string
+// 统一响应格式
+interface ApiResponse<T = any> {
+  code: number // 0: 成功, 非0: 失败
+  data: T | null // 响应数据
+  message: string // 提示信息
 }
 
-const defaultConfig: Required<LocalAIConfig> = {
-  baseURL: 'http://localhost:11434/v1',
-  apiKey: 'dummy', // Local setups often don't require a real API key
-  model: 'deepseek-r1',
-  onMessage: () => {}, // 默认空函数
-}
+class Request {
+  private instance: AxiosInstance
 
-class LocalAI {
-  private config: Required<LocalAIConfig>
-  private openai: OpenAI
-
-  constructor(config: LocalAIConfig = {}) {
-    this.config = { ...defaultConfig, ...config }
-    this.openai = new OpenAI({
-      baseURL: this.config.baseURL,
-      apiKey: this.config.apiKey,
-      dangerouslyAllowBrowser: true,
+  constructor(config?: AxiosRequestConfig) {
+    this.instance = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 60000,
+      ...config,
     })
+
+    this.setupInterceptors()
   }
 
-  async createChatCompletion(
-    messages: Message[],
-    streaming: boolean = true,
-  ): Promise<OpenAI.Chat.Completions.ChatCompletion | void> {
-    const params: OpenAI.Chat.Completions.ChatCompletionCreateParams = {
-      model: this.config.model,
-      messages: messages,
-      stream: streaming,
-    }
-
-    if (streaming) {
-      const stream = await this.openai.chat.completions.create(params)
-      return this.handleStream(stream)
-    } else {
-      const response = await this.openai.chat.completions.create(params)
-      return this.handleResponse(response)
-    }
-  }
-
-  private async handleStream(
-    stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
-  ): Promise<void> {
-    console.log(
-      `Streaming response from local AI model (${this.config.model}):\n`,
+  private setupInterceptors() {
+    // 请求拦截器
+    this.instance.interceptors.request.use(
+      config => {
+        // 这里可以添加 token 等通用请求头
+        return config
+      },
+      error => Promise.reject(error),
     )
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || ''
-      this.config.onMessage(content) // 使用回调函数替代 process.stdout.write
-    }
-    console.log('\n\nStream finished.')
+
+    // 响应拦截器
+    this.instance.interceptors.response.use(
+      (response: AxiosResponse<ApiResponse>) => {
+        const { code, data, message } = response.data
+        console.log(response)
+
+        // 业务状态判断
+        if (code !== 0) {
+          // 统一处理业务错误
+          return Promise.reject(new Error(message || '请求失败'))
+        }
+
+        // 成功返回数据
+        return data
+      },
+      error => {
+        // 处理 HTTP 错误
+        const message = error.response?.data?.message || error.message
+        return Promise.reject(new Error(message))
+      },
+    )
   }
 
-  private handleResponse(
-    response: OpenAI.Chat.Completions.ChatCompletion,
-  ): OpenAI.Chat.Completions.ChatCompletion {
-    // console.log(`Response from local AI model (${this.config.model}):\n`)
-    // console.log(response.choices[0].message.content)
-    // console.log('\nUsage:', response.usage)
-    return response
+  // 通用请求方法
+  public async request<T = any>(config: RequestConfig): Promise<T> {
+    try {
+      const response = await this.instance.request<any, T>(config)
+      return response
+    } catch (error) {
+      return Promise.reject(error)
+    }
+  }
+
+  // GET 请求
+  public get<T = any>(
+    url: string,
+    params?: any,
+    config?: RequestConfig,
+  ): Promise<T> {
+    return this.request({ ...config, method: 'GET', url, params })
+  }
+
+  // POST 请求
+  public post<T = any>(
+    url: string,
+    data?: any,
+    config?: RequestConfig,
+  ): Promise<T> {
+    return this.request({ ...config, method: 'POST', url, data })
+  }
+
+  // PUT 请求
+  public put<T = any>(
+    url: string,
+    data?: any,
+    config?: RequestConfig,
+  ): Promise<T> {
+    return this.request({ ...config, method: 'PUT', url, data })
+  }
+
+  // DELETE 请求
+  public delete<T = any>(url: string, config?: RequestConfig): Promise<T> {
+    return this.request({ ...config, method: 'DELETE', url })
   }
 }
 
-export default LocalAI
+// 导出请求实例
+export const request = new Request()
+
+// 聊天相关的 API 方法
+export const chatApi = {
+  async sendMessage(
+    messages: Array<{ role: string; content: string }>,
+    onProgress?: (content: string) => void,
+  ) {
+    try {
+      const response = await fetch('http://localhost:7002/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages }),
+      })
+
+      if (!response.ok) {
+        throw new Error('请求失败')
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      while (reader) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (!line || !line.startsWith('data: ')) continue
+
+          try {
+            const data = JSON.parse(line.slice(5))
+            if (data.code === 0 && data.data?.content) {
+              onProgress?.(data.data.content)
+            }
+          } catch (e) {
+            console.error('Parse response error:', e)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Chat error:', error)
+      throw error
+    }
+  },
+
+  // 获取聊天历史
+  getChatHistory() {
+    return request.get('/api/chat/history')
+  },
+}

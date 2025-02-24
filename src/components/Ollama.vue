@@ -40,7 +40,7 @@ const checkOllamaStatus = async () => {
         status.value = OllamaStatus.STOPPED
         return
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(`Attempt ${attempts + 1} failed:`, error)
       attempts++
 
@@ -66,7 +66,7 @@ const checkOllamaStatus = async () => {
 }
 
 // 启动 Ollama
-const startOllama = async () => {
+const startOllama = async (): Promise<void> => {
   try {
     shouldCheck.value = true // 开始检查
     status.value = OllamaStatus.CHECKING
@@ -104,7 +104,7 @@ const startOllama = async () => {
     // 如果多次尝试后仍未成功,则认为启动失败
     shouldCheck.value = false
     throw new Error('启动超时')
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to start Ollama:', error)
     status.value = OllamaStatus.ERROR
     errorMessage.value = '启动失败: ' + (error.message || '未知错误')
@@ -150,6 +150,7 @@ const stopOllama = async () => {
   } catch (error) {
     console.error('Failed to stop Ollama:', error)
     status.value = OllamaStatus.ERROR
+    // @ts-ignore
     errorMessage.value = '停止失败: ' + (error.message || '未知错误')
   } finally {
     shouldCheck.value = true // 恢复检查
@@ -229,6 +230,7 @@ onUnmounted(() => {
           'text-red-500': status === OllamaStatus.NOT_INSTALLED,
           'text-yellow-500': status === OllamaStatus.STOPPED,
           'text-green-500': status === OllamaStatus.RUNNING,
+          // @ts-ignore
           'text-red-500': status === OllamaStatus.ERROR,
         }"
       />

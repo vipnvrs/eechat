@@ -9,7 +9,7 @@ const count = ref(0)
 const msg = ref('给我写一个企业网站')
 const emit = defineEmits(['sendMsg'])
 
-const handleSendMsg = e => {
+const handleSendMsg = (e: Event) => {
   emit('sendMsg', msg.value)
   msg.value = ''
 }
@@ -23,12 +23,17 @@ const initEvent = () => {
   })
 }
 initEvent()
+
+defineProps<{
+  disabled?: boolean
+}>()
 </script>
 
 <template>
   <div class="relative">
     <Textarea
       v-model="msg"
+      :disabled="disabled"
       class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
       placeholder="输入您要发送的消息"
     ></Textarea>
@@ -37,6 +42,7 @@ initEvent()
     </Button> -->
     <Button
       @click="handleSendMsg"
+      :disabled="disabled"
       type="submit"
       size="sm"
       class="ml-auto gap-1.5 absolute bottom-2 right-2"

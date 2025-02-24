@@ -183,7 +183,7 @@ const { setOpen } = useSidebar()
           <SidebarGroupContent>
             <a
               v-for="item in chats"
-              :key="item.email"
+              :key="item.name"
               href="#"
               class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
