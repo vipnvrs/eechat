@@ -35,6 +35,7 @@ const md = new MarkdownIt({
 }).use(markdownItDeflist)  // 使用 ES 模块方式
 
 const renderMarkdown = (message: string) => {
+  if(!message) return ''
   // 正则匹配提取 <think></think> 标签中的内容
   const thinkReg = /<think>(.*?)<\/think>/gs
   const parts = message.split(thinkReg)

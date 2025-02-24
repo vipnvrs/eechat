@@ -29,5 +29,24 @@ module.exports = appInfo => {
     domainWhiteList: ['*'],
   }
 
+  // 添加数据库配置
+  const path = require('path')
+  config.sequelize = {
+    dialect: 'sqlite',
+    storage: path.join(__dirname, '../database/chat.db'),
+    define: {
+      freezeTableName: true,
+      timestamps: true,
+      paranoid: true,
+      underscored: true,
+    },
+    logging: console.log,
+    sync: {
+      // 启用同步
+      force: false, // 不强制重建表
+      alter: true, // 允许修改表结构
+    },
+  }
+
   return config
 }

@@ -26,11 +26,20 @@ import {
   Trash2,
   Plus,
 } from 'lucide-vue-next'
-import { h, ref } from 'vue'
+import { h, ref, onMounted } from 'vue'
+import { chatApi } from '@/api/request'
+
+interface Session {
+  id: number
+  title: string
+  updatedAt: string
+  lastMessage?: string
+}
+
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
 })
-// This is sample data
+
 const data = {
   user: {
     name: 'shadcn',
@@ -62,43 +71,63 @@ const data = {
       name: '新对话',
       teaser: '对话的内容简短展示的内容',
     },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
   ],
 }
 const activeItem = ref(data.navMain[0])
 const chats = ref(data.chats)
 const { setOpen } = useSidebar()
+
+const localActiveSessionId = localStorage.getItem('activeSessionId')
+const activeSessionId = ref<number>(localActiveSessionId ? +localActiveSessionId : 0)
+
+const sessions = ref<Session[]>([])
+
+// 获取会话列表
+const fetchSessions = async () => {
+  try {
+    const res = await chatApi.getSessions()
+    sessions.value = res.data
+    console.log(sessions.value);
+    if(sessions.value.length > 0 && !localActiveSessionId) {
+      activeSessionId.value = sessions.value[0].id
+      emit('sessionChange', sessions.value[0].id)
+    }
+  } catch (error) {
+    console.error('Failed to fetch sessions:', error)
+  }
+}
+
+// 创建新对话
+const createNewChat = async () => {
+  try {
+    const res = await chatApi.createChat()
+    const newSession = res
+    sessions.value.unshift(newSession)
+    activeSessionId.value = newSession.id
+    emit('sessionChange', newSession.id)
+  } catch (error) {
+    console.error('Failed to create chat:', error)
+  }
+}
+
+// 切换会话
+const handleSessionChange = (sessionId: number) => {
+  activeSessionId.value = sessionId
+  emit('sessionChange', sessionId)
+}
+
+// 定义事件
+const emit = defineEmits(['sessionChange'])
+
+onMounted(() => {
+  fetchSessions()
+
+  if (localActiveSessionId) {
+    activeSessionId.value = +localActiveSessionId
+    handleSessionChange(+localActiveSessionId)
+  }
+})
+
 </script>
 <template>
   <Sidebar
@@ -173,7 +202,7 @@ const { setOpen } = useSidebar()
             {{ activeItem.title }}
           </div>
           <Label class="flex items-center gap-2 text-sm">
-            <Button size="sm"> <Plus class="w-4 h-4" />新对话 </Button>
+            <Button size="sm" @click="createNewChat"> <Plus class="w-4 h-4" />新对话 </Button>
           </Label>
         </div>
         <SidebarInput placeholder="输入要搜索的内容..." />
@@ -182,16 +211,18 @@ const { setOpen } = useSidebar()
         <SidebarGroup class="px-0">
           <SidebarGroupContent>
             <a
-              v-for="item in chats"
-              :key="item.name"
+              @click="handleSessionChange(item.id)"
+              v-for="item in sessions"
+              :key="item.id"
               href="#"
               class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              :class="{ 'bg-white': item.id === activeSessionId }"
             >
               <div class="flex w-full items-center gap-2">
-                <span>{{ item.name }}</span>
+                <span>{{ item.title }}</span>
               </div>
               <span class="line-clamp-2 w- whitespace-break-spaces text-xs">
-                {{ item.teaser }}
+                {{ item.title }}
               </span>
             </a>
           </SidebarGroupContent>

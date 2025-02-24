@@ -112,22 +112,35 @@ export const request = new Request()
 
 // 聊天相关的 API 方法
 export const chatApi = {
+  // 创建新对话
+  async createChat(title?: string) {
+    return request.post('/api/session/new', { title })
+  },
+
+  // 获取历史会话列表
+  async getSessions() {
+    return request.get('/api/session/list', {
+      // params: {
+      //   page: 1,
+      //   pageSize: 20,
+      // },
+    })
+  },
+
+  // 发送消息
   async sendMessage(
     messages: Array<{ role: string; content: string }>,
+    sessionId,
     onProgress?: (content: string) => void,
   ) {
     try {
-      const response = await fetch('http://localhost:7002/api/chat', {
+      const response = await fetch(API_BASE_URL + '/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({ messages, sessionId }),
       })
-
-      if (!response.ok) {
-        throw new Error('请求失败')
-      }
 
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
@@ -158,8 +171,8 @@ export const chatApi = {
     }
   },
 
-  // 获取聊天历史
-  getChatHistory() {
-    return request.get('/api/chat/history')
+  // 获取消息记录
+  async getMessages(sessionId) {
+    return request.get(`/api/chat/${sessionId}`)
   },
 }

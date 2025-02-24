@@ -7,14 +7,18 @@
     "declarations": true
   },
   "dependencies": {
+    "better-sqlite3": "^11.8.1",
     "egg": "^3.17.5",
-    "egg-scripts": "2"
+    "egg-scripts": "2",
+    "egg-sequelize": "^6.0.0",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "egg-bin": "6",
     "egg-mock": "5",
     "eslint": "8",
-    "eslint-config-egg": "13"
+    "eslint-config-egg": "13",
+    "sequelize-cli": "^6.6.2"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -27,7 +31,10 @@
     "test:local": "egg-bin test",
     "cov": "egg-bin cov",
     "lint": "eslint .",
-    "ci": "npm run lint && npm run cov"
+    "ci": "npm run lint && npm run cov",
+    "migrate:up": "npx sequelize db:migrate",
+    "migrate:undo": "npx sequelize db:migrate:undo",
+    "migrate:undo:all": "npx sequelize db:migrate:undo:all"
   },
   "repository": {
     "type": "git",
