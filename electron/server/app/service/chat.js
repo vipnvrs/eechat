@@ -50,7 +50,11 @@ class ChatService extends Service {
       let assistantMessage = '' // 用于累积助手的完整回复
 
       for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || ''
+        const content =
+          (chunk.choices[0] &&
+            chunk.choices[0].delta &&
+            chunk.choices[0].delta.content) ||
+          ''
         assistantMessage += content // 累积回复内容
 
         const data = {
