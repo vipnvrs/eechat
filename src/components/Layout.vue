@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import SidebarLeft from '@/components/SidebarLeft.vue'
+import SidebarRight from '@/components/SidebarRight.vue'
 import { Button } from '@/components/ui/button'
-import AppSidebar from '@/components/Sidebar.vue'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider, SidebarTrigger, useSidebar } from '@/components/ui/sidebar'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,24 +16,28 @@ import { Separator } from '@/components/ui/separator'
 
 import Message from '@/components/Message.vue'
 import ChatInput from '@/components/ChatInput.vue'
+import ModelSelect from '@/components/ModelSelect.vue'
 import { chatApi } from '@/api/request'
+import { PanelLeft, PanelRight } from 'lucide-vue-next'
 
 interface Message {
   role: 'system' | 'user' | 'assistant'
   content: string
 }
-
-const activeSessionId = ref<number>()
+const activeSession = ref({})
 const chatHistory = ref<Message[]>([])
 const loading = ref(false)
 const currentAssistantMessage = ref('')
+const sidebarLeftOpen = ref(true)
+const sidebarRightOpen = ref(true)
 
-const handleSessionChange = async (sessionId: number) => {
-  activeSessionId.value = sessionId
-  console.log('Session changed:', sessionId);
-  localStorage.setItem('activeSessionId', sessionId.toString())
+
+const handleSessionChange = async (session) => {
+  activeSession.value = session
+  console.log('Session changed:', session.id)
+  localStorage.setItem('activeSession', JSON.stringify(session))
   chatHistory.value = []
-  chatApi.getMessages(sessionId)
+  chatApi.getMessages(session.id)
     .then((messages) => {
       chatHistory.value = messages.data
     })
@@ -61,7 +66,7 @@ const sendMsg = async (msg: string) => {
         { role: 'system', content: '你是一个AI助手' },
         ...chatHistory.value.slice(0, -1) // 不包含空的助手消息
       ],
-      activeSessionId.value,
+      activeSession.value.id,
       (content: string) => {
         // 更新最后一条消息的内容
         const lastMessage = chatHistory.value[chatHistory.value.length - 1]
@@ -80,34 +85,49 @@ const sendMsg = async (msg: string) => {
 </script>
 
 <template>
-  <SidebarProvider :style="{ '--sidebar-width': '300px' }">
-    <AppSidebar @session-change="handleSessionChange" />
-    <SidebarInset class="">
-      <div class="w-full h-full overflow-y-hidden max-h-[100vh] flex flex-col">
-        <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4">
-          <SidebarTrigger class="-ml-1" />
+  <div class="flex">
+    <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }" v-model:open="sidebarLeftOpen">
+      <SidebarLeft @session-change="handleSessionChange" />
+    </SidebarProvider>
+    <div class="w-full h-[100vh] overflow-y-hidden max-h-[100vh] flex flex-col grow">
+      <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between">
+        <div class="flex items-center gap-2">
+          <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarLeftOpen = !sidebarLeftOpen">
+            <PanelLeft></PanelLeft>
+          </Button>
           <Separator orientation="vertical" class="mr-2 h-4" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem class="hidden md:block">
-                <BreadcrumbLink href="#">
+                <!-- <BreadcrumbLink href="#">
                   对话
-                </BreadcrumbLink>
+                </BreadcrumbLink> -->
+                
+                <ModelSelect></ModelSelect>
               </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>新对话</BreadcrumbPage>
+                <BreadcrumbPage>{{ activeSession.title }}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-        </header>
-        <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
-          <Message :messages="chatHistory" />
         </div>
-        <div class="sticky bottom-0 content-center shrink-0 items-center gap-2 border-b bg-background">
-          <ChatInput @sendMsg="sendMsg" :disabled="loading" />
+        <div class="flex items-center gap-2">
+          <Separator orientation="vertical" class="mx-2 h-4" />
+          <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarRightOpen = !sidebarRightOpen">
+            <PanelRight></PanelRight>
+          </Button>
         </div>
+      </header>
+      <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
+        <Message :messages="chatHistory" />
       </div>
-    </SidebarInset>
-  </SidebarProvider>
+      <div class="sticky bottom-0 content-center shrink-0 items-center gap-2 border-b bg-background">
+        <ChatInput @sendMsg="sendMsg" :disabled="loading" />
+      </div>
+    </div>
+    <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }" v-model:open="sidebarRightOpen">
+      <SidebarRight :activeSession="activeSession"/>
+    </SidebarProvider>
+  </div>
 </template>

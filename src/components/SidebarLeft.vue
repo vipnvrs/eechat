@@ -73,24 +73,24 @@ const data = {
     },
   ],
 }
+const emit = defineEmits(['sessionChange'])
+
 const activeItem = ref(data.navMain[0])
 const chats = ref(data.chats)
 const { setOpen } = useSidebar()
 
-const localActiveSessionId = localStorage.getItem('activeSessionId')
-const activeSessionId = ref<number>(localActiveSessionId ? +localActiveSessionId : 0)
-
+const activeSessionId = ref<number>(0)
 const sessions = ref<Session[]>([])
 
 // 获取会话列表
-const fetchSessions = async () => {
+const fetchSessions = async localActiveSessionId => {
   try {
     const res = await chatApi.getSessions()
     sessions.value = res.data
-    console.log(sessions.value);
-    if(sessions.value.length > 0 && !localActiveSessionId) {
+    console.log(sessions.value)
+    if (sessions.value.length > 0 && !localActiveSessionId) {
       activeSessionId.value = sessions.value[0].id
-      emit('sessionChange', sessions.value[0].id)
+      emit('sessionChange', sessions.value[0])
     }
   } catch (error) {
     console.error('Failed to fetch sessions:', error)
@@ -104,30 +104,32 @@ const createNewChat = async () => {
     const newSession = res
     sessions.value.unshift(newSession)
     activeSessionId.value = newSession.id
-    emit('sessionChange', newSession.id)
+    emit('sessionChange', newSession)
   } catch (error) {
     console.error('Failed to create chat:', error)
   }
 }
 
 // 切换会话
-const handleSessionChange = (sessionId: number) => {
-  activeSessionId.value = sessionId
-  emit('sessionChange', sessionId)
+const handleSessionChange = session => {
+  const sessoionId = session.id
+  activeSessionId.value = sessoionId
+  emit('sessionChange', session)
 }
 
-// 定义事件
-const emit = defineEmits(['sessionChange'])
-
+const activeSessionTitle = ref<string>('')
 onMounted(() => {
-  fetchSessions()
-
-  if (localActiveSessionId) {
-    activeSessionId.value = +localActiveSessionId
-    handleSessionChange(+localActiveSessionId)
+  const localActiveSession = localStorage.getItem('activeSession')
+  let localActiveSessionId = null
+  if (localActiveSession) {
+    const activeSession = JSON.parse(localActiveSession)
+    activeSessionId.value = activeSession.id
+    activeSessionTitle.value = activeSession.title
+    localActiveSessionId = activeSession.id
+    handleSessionChange(activeSession)
   }
+  fetchSessions(localActiveSessionId)
 })
-
 </script>
 <template>
   <Sidebar
@@ -202,7 +204,9 @@ onMounted(() => {
             {{ activeItem.title }}
           </div>
           <Label class="flex items-center gap-2 text-sm">
-            <Button size="sm" @click="createNewChat"> <Plus class="w-4 h-4" />新对话 </Button>
+            <Button size="sm" @click="createNewChat">
+              <Plus class="w-4 h-4" />新对话
+            </Button>
           </Label>
         </div>
         <SidebarInput placeholder="输入要搜索的内容..." />
@@ -211,7 +215,7 @@ onMounted(() => {
         <SidebarGroup class="px-0">
           <SidebarGroupContent>
             <a
-              @click="handleSessionChange(item.id)"
+              @click="handleSessionChange(item)"
               v-for="item in sessions"
               :key="item.id"
               href="#"

@@ -42,6 +42,7 @@
   },
   "packageManager": "pnpm@9.14.2+sha512.6e2baf77d06b9362294152c851c4f278ede37ab1eba3a55fda317a4a17b209f4dbb973fb250a77abc463a341fcb1f17f17cfa24091c4eb319cda0d9b84278387",
   "dependencies": {
+    "@vee-validate/zod": "^4.15.0",
     "@vueuse/core": "^12.5.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
@@ -57,6 +58,8 @@
     "radix-vue": "^1.9.13",
     "reka-ui": "^2.0.0",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vee-validate": "^4.15.0",
+    "zod": "^3.24.2"
   }
 }

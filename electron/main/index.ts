@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, screen } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -44,9 +44,18 @@ const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
+  // 获取主屏幕的尺寸
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize
+
+  // 设置窗口的宽度和高度
+  const windowWidth = Math.min(1200, width * 0.8) // 窗口宽度为屏幕宽度的80%，最大宽度为1200px
+  const windowHeight = Math.min(800, height * 0.8) // 窗口高度为屏幕高度的80%，最大高度为800px
+
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
+    width: windowWidth,
+    height: windowHeight,
     webPreferences: {
       preload,
       webSecurity: false,
