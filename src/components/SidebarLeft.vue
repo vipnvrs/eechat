@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { ScrollArea } from '@/components/ui/scroll-area'
+
 import {
   ArchiveX,
   Command,
@@ -212,25 +214,28 @@ onMounted(() => {
         <SidebarInput placeholder="输入要搜索的内容..." />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup class="px-0">
-          <SidebarGroupContent>
-            <a
-              @click="handleSessionChange(item)"
-              v-for="item in sessions"
-              :key="item.id"
-              href="#"
-              class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              :class="{ 'bg-white': item.id === activeSessionId }"
-            >
-              <div class="flex w-full items-center gap-2">
-                <span>{{ item.title }}</span>
-              </div>
-              <span class="line-clamp-2 w- whitespace-break-spaces text-xs">
-                {{ item.title }}
-              </span>
-            </a>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <ScrollArea class="h-full w-full">
+          <SidebarGroup class="px-0">
+            <SidebarGroupContent>
+              <a
+                @click="handleSessionChange(item)"
+                v-for="item in sessions"
+                :key="item.id"
+                href="#"
+                class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                :class="item.id === activeSessionId ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''"
+              >
+                <div class="flex w-full items-center gap-2">
+                  <span>{{ item.title }}</span>
+                </div>
+                <span class="line-clamp-2 w- whitespace-break-spaces text-xs">
+                  {{ item.title }}
+                </span>
+              </a>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <ScrollBar />
+        </ScrollArea>
       </SidebarContent>
     </Sidebar>
   </Sidebar>

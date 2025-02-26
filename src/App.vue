@@ -4,7 +4,7 @@ import Layout from '@/components/Layout.vue'
 </script>
 
 <template>
-  <div class="h-full w-full overflow-hidden bg-gray-100"><Layout></Layout></div>
+  <div class="h-full w-full overflow-hidden"><Layout></Layout></div>
 </template>
 
 <style>

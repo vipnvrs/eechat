@@ -17,6 +17,8 @@ import { Separator } from '@/components/ui/separator'
 import Message from '@/components/Message.vue'
 import ChatInput from '@/components/ChatInput.vue'
 import ModelSelect from '@/components/ModelSelect.vue'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import Theme from '@/components/Theme.vue'
 import { chatApi } from '@/api/request'
 import { PanelLeft, PanelRight } from 'lucide-vue-next'
 
@@ -89,7 +91,7 @@ const sendMsg = async (msg: string) => {
     <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }" v-model:open="sidebarLeftOpen">
       <SidebarLeft @session-change="handleSessionChange" />
     </SidebarProvider>
-    <div class="w-full h-[100vh] overflow-y-hidden max-h-[100vh] flex flex-col grow">
+    <div class="w-full h-[100vh] max-h-[100vh] flex flex-col grow">
       <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between">
         <div class="flex items-center gap-2">
           <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarLeftOpen = !sidebarLeftOpen">
@@ -113,16 +115,18 @@ const sendMsg = async (msg: string) => {
           </Breadcrumb>
         </div>
         <div class="flex items-center gap-2">
+          <Theme></Theme>
           <Separator orientation="vertical" class="mx-2 h-4" />
           <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarRightOpen = !sidebarRightOpen">
             <PanelRight></PanelRight>
           </Button>
         </div>
       </header>
-      <div class="h-full pb-[100px] overflow-y-scroll p-4 bg-slate-200">
-        <Message :messages="chatHistory" />
-      </div>
-      <div class="sticky bottom-0 content-center shrink-0 items-center gap-2 border-b bg-background">
+      <ScrollArea class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]">
+        <Message :messages="chatHistory" class="py-4"/>
+        <ScrollBar/>
+    </ScrollArea> 
+      <div class="sticky bottom-0 h-[100px] content-center shrink-0 items-center gap-2 border-b bg-background">
         <ChatInput @sendMsg="sendMsg" :disabled="loading" />
       </div>
     </div>

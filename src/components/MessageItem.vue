@@ -80,7 +80,7 @@ const renderMarkdown = (message: string) => {
       <div class="rounded-lg px-4 py-2 list-disc text-[14px]"
         :class="role === 'user' 
           ? 'bg-primary text-primary-foreground' 
-          : 'bg-white'"
+          : 'bg-white dark:bg-[#404558] dark:text-white'"
         v-html="renderMarkdown(message)">
       </div>
     </div>

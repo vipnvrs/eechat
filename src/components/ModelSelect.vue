@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
-import { ChevronsDownUp } from 'lucide-vue-next'
+import { ChevronsDownUp, SlidersHorizontal  } from 'lucide-vue-next'
 import Icon from '@/components/icon.vue'
 
 interface Model {
@@ -80,78 +80,94 @@ const modelData = [
 
 <template>
   <div>
-    <Dialog width="100%">
+    <Dialog class="w-[700px]">
       <DialogTrigger>
         <Button size="sm" variant="outline">
           <span> Deepseek R1 </span>
           <ChevronsDownUp></ChevronsDownUp>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent class="max-w-fit min-w-[80%]">
         <DialogHeader>
           <DialogTitle>模型设置</DialogTitle>
           <DialogDescription> 自定义配置您的模型 </DialogDescription>
         </DialogHeader>
-        <div class="grid gap-4 py-6">
-          <div class="grid gap-2">
-            <Label>模型提供商</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="选择模型提供商" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ollama">
-                  <div class="flex items-center">
-                    <Icon name="ollama" :size="24"></Icon>
-                    <div class="ml-2">Ollama</div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="openai">
-                  <div class="flex items-center">
-                    <Icon name="openai" :size="24"></Icon>
-                    <div class="ml-2">OpenAI</div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="claude">
-                  <div class="flex items-center">
-                    <Icon name="claude" :size="24"></Icon>
-                    <div class="ml-2">Claude</div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="grid gap-2">
-            <Label>API 请求地址</Label>
-            <Input type="text" placeholder="http://" />
-          </div>
-          <div class="grid gap-2">
-            <Label>模型</Label>
-            <Select>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a fruit" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="apple"> Deepseek R1 </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div class="grid gap-2">
-            <Label
-              >单次回复限制 <Badge variant="outline">max_tokens</Badge></Label
-            >
-            <div class="flex">
-              <Slider
-                v-model="formData.temperature"
-                :default-value="[12600]"
-                :max="32000"
-                :min="100"
-                :step="100"
-              />
-              <Input
-                class="w-20 ml-2"
-                v-model="formData.temperature[0]"
-              ></Input>
+        <div class="flex w-[700px]">
+            <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }">
+              <Sidebar>
+                <SidebarContent>
+                  <SidebarMenu>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild>
+                          <a href="#">
+                          <SlidersHorizontal></SlidersHorizontal>aaa</a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarContent>
+              </Sidebar>
+            </SidebarProvider>
+          <div class="grid gap-4 py-6">
+            <div class="grid gap-2">
+              <Label>模型提供商</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="选择模型提供商" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ollama">
+                    <div class="flex items-center">
+                      <Icon name="ollama" :size="24"></Icon>
+                      <div class="ml-2">Ollama</div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="openai">
+                    <div class="flex items-center">
+                      <Icon name="openai" :size="24"></Icon>
+                      <div class="ml-2">OpenAI</div>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="claude">
+                    <div class="flex items-center">
+                      <Icon name="claude" :size="24"></Icon>
+                      <div class="ml-2">Claude</div>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid gap-2">
+              <Label>API 请求地址</Label>
+              <Input type="text" placeholder="http://" />
+            </div>
+            <div class="grid gap-2">
+              <Label>模型</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a fruit" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="apple"> Deepseek R1 </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div class="grid gap-2">
+              <Label
+                >单次回复限制 <Badge variant="outline">max_tokens</Badge></Label
+              >
+              <div class="flex">
+                <Slider
+                  v-model="formData.temperature"
+                  :default-value="[12600]"
+                  :max="32000"
+                  :min="100"
+                  :step="100"
+                />
+                <Input
+                  class="w-20 ml-2"
+                  v-model="formData.temperature[0]"
+                ></Input>
+              </div>
             </div>
           </div>
         </div>
