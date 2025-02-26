@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Skeleton } from '@/components/ui/skeleton'
+import { LoaderCircle} from 'lucide-vue-next'
 // @ts-ignore
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import CodeCopy from './CodeCopy.vue'
 import 'highlight.js/styles/atom-one-dark.css'
 // @ts-ignore
 import markdownItDeflist from 'markdown-it-deflist'
@@ -62,7 +63,11 @@ const renderMarkdown = (message: string) => {
 </script>
 
 <template>
-  <div class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
+   <div v-if="message == ''" class="bg-white dark:bg-[#404558] dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center">
+    <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
+    <span class="ml-2 text-[14px]">思考中...</span>
+   </div>
+  <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
     <!-- <Avatar>
       <AvatarImage 
         :src="role === 'user' 
