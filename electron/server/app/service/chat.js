@@ -35,7 +35,7 @@ class ChatService extends Service {
       )
 
       const requestParams = {
-        model: 'deepseek-r1',
+        model: '22222-r1',
         messages,
         stream: true,
       }

@@ -8,8 +8,7 @@ class ChatController extends Controller {
       const result = await ctx.service.chat.sendMessage(messages, sessionId)
       ctx.body = ctx.helper.success(result)
     } catch (error) {
-      ctx.status = 200 // 保持 HTTP 状态码为 200
-      ctx.body = ctx.helper.error(error.message)
+      ctx.helper.streamError(ctx, error, sessionId)
     }
   }
 
