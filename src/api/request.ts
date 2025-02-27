@@ -176,3 +176,22 @@ export const chatApi = {
     return request.get(`/api/chat/${sessionId}`)
   },
 }
+
+export const ollamaApi = {
+  // 获取 Ollama 状态
+  async getOllamaSatate() {
+    return request.get('/api/ollama/state')
+  },
+  async installOllama() {
+    return request.post('/api/ollama/install')
+  },
+  async startOllama() {
+    return request.post('/api/ollama/start')
+  },
+  async stopOllama() {
+    return request.post('/api/ollama/stop')
+  },
+  async restartOllama() {
+    return request.post('/api/ollama/restart')
+  },
+}

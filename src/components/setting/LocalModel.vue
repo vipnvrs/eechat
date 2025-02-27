@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, reactive } from 'vue'
+import { ref, onMounted, watch, reactive, computed } from 'vue'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,33 +28,80 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { modelsData } from '@/lib/models'
-import {getIconName} from '@/lib/utils'
+import {getIconName, modelSizeToGB} from '@/lib/utils'
 import Icon from '@/components/Icon.vue'
-onMounted(() => {})
+import { LoaderCircle} from 'lucide-vue-next'
+import { ollamaApi } from '@/api/request'
 
-// 模型数据
-console.log(modelsData)
+const loading = ref(false)
 
-// 辅助函数：将参数量转换为文件大小
-function modelSizeToGB(size: string): string {
-  // 提取数字和单位
-  const dNum = 0.73
-  const match = size.match(/(\d+(?:\.\d+)?)([bm]+)/)
-  if (!match) return 'Unknown'
-
-  const [_, num, unit] = match
-  const number = parseFloat(num)
-
-  // 根据单位转换
-  switch (unit.toLowerCase()) {
-    case 'b': // billion
-      return `${(number * dNum).toFixed(1)}GB`
-    case 'm': // million
-      return `${((number * dNum) / 1000).toFixed(1)}GB`
-    default:
-      return 'Unknown'
-  }
+const ollamaState = reactive({
+  error: "服务未响应",
+  installed:false,
+  running: false,
+  checked: false
+})
+const getOllamaState = async () => {
+  loading.value = true
+  const res = await ollamaApi.getOllamaSatate()
+  ollamaState.error = res.error
+  ollamaState.installed = res.installed
+  ollamaState.running = res.running
+  ollamaState.checked = true
+  console.log(ollamaState);
+  loading.value = false
 }
+const installOllama = async () => {
+  const res = await ollamaApi.installOllama()
+  console.log(res);
+  getOllamaState()
+}
+const startOllama = async () => {
+  loading.value = true
+  const res = await ollamaApi.startOllama()
+  console.log(res);
+  loading.value = false
+  getOllamaState()
+}
+const stopOllama = async () => {
+  const res = await ollamaApi.stopOllama()
+  console.log(res);
+  getOllamaState()
+}
+
+onMounted(() => {
+  getOllamaState()
+})
+
+// 添加搜索关键字
+const searchQuery = ref('')
+
+// 添加计算属性来过滤模型 
+const filteredModels = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  if (!query) return modelsData
+
+  return modelsData.filter(item => {
+    // 搜索条件:模型名称、描述、功能标签、模型大小
+    const nameMatch = item.name.toLowerCase().includes(query)
+    const capabilitiesMatch = item.capabilities.some(cap => 
+      cap.toLowerCase().includes(query)
+    )
+    // 添加模型大小匹配
+    const sizeMatch = item.sizes.some(size => {
+      // 移除 b/m 单位进行数字比较
+      const sizeNum = size.replace(/[bm]/i, '')
+      const queryNum = query.replace(/[bm]/i, '')
+      // 完全匹配如 "7b" "1b"
+      const exactMatch = size.toLowerCase() === query
+      // 数字匹配如 "7" "1" 
+      const numberMatch = sizeNum === queryNum
+      return exactMatch || numberMatch
+    })
+    return nameMatch || capabilitiesMatch || sizeMatch
+  })
+})
+
 </script>
 
 <template>
@@ -69,18 +116,29 @@ function modelSizeToGB(size: string): string {
         <p>建议: 由于硬件资源有限，建议选择轻量级的模型，如: 1b、2b 等</p>
       </AlertDescription>
     </Alert>
-    <Alert>
-      <Rocket class="h-4 w-4" />
-      <AlertTitle class="font-bold">暂时无法运行!</AlertTitle>
-      <AlertDescription>
-        <div>系统未检测到本地模型管理工具，是否马上安装?</div>
-        <Button class="mt-2">安装 Ollama</Button>
-      </AlertDescription>
-    </Alert>
+    <div class="flex rounded p-4 border justify-between items-center">
+      <div class="font-bold flex items-center space-x-2">
+        <template v-if="ollamaState.running"><div class="rounded-full w-2 h-2 mr-3 bg-green-500"></div> 本地服务运行正常</template>
+        <template v-if="!ollamaState.running && ollamaState.installed"><div class="rounded-full w-2 h-2 mr-3 bg-yellow-500"></div> {{ollamaState.error}}</template>
+        <template v-if="!ollamaState.installed"><div class="rounded-full w-2 h-2 mr-3 bg-red-500"></div> {{ollamaState.error}}</template>
+      </div>
+      <div>
+        <Button v-if="!ollamaState.checked" @click="getOllamaState">刷新状态</Button>
+        <Button v-if="ollamaState.running" @click="stopOllama">停止 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>
+        <Button v-if="!ollamaState.installed && ollamaState.checked" @click="installOllama">安装 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>
+        <Button v-if="!ollamaState.running && ollamaState.installed" @click="startOllama">启动 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>        
+      </div>
+    </div>
     <div class="flex justify-between items-center py-6">
       <div class="font-bold">模型管理</div>
       <div class="relative w-full max-w-sm items-center">
-        <Input id="search" type="text" placeholder="搜索..." class="pl-10" />
+        <Input
+          id="search"
+          type="text"
+          v-model="searchQuery"
+          placeholder="搜索模型名称、描述或功能..."
+          class="pl-10"
+        />
         <span
           class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
         >
@@ -89,15 +147,15 @@ function modelSizeToGB(size: string): string {
       </div>
     </div>
     <ScrollArea class="flex-1 flex flex-col space-y-2">
-      <template v-for="item in modelsData">
+      <template v-for="item in filteredModels">
         <div
           class="rounded border p-4 mb-4"
-          v-for="model in item.sizes"
-          :key="item.name"
+          v-for="(model, modelIndex) in item.sizes" 
+          :key="`${item.name}-${model}-${modelIndex}`"
         >
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
-               <Icon :name="getIconName(item.name)"></Icon>
+              <Icon :name="getIconName(item.name)"></Icon>
               <div class="font-bold">{{ item.name }}:{{ model }}</div>
               <Badge variant="outline">{{ modelSizeToGB(model) }}</Badge>
             </div>
@@ -106,11 +164,12 @@ function modelSizeToGB(size: string): string {
           <div class="flex space-x-2">
             <Badge variant="secondary">LLM</Badge>
             <Badge
-              variant="secondary"
-              v-for="capability in item.capabilities"
-              :key="capability"
-              >{{ capability }}</Badge
+              variant="secondary" 
+              v-for="(capability, capIndex) in item.capabilities"
+              :key="`${capability}-${capIndex}`"
             >
+              {{ capability }}
+            </Badge>
           </div>
           <div class="text-sm text-gray-500 truncate whitespace-pre-wrap">
             {{ item.description }}

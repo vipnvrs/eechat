@@ -69,3 +69,24 @@ export function getIconName(modelName: string): string {
 
   return firstChar
 }
+
+// 将参数量转换为文件大小
+export function modelSizeToGB(size: string): string {
+  // 提取数字和单位
+  const dNum = 0.73
+  const match = size.match(/(\d+(?:\.\d+)?)([bm]+)/)
+  if (!match) return 'Unknown'
+
+  const [_, num, unit] = match
+  const number = parseFloat(num)
+
+  // 根据单位转换
+  switch (unit.toLowerCase()) {
+    case 'b': // billion
+      return `${(number * dNum).toFixed(1)}GB`
+    case 'm': // million
+      return `${((number * dNum) / 1000).toFixed(1)}GB`
+    default:
+      return 'Unknown'
+  }
+}
