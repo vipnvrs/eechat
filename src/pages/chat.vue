@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 
-import Message from '@/components/Message.vue'
-import ChatInput from '@/components/ChatInput.vue'
+import Message from '@/components/chat/Message.vue'
+import ChatInput from '@/components/chat/ChatInput.vue'
 import ModelSelect from '@/components/ModelSelect.vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import Theme from '@/components/Theme.vue'
