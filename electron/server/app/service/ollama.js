@@ -2,6 +2,7 @@ const { Service } = require('egg')
 const { exec } = require('child_process')
 const util = require('util')
 const { sleep } = require('openai/core')
+const { read } = require('fs')
 const execAsync = util.promisify(exec)
 
 class OllamaService extends Service {
@@ -167,6 +168,39 @@ class OllamaService extends Service {
       await execAsync(installCmd)
     } catch (error) {
       throw new Error('安装模型管理器失败')
+    }
+  }
+
+  /**
+   * ollama 模型安装
+   */
+  async pullModel(modelName) {
+    const { ctx } = this
+    var requestOptions = {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify({
+        model: modelName,
+        stream: true,
+      }),
+    }
+    try {
+      const response = await fetch(
+        'http://localhost:11434/api/pull',
+        requestOptions,
+      )
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      while (reader) {
+        const { done, value } = await reader.read()
+        const chunk = decoder.decode(value)
+        console.log(done, chunk)
+        if (done) break
+      }
+    } catch (error) {
+      ctx.res.end()
+      throw new Error('模型安装失败')
     }
   }
 }

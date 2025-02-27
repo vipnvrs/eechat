@@ -68,6 +68,10 @@ const stopOllama = async () => {
   console.log(res);
   getOllamaState()
 }
+const handlePullModel = async (model: string) => {
+  const res = await ollamaApi.pullModel(model)
+  console.log(res);
+}
 
 onMounted(() => {
   getOllamaState()
@@ -159,7 +163,7 @@ const filteredModels = computed(() => {
               <div class="font-bold">{{ item.name }}:{{ model }}</div>
               <Badge variant="outline">{{ modelSizeToGB(model) }}</Badge>
             </div>
-            <Button variant="" size="sm">安装</Button>
+            <Button variant="" size="sm" @click="handlePullModel(`${item.name}:${model}`)">安装</Button>
           </div>
           <div class="flex space-x-2">
             <Badge variant="secondary">LLM</Badge>

@@ -58,6 +58,18 @@ const menuData = [
       },
     ],
   },
+  {
+    label: '数据',
+    icon: Brain,
+    items: [
+      {
+        label: '备份/恢复',
+        icon: HardDrive,
+        key: 'interface',
+        component: markRaw(LocalModel),
+      },
+    ],
+  },
 ]
 const emit = defineEmits(['change'])
 

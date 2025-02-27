@@ -194,4 +194,15 @@ export const ollamaApi = {
   async restartOllama() {
     return request.post('/api/ollama/restart')
   },
+  async pullModel(modelName) {
+    try {
+      const response = await fetch(API_BASE_URL + '/api/ollama/pull', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ modelName }),
+      })
+    } catch (error) {}
+  },
 }
