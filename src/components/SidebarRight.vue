@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
+import { SquarePen } from 'lucide-vue-next'
 import { reactive } from 'vue'
 import { watch } from 'vue'
 
@@ -54,7 +55,15 @@ const handleSubmit = () => {
         </div>
         <!-- </FormField> -->
         <div class="grid gap-2">
-          <Label>系统提示 <Badge variant="outline">角色设定</Badge></Label>
+          <Label class="flex justify-between items-center">
+            <span> 
+              <span>系统提示</span>
+              <Badge variant="outline">角色设定</Badge>
+            </span>
+            <Button variant="ghost" size="icon">
+              <SquarePen></SquarePen>
+            </Button>
+          </Label>
           <Textarea
             type="text"
             placeholder="shadcn"
