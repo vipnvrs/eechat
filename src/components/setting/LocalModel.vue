@@ -126,6 +126,7 @@ function modelSizeToGB(size: string): string {
       :sibling-count="1"
       show-edges
       :default-page="2"
+      class="hidden"
     >
       <PaginationList v-slot="{ items }" class="flex items-center gap-1">
         <PaginationFirst />
