@@ -28,6 +28,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { modelsData } from '@/lib/models'
+import {getIconName} from '@/lib/utils'
+import Icon from '@/components/Icon.vue'
 onMounted(() => {})
 
 // 模型数据
@@ -95,6 +97,7 @@ function modelSizeToGB(size: string): string {
         >
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
+               <Icon :name="getIconName(item.name)"></Icon>
               <div class="font-bold">{{ item.name }}:{{ model }}</div>
               <Badge variant="outline">{{ modelSizeToGB(model) }}</Badge>
             </div>
