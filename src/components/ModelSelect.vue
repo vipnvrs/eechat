@@ -16,12 +16,25 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
-import { ChevronsDownUp, SlidersHorizontal  } from 'lucide-vue-next'
+import { ChevronsDownUp, SlidersHorizontal } from 'lucide-vue-next'
 import Icon from '@/components/icon.vue'
 
 interface Model {
@@ -75,12 +88,12 @@ const formData = reactive({
 // 模型数据
 const modelData = [
   { sup: 'ollama', name: 'Ollama', icon: 'ollama', models: ['Deepseek R1'] },
-] 
+]
 </script>
 
 <template>
   <div>
-    <Dialog class="w-[700px]">
+    <Dialog class="w-[700px]" :default-open="false">
       <DialogTrigger>
         <Button size="sm" variant="outline">
           <span> Deepseek R1 </span>
@@ -93,20 +106,36 @@ const modelData = [
           <DialogDescription> 自定义配置您的模型 </DialogDescription>
         </DialogHeader>
         <div class="flex w-[700px]">
-            <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }">
-              <Sidebar>
+          <div>
+            <SidebarProvider class="w-auto h-[200px] min-h-[200px] max-h-[200px]" :style="{ '--sidebar-width': '300px' }">
+              <Sidebar class="h-[200px] min-h-[200px] max-h-[200px]">
                 <SidebarContent>
-                  <SidebarMenu>
-                      <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
-                          <a href="#">
-                          <SlidersHorizontal></SlidersHorizontal>aaa</a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarContent>
+                  <SidebarGroup>
+                    <SidebarGroupLabel>可添加模型</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        <SidebarMenuItem
+                          v-for="item in modelData"
+                          :key="item.name"
+                        >
+                          <SidebarMenuButton asChild>
+                            <a :href="item.name">
+                              <component :is="item.icon" />
+                              <span>{{ item.name }}</span>
+                            </a>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup></SidebarContent
+                >
               </Sidebar>
+              <!-- <main>
+                <SidebarTrigger />
+                <slot />
+              </main> -->
             </SidebarProvider>
+          </div>
           <div class="grid gap-4 py-6">
             <div class="grid gap-2">
               <Label>模型提供商</Label>
