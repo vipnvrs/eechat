@@ -242,6 +242,23 @@ class OllamaService extends Service {
     chunk.model = modelName
     return chunk
   }
+
+  /**
+   * 获取ollama模型列表
+   */
+  async listModel() {
+    try {
+      const response = await this.ctx.curl('http://localhost:11434/api/tags', {
+        timeout: 3000,
+        dataType: 'json',
+      })
+      if (response.status === 200) {
+        return response
+      }
+    } catch (error) {
+      throw new Error('获取模型列表失败')
+    }
+  }
 }
 
 module.exports = OllamaService

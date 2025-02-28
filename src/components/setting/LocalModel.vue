@@ -15,34 +15,28 @@ import {
   PaginationNext,
   PaginationPrev,
 } from '@/components/ui/pagination'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Search } from 'lucide-vue-next'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Rocket } from 'lucide-vue-next'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { modelsData } from '@/lib/models'
-import {getIconName, modelSizeToGB} from '@/lib/utils'
+import { getIconName, modelSizeToGB } from '@/lib/utils'
 import Icon from '@/components/Icon.vue'
-import { LoaderCircle} from 'lucide-vue-next'
+import { LoaderCircle } from 'lucide-vue-next'
 import { ollamaApi } from '@/api/request'
 import { useOllamaStore } from '@/stores/ollama'
+import ModelFilter from './ModelFilter.vue'
+import type { FilterOption } from './ModelFilter.vue'
 
 const ollamaStore = useOllamaStore()
 
 const loading = ref(false)
 
 const ollamaState = reactive({
-  error: "服务未响应",
-  installed:false,
+  error: '服务未响应',
+  installed: false,
   running: false,
-  checked: false
+  checked: false,
 })
 const getOllamaState = async () => {
   loading.value = true
@@ -51,24 +45,27 @@ const getOllamaState = async () => {
   ollamaState.installed = res.installed
   ollamaState.running = res.running
   ollamaState.checked = true
-  console.log(ollamaState);
+  console.log(ollamaState)
   loading.value = false
+  if (res.running) {
+    listModel()
+  }
 }
 const installOllama = async () => {
   const res = await ollamaApi.installOllama()
-  console.log(res);
+  console.log(res)
   getOllamaState()
 }
 const startOllama = async () => {
   loading.value = true
   const res = await ollamaApi.startOllama()
-  console.log(res);
+  console.log(res)
   loading.value = false
   getOllamaState()
 }
 const stopOllama = async () => {
   const res = await ollamaApi.stopOllama()
-  console.log(res);
+  console.log(res)
   getOllamaState()
 }
 const handlePullModel = async (model: string) => {
@@ -77,7 +74,7 @@ const handlePullModel = async (model: string) => {
 
     const reader = response.body?.getReader()
     const decoder = new TextDecoder()
-    
+
     while (reader) {
       const { done, value } = await reader.read()
       const chunk = decoder.decode(value)
@@ -94,45 +91,31 @@ const handlePullModel = async (model: string) => {
             total: data.total,
             percent: data.percent,
             speed: data.speed,
-            status: data.status 
+            status: data.status,
           })
-
         } catch (e) {
           // console.error('Parse response error:', e)
         }
       }
-      if(done) {
+      if (done) {
         ollamaStore.clearDownloadStatus(model)
         break
       }
     }
-
-    // while(reader) {
-    //   const {done, value} = await reader.read()
-    //   const chunk = decoder.decode(value)
-      
-    //   try {
-    //     const data = JSON.parse(chunk)
-    //     // 更新下载状态
-    //     ollamaStore.updateDownloadStatus(model, {
-    //       completed: data.completed,
-    //       total: data.total,
-    //       percent: data.percent,
-    //       speed: data.speed,
-    //       status: data.status 
-    //     })
-    //   } catch (e) {
-    //     console.error('Parse error:', e)
-    //   }
-
-    //   if(done) {
-    //     ollamaStore.clearDownloadStatus(model)
-    //     break
-    //   }
-    // }
   } catch (error) {
-    console.error('Download failed:', error) 
+    console.error('Download failed:', error)
     ollamaStore.clearDownloadStatus(model)
+  }
+}
+
+const listModel = async () => {
+  try {
+    const res = await ollamaApi.listModel()
+    if (res?.data?.models) {
+      ollamaStore.setLocalModels(res.data.models)
+    }
+  } catch (error) {
+    console.error('获取本地模型列表失败:', error)
   }
 }
 
@@ -140,33 +123,13 @@ onMounted(() => {
   getOllamaState()
 })
 
-// 添加搜索关键字
+// 筛选和搜索状态
+const selectedFilters = ref<FilterOption[]>(['all'])
 const searchQuery = ref('0.5')
+const filteredModels = ref(modelsData)
 
-// 添加计算属性来过滤模型 
-const filteredModels = computed(() => {
-  const query = searchQuery.value.toLowerCase().trim()
-  if (!query) return modelsData
-
-  return modelsData.filter(item => {
-    // 搜索条件:模型名称、描述、功能标签、模型大小
-    const nameMatch = item.name.toLowerCase().includes(query)
-    const capabilitiesMatch = item.capabilities.some(cap => 
-      cap.toLowerCase().includes(query)
-    )
-    // 添加模型大小匹配
-    const sizeMatch = item.sizes.some(size => {
-      // 移除 b/m 单位进行数字比较
-      const sizeNum = size.replace(/[bm]/i, '')
-      const queryNum = query.replace(/[bm]/i, '')
-      // 完全匹配如 "7b" "1b"
-      const exactMatch = size.toLowerCase() === query
-      // 数字匹配如 "7" "1" 
-      const numberMatch = sizeNum === queryNum
-      return exactMatch || numberMatch
-    })
-    return nameMatch || capabilitiesMatch || sizeMatch
-  })
+watch(searchQuery, val => {
+  console.log(val);
 })
 
 </script>
@@ -185,82 +148,99 @@ const filteredModels = computed(() => {
     </Alert>
     <div class="flex rounded p-4 border justify-between items-center">
       <div class="font-bold flex items-center space-x-2">
-        <template v-if="ollamaState.running"><div class="rounded-full w-2 h-2 mr-3 bg-green-500"></div> 本地服务运行正常</template>
-        <template v-if="!ollamaState.running && ollamaState.installed"><div class="rounded-full w-2 h-2 mr-3 bg-yellow-500"></div> {{ollamaState.error}}</template>
-        <template v-if="!ollamaState.installed"><div class="rounded-full w-2 h-2 mr-3 bg-red-500"></div> {{ollamaState.error}}</template>
+        <template v-if="ollamaState.running">
+          <div class="rounded-full w-2 h-2 mr-3 bg-green-500"></div>
+          本地服务运行正常
+        </template>
+        <template v-if="!ollamaState.running && ollamaState.installed">
+          <div class="rounded-full w-2 h-2 mr-3 bg-yellow-500"></div>
+          {{ ollamaState.error }}
+        </template>
+        <template v-if="!ollamaState.installed">
+          <div class="rounded-full w-2 h-2 mr-3 bg-red-500"></div>
+          {{ ollamaState.error }}
+        </template>
       </div>
       <div>
         <Button v-if="!ollamaState.checked" @click="getOllamaState">刷新状态</Button>
-        <Button v-if="ollamaState.running" @click="stopOllama">停止 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>
-        <Button v-if="!ollamaState.installed && ollamaState.checked" @click="installOllama">安装 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>
-        <Button v-if="!ollamaState.running && ollamaState.installed" @click="startOllama">启动 Ollama <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle></Button>        
+        <Button v-if="ollamaState.running" @click="stopOllama">停止 Ollama
+          <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
+        </Button>
+        <Button v-if="!ollamaState.installed && ollamaState.checked" @click="installOllama">安装 Ollama
+          <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
+        </Button>
+        <Button v-if="!ollamaState.running && ollamaState.installed" @click="startOllama">启动 Ollama
+          <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
+        </Button>
       </div>
     </div>
-    <div class="flex justify-between items-center py-6">
+    <div class="flex justify-between items-center pt-6">
       <div class="font-bold">模型管理</div>
-      <div class="relative w-full max-w-sm items-center">
-        <Input
-          id="search"
-          type="text"
-          v-model="searchQuery"
-          placeholder="搜索模型名称、描述或功能..."
-          class="pl-10"
-        />
-        <span
-          class="absolute start-0 inset-y-0 flex items-center justify-center px-2"
-        >
-          <Search class="size-6 text-muted-foreground" />
-        </span>
-      </div>
+      <Button variant="link" class="text-gray-400">更多模型?</Button>
     </div>
+
+    <ModelFilter v-model="selectedFilters" v-model:search-query="searchQuery"
+      @update:filteredModels="filtered => filteredModels = filtered" />
+
     <ScrollArea class="flex-1 flex flex-col space-y-2">
       <template v-for="item in filteredModels">
-        <div
-          class="rounded border p-4 mb-4"
-          v-for="(model, modelIndex) in item.sizes" 
-          :key="`${item.name}-${model}-${modelIndex}`"
-        >
+        <div class="rounded border p-4 mb-4" v-for="(model, modelIndex) in item.sizes"
+          :key="`${item.name}-${model}-${modelIndex}`">
           <div class="flex justify-between items-center">
             <div class="flex items-center space-x-2">
               <Icon :name="getIconName(item.name)"></Icon>
               <div class="font-bold">{{ item.name }}:{{ model }}</div>
               <Badge variant="outline">{{ modelSizeToGB(model) }}</Badge>
-            </div>
-           <Button
-              variant=""
-              size="sm" 
-              @click="handlePullModel(`${item.name}:${model}`)"
-              :disabled="ollamaStore.isDownloading(`${item.name}:${model}`)"
-            >
-              <template v-if="ollamaStore.isDownloading(`${item.name}:${model}`)">
-                <LoaderCircle class="animate-spin w-4 h-4 mr-2"/>
-                {{ ollamaStore.getDownloadStatus(`${item.name}:${model}`).percent }}%
-              </template>
-              <template v-else>
-                安装
-              </template>
-            </Button>
-          </div>
-          
-          <!-- 添加下载进度条 -->
-          <div v-if="ollamaStore.isDownloading(`${item.name}:${model}`)" 
-              class="mt-2">
-            <div class="w-full bg-gray-200 rounded">
-              <div class="bg-blue-600 h-2 rounded" 
-                  :style="{width: `${ollamaStore.getDownloadStatus(`${item.name}:${model}`).percent}%`}">
+              <!-- 添加本地模型标记 -->
+              <Badge v-if="ollamaStore.isModelInstalled(`${item.name}:${model}`)" variant="outline"
+                class="border-green-500 text-green-500">
+                已安装
+              </Badge>
+              <!-- 显示模型详细信息 -->
+              <div v-if="ollamaStore.getModelInfo(`${item.name}:${model}`)" class="text-sm text-gray-500">
+                {{
+                  ollamaStore.getModelInfo(`${item.name}:${model}`).details
+                    .parameter_size
+                }}
+                |
+                {{
+                  ollamaStore.getModelInfo(`${item.name}:${model}`).details
+                    .quantization_level
+                }}
               </div>
             </div>
+            <Button size="sm" @click="handlePullModel(`${item.name}:${model}`)"
+              :disabled="ollamaStore.isDownloading(`${item.name}:${model}`)">
+              <template v-if="ollamaStore.isDownloading(`${item.name}:${model}`)">
+                <LoaderCircle class="animate-spin w-4 h-4 mr-2" />
+                {{
+                  ollamaStore.getDownloadStatus(`${item.name}:${model}`)
+                    .percent
+                }}%
+              </template>
+              <template v-else> 安装 </template>
+            </Button>
+          </div>
+
+          <!-- 添加下载进度条 -->
+          <div v-if="ollamaStore.isDownloading(`${item.name}:${model}`)" class="mt-2">
+            <div class="w-full bg-gray-200 rounded">
+              <div class="bg-blue-600 h-2 rounded" :style="{
+                width: `${ollamaStore.getDownloadStatus(`${item.name}:${model}`)
+                  .percent
+                  }%`,
+              }"></div>
+            </div>
             <div class="text-sm text-gray-500 mt-1">
-              {{ ollamaStore.getDownloadStatus(`${item.name}:${model}`).speed }}MB/s
+              {{
+                ollamaStore.getDownloadStatus(`${item.name}:${model}`).speed
+              }}MB/s
             </div>
           </div>
           <div class="flex space-x-2">
             <Badge variant="secondary">LLM</Badge>
-            <Badge
-              variant="secondary" 
-              v-for="(capability, capIndex) in item.capabilities"
-              :key="`${capability}-${capIndex}`"
-            >
+            <Badge variant="secondary" v-for="(capability, capIndex) in item.capabilities"
+              :key="`${capability}-${capIndex}`">
               {{ capability }}
             </Badge>
           </div>
@@ -271,30 +251,15 @@ const filteredModels = computed(() => {
       </template>
     </ScrollArea>
 
-    <Pagination
-      v-slot="{ page }"
-      :items-per-page="10"
-      :total="100"
-      :sibling-count="1"
-      show-edges
-      :default-page="2"
-      class="hidden"
-    >
+    <Pagination v-slot="{ page }" :items-per-page="10" :total="100" :sibling-count="1" show-edges :default-page="2"
+      class="hidden">
       <PaginationList v-slot="{ items }" class="flex items-center gap-1">
         <PaginationFirst />
         <PaginationPrev />
 
         <template v-for="(item, index) in items">
-          <PaginationListItem
-            v-if="item.type === 'page'"
-            :key="index"
-            :value="item.value"
-            as-child
-          >
-            <Button
-              class="w-9 h-9 p-0"
-              :variant="item.value === page ? 'default' : 'outline'"
-            >
+          <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+            <Button class="w-9 h-9 p-0" :variant="item.value === page ? 'default' : 'outline'">
               {{ item.value }}
             </Button>
           </PaginationListItem>

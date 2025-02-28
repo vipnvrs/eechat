@@ -79,7 +79,7 @@ const handleMenuClick = e => {
 </script>
 
 <template>
-  <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '240px' }">
+  <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '200px' }">
     <Sidebar class="hidden flex-1 md:flex absolute">
       <SidebarHeader class="gap-3.5 border-b p-4">
         <div class="flex w-full items-center justify-between">

@@ -59,6 +59,16 @@ class OllamaController extends Controller {
       ctx.body = ctx.helper.error(error.message)
     }
   }
+
+  async listModel() {
+    const { ctx } = this
+    try {
+      const data = await ctx.service.ollama.listModel()
+      ctx.body = ctx.helper.success(data)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
 }
 
 module.exports = OllamaController

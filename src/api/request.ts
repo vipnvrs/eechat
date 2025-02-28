@@ -206,4 +206,7 @@ export const ollamaApi = {
       return response
     } catch (error) {}
   },
+  async listModel() {
+    return await request.get('/api/ollama/list')
+  },
 }
