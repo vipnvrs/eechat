@@ -32,6 +32,9 @@ import {getIconName, modelSizeToGB} from '@/lib/utils'
 import Icon from '@/components/Icon.vue'
 import { LoaderCircle} from 'lucide-vue-next'
 import { ollamaApi } from '@/api/request'
+import { useOllamaStore } from '@/stores/ollama'
+
+const ollamaStore = useOllamaStore()
 
 const loading = ref(false)
 
@@ -69,8 +72,68 @@ const stopOllama = async () => {
   getOllamaState()
 }
 const handlePullModel = async (model: string) => {
-  const res = await ollamaApi.pullModel(model)
-  console.log(res);
+  try {
+    const response = await ollamaApi.pullModel(model)
+
+    const reader = response.body?.getReader()
+    const decoder = new TextDecoder()
+    
+    while (reader) {
+      const { done, value } = await reader.read()
+      const chunk = decoder.decode(value)
+      const lines = chunk.split('\n')
+
+      for (const line of lines) {
+        if (!line) continue
+        try {
+          const data = JSON.parse(line)
+          console.log(done, data)
+          // 更新下载状态
+          ollamaStore.updateDownloadStatus(model, {
+            completed: data.completed,
+            total: data.total,
+            percent: data.percent,
+            speed: data.speed,
+            status: data.status 
+          })
+
+        } catch (e) {
+          // console.error('Parse response error:', e)
+        }
+      }
+      if(done) {
+        ollamaStore.clearDownloadStatus(model)
+        break
+      }
+    }
+
+    // while(reader) {
+    //   const {done, value} = await reader.read()
+    //   const chunk = decoder.decode(value)
+      
+    //   try {
+    //     const data = JSON.parse(chunk)
+    //     // 更新下载状态
+    //     ollamaStore.updateDownloadStatus(model, {
+    //       completed: data.completed,
+    //       total: data.total,
+    //       percent: data.percent,
+    //       speed: data.speed,
+    //       status: data.status 
+    //     })
+    //   } catch (e) {
+    //     console.error('Parse error:', e)
+    //   }
+
+    //   if(done) {
+    //     ollamaStore.clearDownloadStatus(model)
+    //     break
+    //   }
+    // }
+  } catch (error) {
+    console.error('Download failed:', error) 
+    ollamaStore.clearDownloadStatus(model)
+  }
 }
 
 onMounted(() => {
@@ -78,7 +141,7 @@ onMounted(() => {
 })
 
 // 添加搜索关键字
-const searchQuery = ref('')
+const searchQuery = ref('0.5')
 
 // 添加计算属性来过滤模型 
 const filteredModels = computed(() => {
@@ -163,7 +226,33 @@ const filteredModels = computed(() => {
               <div class="font-bold">{{ item.name }}:{{ model }}</div>
               <Badge variant="outline">{{ modelSizeToGB(model) }}</Badge>
             </div>
-            <Button variant="" size="sm" @click="handlePullModel(`${item.name}:${model}`)">安装</Button>
+           <Button
+              variant=""
+              size="sm" 
+              @click="handlePullModel(`${item.name}:${model}`)"
+              :disabled="ollamaStore.isDownloading(`${item.name}:${model}`)"
+            >
+              <template v-if="ollamaStore.isDownloading(`${item.name}:${model}`)">
+                <LoaderCircle class="animate-spin w-4 h-4 mr-2"/>
+                {{ ollamaStore.getDownloadStatus(`${item.name}:${model}`).percent }}%
+              </template>
+              <template v-else>
+                安装
+              </template>
+            </Button>
+          </div>
+          
+          <!-- 添加下载进度条 -->
+          <div v-if="ollamaStore.isDownloading(`${item.name}:${model}`)" 
+              class="mt-2">
+            <div class="w-full bg-gray-200 rounded">
+              <div class="bg-blue-600 h-2 rounded" 
+                  :style="{width: `${ollamaStore.getDownloadStatus(`${item.name}:${model}`).percent}%`}">
+              </div>
+            </div>
+            <div class="text-sm text-gray-500 mt-1">
+              {{ ollamaStore.getDownloadStatus(`${item.name}:${model}`).speed }}MB/s
+            </div>
           </div>
           <div class="flex space-x-2">
             <Badge variant="secondary">LLM</Badge>

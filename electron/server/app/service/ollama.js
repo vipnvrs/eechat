@@ -92,7 +92,7 @@ class OllamaService extends Service {
 
     // 等待服务启动
     let attempts = 0
-    const maxAttempts = 10 // 最多尝试10次
+    const maxAttempts = 5 // 最多尝试5次
 
     while (attempts < maxAttempts) {
       try {
@@ -189,19 +189,58 @@ class OllamaService extends Service {
         'http://localhost:11434/api/pull',
         requestOptions,
       )
+      ctx.set({
+        'Content-Type': 'text/event-stream;charset=utf-8',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      })
+      ctx.res.statusCode = 200
+
       const reader = response.body?.getReader()
       const decoder = new TextDecoder()
 
       while (reader) {
         const { done, value } = await reader.read()
         const chunk = decoder.decode(value)
-        console.log(done, chunk)
-        if (done) break
+        const chunkWithDownloadInfo = this.getDownloadInfo(chunk, modelName)
+        console.log(done, chunk, chunkWithDownloadInfo)
+        ctx.res.write(JSON.stringify(chunkWithDownloadInfo))
+        if (done) {
+          ctx.res.done = true
+          ctx.res.end()
+          break
+        }
       }
     } catch (error) {
       ctx.res.end()
       throw new Error('模型安装失败')
     }
+  }
+
+  /**
+   * 获取下载进度信息
+   * @param {Object} chunk 
+    格式如下：
+    { completed: 390299136,
+      digest: "sha256:c5396e06af294bd101b30dce59131a76d2b773e76950acc870eda801d3ab0515",
+      status: "pulling c5396e06af29",
+      total: 397807936
+    }
+   * @return {Object} {speed, percent}
+   */
+  getDownloadInfo(chunk, modelName) {
+    chunk = JSON.parse(chunk)
+    if (!chunk.completed || !chunk.total) {
+      return { speed: 0, percent: 0 }
+    }
+    // 计算下载百分比
+    const percent = Math.round((chunk.completed / chunk.total) * 100)
+    // 计算下载速度 (MB/s)
+    const speed = Math.round((chunk.completed / 1024 / 1024) * 100) / 100
+    chunk.speed = speed
+    chunk.percent = percent
+    chunk.model = modelName
+    return chunk
   }
 }
 

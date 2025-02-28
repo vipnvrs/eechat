@@ -203,6 +203,7 @@ export const ollamaApi = {
         },
         body: JSON.stringify({ modelName }),
       })
+      return response
     } catch (error) {}
   },
 }
