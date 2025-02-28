@@ -106,7 +106,7 @@ const handleSearchChange = (value: string) => {
   <div class="flex space-x-2 justify-between">
     <ToggleGroup type="multiple" variant="outline" size="sm" :model-value="modelValue"
       @update:model-value="(values) => handleFilterChange(values as FilterOption[])">
-      <ToggleGroupItem value="all">所有</ToggleGroupItem>
+      <ToggleGroupItem value="all">热门</ToggleGroupItem>
       <ToggleGroupItem value="installed">已安装</ToggleGroupItem>
       <ToggleGroupItem value="llm">LLM</ToggleGroupItem>
       <ToggleGroupItem value="vision">Vision</ToggleGroupItem>

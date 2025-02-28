@@ -42,8 +42,8 @@ class OllamaController extends Controller {
   async install() {
     const { ctx } = this
     try {
-      await ctx.service.ollama.install()
-      ctx.body = ctx.helper.success()
+      const data = await ctx.service.ollama.install()
+      ctx.body = ctx.helper.success(data)
     } catch (error) {
       ctx.body = ctx.helper.error(error.message)
     }
@@ -65,6 +65,18 @@ class OllamaController extends Controller {
     try {
       const data = await ctx.service.ollama.listModel()
       ctx.body = ctx.helper.success(data)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  async removeModel() {
+    const { ctx } = this
+    const { name } = ctx.params
+
+    try {
+      const result = await ctx.service.ollama.removeModel(name)
+      ctx.body = ctx.helper.success(result)
     } catch (error) {
       ctx.body = ctx.helper.error(error.message)
     }

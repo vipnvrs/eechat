@@ -19,6 +19,5 @@ module.exports = app => {
   router.post('/api/ollama/install', controller.ollama.install)
   router.post('/api/ollama/pull', controller.ollama.pullModel)
   router.get('/api/ollama/list', controller.ollama.listModel)
-  
-  
+  router.delete('/api/ollama/remove/:name', controller.ollama.removeModel)
 }

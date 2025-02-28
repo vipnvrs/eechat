@@ -68,11 +68,7 @@ class OllamaService extends Service {
     // 启动服务
     switch (platform) {
       case 'win32':
-        try {
-          await execAsync('"ollama app"')
-        } catch (error) {
-          throw new Error('启动模型管理器失败')
-        }
+        exec('"ollama app"')
         break
       case 'darwin':
         try {
@@ -100,6 +96,7 @@ class OllamaService extends Service {
           timeout: 3000,
           dataType: 'json',
         })
+        console.log(attempts, response)
 
         if (response.status === 200) {
           return // 服务已启动
@@ -124,7 +121,18 @@ class OllamaService extends Service {
     switch (platform) {
       case 'win32':
         try {
-          await execAsync('taskkill /f /im ollama.exe')
+          // 首先尝试优雅地关闭
+          await execAsync('taskkill /im ollama.exe')
+          // 等待一会儿让进程有机会正常关闭
+          await sleep(1000)
+          // 如果还在运行，则强制终止所有相关进程
+          try {
+            await execAsync(
+              'taskkill /f /im "ollama app.exe" & taskkill /f /im ollama.exe',
+            )
+          } catch (e) {
+            console.log(e)
+          }
         } catch (error) {
           throw new Error('停止模型管理器失败')
         }
@@ -161,13 +169,21 @@ class OllamaService extends Service {
    */
   async install() {
     const { platform } = process
-    const installCmd =
-      platform === 'win32' ? 'choco install ollama' : 'brew install ollama'
-
     try {
-      await execAsync(installCmd)
+      if (platform === 'win32') {
+        // 通过 HTTP 请求通知渲染进程打开下载页面
+        return {data: 'https://ollama.com/download/OllamaSetup.exe'}
+      } else {
+        // macOS 和 Linux 继续使用包管理器安装
+        const installCmd = 'brew install ollama'
+        await execAsync(installCmd)
+      }
     } catch (error) {
-      throw new Error('安装模型管理器失败')
+      if (platform === 'win32') {
+        throw new Error('请从官网下载并手动安装 Ollama: https://ollama.ai/download/windows')
+      } else {
+        throw new Error('安装模型管理器失败，请手动安装')
+      }
     }
   }
 
@@ -202,16 +218,34 @@ class OllamaService extends Service {
       while (reader) {
         const { done, value } = await reader.read()
         const chunk = decoder.decode(value)
-        const chunkWithDownloadInfo = this.getDownloadInfo(chunk, modelName)
-        console.log(done, chunk, chunkWithDownloadInfo)
-        ctx.res.write(JSON.stringify(chunkWithDownloadInfo))
+        // 处理可能包含多个 JSON 对象的情况
+        const jsonStrings = chunk.match(/({[^}]+})/g) || []
+
+        for (const jsonStr of jsonStrings) {
+          try {
+            const chunkWithDownloadInfo = this.getDownloadInfo(
+              jsonStr,
+              modelName,
+            )
+            ctx.res.write(`data: ${JSON.stringify(chunkWithDownloadInfo)}\n\n`)
+
+            if (chunkWithDownloadInfo.status === 'success') {
+              ctx.res.end()
+              return
+            }
+          } catch (error) {
+            console.error('解析下载信息失败:', error)
+            continue
+          }
+        }
+
         if (done) {
-          ctx.res.done = true
           ctx.res.end()
           break
         }
       }
     } catch (error) {
+      console.log('模型安装失败:', error)
       ctx.res.end()
       throw new Error('模型安装失败')
     }
@@ -229,14 +263,30 @@ class OllamaService extends Service {
    * @return {Object} {speed, percent}
    */
   getDownloadInfo(chunk, modelName) {
-    chunk = JSON.parse(chunk)
+    try {
+      chunk = JSON.parse(chunk)
+    } catch (error) {
+      console.log(chunk)
+      debugger
+    }
+
+    let speed = 0
+    let percent = 2
+
+    if (chunk.status == 'success') {
+      chunk.speed = 0
+      chunk.percent = 100
+      return chunk
+    }
     if (!chunk.completed || !chunk.total) {
-      return { speed: 0, percent: 0 }
+      chunk.speed = 0
+      chunk.percent = 2
+      return chunk
     }
     // 计算下载百分比
-    const percent = Math.round((chunk.completed / chunk.total) * 100)
+    percent = Math.round((chunk.completed / chunk.total) * 100)
     // 计算下载速度 (MB/s)
-    const speed = Math.round((chunk.completed / 1024 / 1024) * 100) / 100
+    speed = Math.round((chunk.completed / 1024 / 1024) * 100) / 100
     chunk.speed = speed
     chunk.percent = percent
     chunk.model = modelName
@@ -257,6 +307,30 @@ class OllamaService extends Service {
       }
     } catch (error) {
       throw new Error('获取模型列表失败')
+    }
+  }
+
+  /**
+   * 移除模型
+   */
+  async removeModel(modelName) {
+    const { ctx } = this
+
+    try {
+      const response = await ctx.curl(`http://localhost:11434/api/delete`, {
+        method: 'DELETE',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({ name: modelName }),
+      })
+
+      if (response.status === 200) {
+        return response.data
+      }
+      throw new Error(response.data.error)
+    } catch (error) {
+      ctx.logger.error(error)
+      throw new Error(error.message)
     }
   }
 }

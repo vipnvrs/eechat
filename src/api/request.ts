@@ -209,4 +209,7 @@ export const ollamaApi = {
   async listModel() {
     return await request.get('/api/ollama/list')
   },
+  async removeModel(modelName: string) {
+    return request.delete(`/api/ollama/remove/${modelName}`)
+  },
 }

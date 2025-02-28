@@ -210,3 +210,8 @@ ipcMain.handle('exec', async (_, command) => {
 ipcMain.handle('open-external', (_, url) => {
   shell.openExternal(url)
 })
+
+// 添加打开下载页面的 handler
+ipcMain.handle('open-url', (_, url) => {
+  return shell.openExternal(url)
+})
