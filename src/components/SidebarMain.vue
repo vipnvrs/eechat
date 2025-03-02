@@ -23,6 +23,8 @@ import {
   SlidersHorizontal,
   Trash2,
   Plus,
+  Sparkles,
+  Compass,
 } from 'lucide-vue-next'
 import { h, ref, onMounted } from 'vue'
 import router from '@/router'
@@ -42,8 +44,8 @@ const data = {
     },
     {
       title: '智能体',
-      url: 'box',
-      icon: File,
+      url: 'discover',
+      icon: Compass,
       isActive: false,
     },
     {
