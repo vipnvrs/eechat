@@ -134,8 +134,11 @@ const sendMsg = async (msg: string) => {
         </div>
       </header>
       <ScrollArea
-        class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
+        class="h-full w-full px-4 flex-1 "
       >
+      <!-- <ScrollArea
+        class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
+      > -->
         <Message :messages="chatHistory" class="py-4" />
         <ScrollBar />
       </ScrollArea>

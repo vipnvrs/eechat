@@ -5,6 +5,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarHeader,
   SidebarInput,
@@ -139,7 +140,7 @@ onMounted(() => {
           {{ activeItem.title }}
         </div>
         <Label class="flex items-center gap-2 text-sm">
-          <Button size="sm" @click="createNewChat">
+          <Button size="sm" class="font-bold" @click="createNewChat">
             <Plus class="w-4 h-4" />新对话
           </Button>
         </Label>
@@ -149,13 +150,15 @@ onMounted(() => {
     <SidebarContent>
       <ScrollArea class="h-full w-full">
         <SidebarGroup class="px-0">
+          <template 
+          v-for="(item, index) in sessions">
+          <SidebarGroupLabel v-if="index % 4 == 0" class="pl-4 mt-6">最近 {{index + 7}} 天</SidebarGroupLabel>
           <SidebarGroupContent>
             <a
               @click="handleSessionChange(item)"
-              v-for="item in sessions"
               :key="item.id"
               href="#"
-              class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 leading-tight hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               :class="
                 item.id === activeSessionId
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -163,13 +166,14 @@ onMounted(() => {
               "
             >
               <div class="flex w-full items-center gap-2">
-                <span>{{ item.title }}</span>
+                <span class="font-bold">{{ item.title }}</span>
               </div>
-              <span class="line-clamp-2 w- whitespace-break-spaces text-xs">
-                {{ item.title }}
+              <span class="line-clamp-1 w- whitespace-break-spaces text-sm text-gray-500">你好，我是 梦境画家，一位能将你的梦想变成现实的梦境艺术家。，让我们开始对话吧！
+                <!-- {{ item.title }} -->
               </span>
             </a>
           </SidebarGroupContent>
+        </template>
         </SidebarGroup>
         <ScrollBar />
       </ScrollArea>
