@@ -18,6 +18,7 @@ import {
 import Icon from '@/components/icon.vue'
 import { Brain, HardDrive } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
+import ApiModel from '@/components/setting/ApiModel.vue'
 
 // const props = withDefaults(defineProps<SidebarProps>(), {
 //   collapsible: 'icon',
@@ -36,8 +37,8 @@ const menuData = [
       {
         label: 'API 模型',
         icon: Brain,
-        key: 'apiModel',
-        component: markRaw(LocalModel),
+        key: 'ApiModel',
+        component: markRaw(ApiModel),
       },
     ],
   },
