@@ -1,3 +1,4 @@
+import { LLMConfig } from '@/types/llm'
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
@@ -211,5 +212,32 @@ export const ollamaApi = {
   },
   async removeModel(modelName: string) {
     return request.delete(`/api/ollama/remove/${modelName}`)
+  },
+}
+
+export const llmApi = {
+  // 获取模型列表
+  async getModels(provider: string) {
+    return request.get(`/api/llm/models/${provider}`)
+  },
+
+  // 测试连接
+  async testConnection(provider: string, config: any) {
+    return request.post(`/api/llm/test/${provider}`, config)
+  },
+
+  // 保存配置
+  async saveConfig(provider: string, config: any) {
+    return request.post(`/api/llm/config/${provider}`, config)
+  },
+
+  // 获取配置
+  async getConfig(provider: string) {
+    return request.get(`/api/llm/config/${provider}`)
+  },
+
+  // 获取提供商列表
+  async getProviders() {
+    return request.get('/api/llm/providers')
   },
 }

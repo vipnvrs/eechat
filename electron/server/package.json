@@ -11,14 +11,14 @@
     "egg": "^3.17.5",
     "egg-scripts": "2",
     "egg-sequelize": "^6.0.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "sequelize-cli": "^6.6.2"
   },
   "devDependencies": {
     "egg-bin": "6",
     "egg-mock": "5",
     "eslint": "8",
-    "eslint-config-egg": "13",
-    "sequelize-cli": "^6.6.2"
+    "eslint-config-egg": "13"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -32,14 +32,18 @@
     "cov": "egg-bin cov",
     "lint": "eslint .",
     "ci": "npm run lint && npm run cov",
-    "migrate:up": "npx sequelize db:migrate",
-    "migrate:undo": "npx sequelize db:migrate:undo",
-    "migrate:undo:all": "npx sequelize db:migrate:undo:all"
+    "migrate:up": "sequelize db:migrate",
+    "migrate:down": "sequelize db:migrate:undo",
+    "migrate:undo": "sequelize db:migrate:undo",
+    "migrate:undo:all": "sequelize db:migrate:undo:all"
   },
   "repository": {
     "type": "git",
     "url": ""
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "sequelize": {
+    "config": "database/config.json"
+  }
 }

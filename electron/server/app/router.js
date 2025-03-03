@@ -20,4 +20,10 @@ module.exports = app => {
   router.post('/api/ollama/pull', controller.ollama.pullModel)
   router.get('/api/ollama/list', controller.ollama.listModel)
   router.delete('/api/ollama/remove/:name', controller.ollama.removeModel)
+
+  // LLM API 路由
+  router.post('/api/llm/config/:provider', controller.llm.saveConfig)
+  router.post('/api/llm/test/:provider', controller.llm.testConnection)
+  router.get('/api/llm/models/:provider', controller.llm.listModels)
+  router.get('/api/llm/providers', controller.llm.listProviders)
 }
