@@ -26,7 +26,7 @@ const md = new MarkdownIt({
   highlight: function (str:string, lang:string) {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return '<pre><code class="hljs w-[660px] text-[13px] leading-[1.6] rounded">' +
+        return '<pre><code class="hljs text-[13px] leading-[1.6] rounded">' +
                hljs.highlight(str, { language: lang, ignoreIllegals: true }).value +
                '</code></pre>';
       } catch (__) {}
@@ -93,6 +93,19 @@ const renderMarkdown = (message: string) => {
 </template>
 
 <style scoped>
+/* 添加代码块样式控制 */
+:deep(pre) {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+:deep(code) {
+  max-width: 100%;
+  word-break: break-all;
+  white-space: pre-wrap;
+}
 .think {
   font-style: italic;
   color: #555;
