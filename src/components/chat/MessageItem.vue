@@ -15,7 +15,7 @@ import rehypeHighlight from 'rehype-highlight'
 import rehypeMermaid from 'rehype-mermaid'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
-import { ref, onMounted, computed, watch, callWithErrorHandling } from 'vue'
+import { ref, onMounted, computed, watch, callWithErrorHandling, nextTick } from 'vue'
 import type { RehypeMermaidOptions } from 'rehype-mermaid'
 
 interface Props {
@@ -71,12 +71,148 @@ const processor = unified()
   // .use(rehypeMermaid, mermaidOptions) // 简化配置
   .use(rehypeStringify) // 输出 HTML 字符串
 
+// 创建响应式变量存储渲染后的HTML
+const renderedHTML = ref('')
+// 存储上一次处理的消息长度
+const lastProcessedLength = ref(0)
+// 存储消息的各个部分
+const messageParts = ref<string[]>([])
+// 存储是否需要完整重新渲染
+const needFullRerender = ref(false)
+// 存储消息处理状态
+const processingMessage = ref(false)
+
+// 处理单个消息部分
+const processMessagePart = async (part: string) => {
+  try {
+    const result = await processor.process(part)
+    return result.toString()
+  } catch (error) {
+    console.error('Error processing message part:', error)
+    return `<div class="text-red-500">Error: ${error.message}</div>`
+  }
+}
+
+// 处理思考标签
+const processThinkTag = async (message: string) => {
+  // 正则匹配提取 <think></think> 标签中的内容
+  const thinkRegex = /<think>([\s\S]*?)<\/think>/g
+  let match
+  let lastIndex = 0
+  const parts = []
+
+  while ((match = thinkRegex.exec(message)) !== null) {
+    // 添加标签前的内容
+    if (match.index > lastIndex) {
+      parts.push({
+        type: 'normal',
+        content: message.substring(lastIndex, match.index)
+      })
+    }
+
+    // 添加思考内容
+    parts.push({
+      type: 'think',
+      content: match[1]
+    })
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // 添加剩余内容
+  if (lastIndex < message.length) {
+    parts.push({
+      type: 'normal',
+      content: message.substring(lastIndex)
+    })
+  }
+
+  return parts
+}
+
+// 增量处理消息
+const incrementalProcessMessage = async (message: string) => {
+  if (processingMessage.value) return
+  processingMessage.value = true
+
+  try {
+    // 检查消息是否包含思考标签，如果有则需要完整重新渲染
+    if (message.includes('<think>') || message.includes('</think>')) {
+      needFullRerender.value = true
+    }
+
+    // 如果需要完整重新渲染或者消息长度减少（编辑情况），则重新处理整个消息
+    if (needFullRerender.value || message.length < lastProcessedLength.value) {
+      const parts = await processThinkTag(message)
+      const htmlParts = await Promise.all(parts.map(async part => {
+        if (part.type === 'think') {
+          const thinkHtml = await processMessagePart(part.content.trim())
+          return `<details><summary class="bg-gray-50 rounded my-2 pl-2 text-gray-400 dark:bg-primary-foreground dark:text-white"> 思考过程</summary><div class="think">${thinkHtml}</div></details>`
+        } else {
+          return await processMessagePart(part.content)
+        }
+      }))
+
+      renderedHTML.value = htmlParts.join('')
+      lastProcessedLength.value = message.length
+      needFullRerender.value = false
+    }
+    // 否则只处理新增的部分
+    else if (message.length > lastProcessedLength.value) {
+      // 获取新增的消息部分
+      const newPart = message.substring(lastProcessedLength.value)
+      // 处理新增部分
+      const newHtml = await processMessagePart(newPart)
+
+      // 如果是第一次处理，直接设置HTML
+      if (lastProcessedLength.value === 0) {
+        renderedHTML.value = newHtml
+      }
+      // 否则追加到现有HTML
+      else {
+        // 检查是否需要合并代码块
+        if (renderedHTML.value.endsWith('</pre>') && newHtml.startsWith('<pre>')) {
+          // 提取现有代码块内容和新代码块内容
+          const existingCodeMatch = renderedHTML.value.match(/<pre><code[^>]*>([\s\S]*)<\/code><\/pre>$/)
+          const newCodeMatch = newHtml.match(/^<pre><code[^>]*>([\s\S]*)<\/code><\/pre>/)
+
+          if (existingCodeMatch && newCodeMatch) {
+            // 合并代码块内容
+            const mergedContent = existingCodeMatch[1] + newCodeMatch[1]
+            // 移除现有代码块
+            renderedHTML.value = renderedHTML.value.substring(0, renderedHTML.value.length - existingCodeMatch[0].length)
+            // 添加合并后的代码块
+            const codeClass = newHtml.match(/^<pre><code[^>]*class="([^"]*)"[^>]*>/) || ['', '']
+            renderedHTML.value += `<pre><code class="${codeClass[1]}">${mergedContent}</code></pre>${newHtml.substring(newCodeMatch[0].length)}`
+          } else {
+            renderedHTML.value += newHtml
+          }
+        } else {
+          renderedHTML.value += newHtml
+        }
+      }
+
+      lastProcessedLength.value = message.length
+    }
+
+    // 处理完成后，确保DOM更新
+    await nextTick()
+  } catch (error) {
+    console.error('Incremental processing error:', error)
+    // 出错时回退到完整渲染
+    renderedHTML.value = await renderMarkdown(message)
+  } finally {
+    processingMessage.value = false
+  }
+}
+
+// 保留原始的完整渲染函数作为备用
 const renderMarkdown = async (message: string) => {
   if (!message) return ''
 
   try {
     // 正则匹配提取 <think></think> 标签中的内容
-    const thinkReg = `/<think>(.*?)</think >/gs`
+    const thinkReg = /<think>([\s\S]*?)<\/think>/g
     const parts = message.split(thinkReg)
 
     // 处理每个部分
@@ -106,22 +242,21 @@ const renderMarkdown = async (message: string) => {
   }
 }
 
-// 创建响应式变量存储渲染后的HTML
-const renderedHTML = ref('')
-
-// 监听消息变化，重新渲染Markdown
+// 监听消息变化，使用增量更新
 watch(() => props.message, async (newMessage) => {
   if (newMessage) {
-    renderedHTML.value = await renderMarkdown(newMessage)
+    await incrementalProcessMessage(newMessage)
   } else {
     renderedHTML.value = ''
+    lastProcessedLength.value = 0
+    needFullRerender.value = false
   }
 }, { immediate: true })
 </script>
 
 <template>
   <div v-if="message == ''"
-    class="bg-white dark:bg-[#404558] dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center">
+    class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center">
     <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
     <span class="ml-2 text-[14px]">思考中...</span>
   </div>
@@ -183,12 +318,6 @@ watch(() => props.message, async (newMessage) => {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.5rem 0;
-}
-
-.think {
-  font-style: italic;
-  color: #555;
-  font-size: 14px;
 }
 
 summary {
@@ -320,5 +449,13 @@ li pre {
 :deep(.graphviz svg) {
   max-width: 100%;
   height: auto;
+}
+</style>
+
+<style>
+.think {
+  font-style: italic;
+  color: #555;
+  font-size: 14px;
 }
 </style>
