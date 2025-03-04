@@ -1,19 +1,13 @@
 <template>
   <div>
-    <!-- <img :src="src" alt="" :width="props.size" :height="props.size" /> -->
-    <!-- <AvatarImage :src="src" :alt="name" /> -->
-    <!-- <Avatar :size="props.size">
-      <AvatarImage :src="src" :alt="props.name" />
-      <AvatarFallback>{{ props.name }}</AvatarFallback>
-    </Avatar> -->
     <div class="rounded-full bg-no-repeat object-contain bg-red-200flex items-center justify-center">
       <div class="flex items-center justify-center bg-slate-200 rounded-full overflow-hidden" :style="{
-      width: props.size + 'px',
-      height: props.size + 'px',
-    }">
-      <img v-if="props.name.length > 1" :src="src" alt="">
-      <div v-else>{{ props.name }}</div>
-    </div>
+        width: props.size + 'px',
+        height: props.size + 'px',
+      }">
+        <img v-if="props.name.length > 1" :src="src" alt="">
+        <div v-else>{{ props.name }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -25,6 +19,7 @@ const props = defineProps({
   name: {
     type: String,
     required: true,
+    default: '',
   },
   size: {
     type: Number,

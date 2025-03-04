@@ -49,13 +49,13 @@ module.exports = app => {
   )
 
   // 定义关联关系
-  ChatSession.associate = function () {
-    app.model.ChatSession.hasMany(app.model.Message, {
-      foreignKey: 'session_id',
-      as: 'messages',
-      onDelete: 'CASCADE', // 删除会话时级联删除消息
-    })
-  }
+  // ChatSession.associate = function () {
+  //   app.model.ChatSession.hasMany(app.model.Message, {
+  //     foreignKey: 'session_id',
+  //     as: 'messages',
+  //     onDelete: 'CASCADE', // 删除会话时级联删除消息
+  //   })
+  // }
 
   return ChatSession
 }

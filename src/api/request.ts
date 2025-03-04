@@ -46,7 +46,7 @@ class Request {
     this.instance.interceptors.response.use(
       (response: AxiosResponse<ApiResponse>) => {
         const { code, data, message } = response.data
-        console.log(response)
+        // console.log(response)
 
         // 业务状态判断
         if (code !== 0) {

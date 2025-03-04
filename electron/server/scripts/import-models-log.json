@@ -1,0 +1,210 @@
+{
+  "timestamp": "2025-03-04T14:37:12.932Z",
+  "totalModels": 0,
+  "newModels": 0,
+  "updatedModels": 0,
+  "providers": [
+    "aihubmix",
+    "o3",
+    "ollama",
+    "lmstudio",
+    "silicon",
+    "ppio",
+    "openai",
+    "azure-openai",
+    "gemini",
+    "anthropic",
+    "gitee-ai",
+    "deepseek",
+    "together",
+    "ocoolai",
+    "github",
+    "yi",
+    "zhipu",
+    "moonshot",
+    "baichuan",
+    "modelscope",
+    "bailian",
+    "stepfun",
+    "doubao",
+    "minimax",
+    "hyperbolic",
+    "grok",
+    "mistral",
+    "jina",
+    "fireworks",
+    "zhinao",
+    "hunyuan",
+    "nvidia",
+    "openrouter",
+    "groq",
+    "baidu-cloud",
+    "dmxapi",
+    "perplexity",
+    "infini",
+    "xirang",
+    "tencent-cloud-ti"
+  ],
+  "modelCount": [
+    {
+      "provider": "aihubmix",
+      "count": 6
+    },
+    {
+      "provider": "o3",
+      "count": 21
+    },
+    {
+      "provider": "ollama",
+      "count": 0
+    },
+    {
+      "provider": "lmstudio",
+      "count": 0
+    },
+    {
+      "provider": "silicon",
+      "count": 5
+    },
+    {
+      "provider": "ppio",
+      "count": 10
+    },
+    {
+      "provider": "openai",
+      "count": 5
+    },
+    {
+      "provider": "azure-openai",
+      "count": 2
+    },
+    {
+      "provider": "gemini",
+      "count": 4
+    },
+    {
+      "provider": "anthropic",
+      "count": 6
+    },
+    {
+      "provider": "gitee-ai",
+      "count": 24
+    },
+    {
+      "provider": "deepseek",
+      "count": 2
+    },
+    {
+      "provider": "together",
+      "count": 4
+    },
+    {
+      "provider": "ocoolai",
+      "count": 25
+    },
+    {
+      "provider": "github",
+      "count": 1
+    },
+    {
+      "provider": "yi",
+      "count": 2
+    },
+    {
+      "provider": "zhipu",
+      "count": 12
+    },
+    {
+      "provider": "moonshot",
+      "count": 1
+    },
+    {
+      "provider": "baichuan",
+      "count": 3
+    },
+    {
+      "provider": "modelscope",
+      "count": 5
+    },
+    {
+      "provider": "bailian",
+      "count": 5
+    },
+    {
+      "provider": "stepfun",
+      "count": 2
+    },
+    {
+      "provider": "doubao",
+      "count": 0
+    },
+    {
+      "provider": "minimax",
+      "count": 5
+    },
+    {
+      "provider": "hyperbolic",
+      "count": 4
+    },
+    {
+      "provider": "grok",
+      "count": 2
+    },
+    {
+      "provider": "mistral",
+      "count": 9
+    },
+    {
+      "provider": "jina",
+      "count": 8
+    },
+    {
+      "provider": "fireworks",
+      "count": 2
+    },
+    {
+      "provider": "zhinao",
+      "count": 2
+    },
+    {
+      "provider": "hunyuan",
+      "count": 10
+    },
+    {
+      "provider": "nvidia",
+      "count": 2
+    },
+    {
+      "provider": "openrouter",
+      "count": 5
+    },
+    {
+      "provider": "groq",
+      "count": 4
+    },
+    {
+      "provider": "baidu-cloud",
+      "count": 8
+    },
+    {
+      "provider": "dmxapi",
+      "count": 11
+    },
+    {
+      "provider": "perplexity",
+      "count": 4
+    },
+    {
+      "provider": "infini",
+      "count": 15
+    },
+    {
+      "provider": "xirang",
+      "count": 0
+    },
+    {
+      "provider": "tencent-cloud-ti",
+      "count": 2
+    }
+  ]
+}

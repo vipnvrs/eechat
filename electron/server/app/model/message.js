@@ -52,12 +52,12 @@ module.exports = app => {
   )
 
   // 定义关联关系
-  Message.associate = function () {
-    app.model.Message.belongsTo(app.model.ChatSession, {
-      foreignKey: 'session_id',
-      as: 'session',
-    })
-  }
+  // Message.associate = function () {
+  //   app.model.Message.belongsTo(app.model.ChatSession, {
+  //     foreignKey: 'session_id',
+  //     as: 'session',
+  //   })
+  // }
 
   return Message
 }

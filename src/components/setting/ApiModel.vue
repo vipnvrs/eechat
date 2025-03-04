@@ -6,12 +6,28 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import Icon from '@/components/Icon.vue'
 import { llmApi } from '@/api/request'
 import type { LLMProvider } from '@/types/llm'
-import { Loader2, CheckCircle2 } from 'lucide-vue-next'
+import { Loader2, Check } from 'lucide-vue-next'
+import { Switch } from '@/components/ui/switch'
 
 const { toast } = useToast()
 const testLoading = ref(false)
@@ -25,163 +41,15 @@ const testPassed = reactive({
 // 添加当前选中的提供商
 const currentProvider = ref('deepseek')
 
-// API 提供商列表
-// const providers: LLMProvider[] = [
-//   { id: 'openai', name: 'OpenAI', icon: 'openai' },
-//   { id: 'anthropic', name: 'Anthropic', icon: 'anthropic' },
-//   { id: 'deepseek', name: 'Deepseek', icon: 'deepseek' }
-// ]
 const providers = ref({})
 
 // API 模型配置状态
 const apiConfig = reactive({
-  openai: {
-    apiKey: '',
-    baseUrl: '',
-    modelGroups: [
-      {
-        name: 'GPT-4',
-        description: '最新的 GPT-4 系列模型',
-        models: [
-          {
-            name: 'gpt-4-turbo-preview',
-            capabilities: ['长文本', '代码', '创意写作'],
-            description: '最新的 GPT-4 模型,支持更长的上下文'
-          },
-          {
-            name: 'gpt-4',
-            capabilities: ['推理', '创意', '分析'],
-            description: 'GPT-4 基础模型'
-          }
-        ]
-      },
-      {
-        name: 'GPT-3.5',
-        description: '性能优秀的通用模型系列',
-        models: [
-          {
-            name: 'gpt-3.5-turbo',
-            capabilities: ['快速', '经济', '通用'],
-            description: '适合日常对话和简单任务'
-          },
-          {
-            name: 'gpt-3.5-turbo-16k',
-            capabilities: ['长文本', '经济', '通用'],
-            description: '支持更长上下文的 3.5 模型'
-          }
-        ]
-      }
-    ]
-  },
-  anthropic: {
-    apiKey: '',
-    baseUrl: '',
-    modelGroups: [
-      {
-        name: 'Claude 3',
-        description: '最新的 Claude 3 系列模型',
-        models: [
-          {
-            name: 'claude-3-opus',
-            capabilities: ['视觉', '分析', '专业'],
-            description: 'Claude 最强大的模型,支持图像理解'
-          },
-          {
-            name: 'claude-3-sonnet',
-            capabilities: ['平衡', '经济', '可靠'],
-            description: '平衡性能和成本的理想选择'
-          }
-        ]
-      },
-      {
-        name: 'Claude 2',
-        description: 'Claude 2 系列模型',
-        models: [
-          {
-            name: 'claude-2.1',
-            capabilities: ['分析', '可靠', '通用'],
-            description: '稳定可靠的通用模型'
-          }
-        ]
-      }
-    ]
-  },
-  google: {
-    apiKey: '',
-    baseUrl: '',
-    modelGroups: [
-      {
-        name: 'Gemini',
-        description: 'Google 最新的 Gemini 系列模型',
-        models: [
-          {
-            name: 'gemini-pro',
-            capabilities: ['多模态', '推理', '创意'],
-            description: '支持文本和图像的多模态模型'
-          },
-          {
-            name: 'gemini-pro-vision',
-            capabilities: ['视觉', '分析', '专业'],
-            description: '专注于视觉理解的模型'
-          }
-        ]
-      }
-    ]
-  },
-  mistral: {
-    apiKey: '',
-    baseUrl: '',
-    modelGroups: [
-      {
-        name: 'Mistral',
-        description: 'Mistral AI 的高性能模型系列',
-        models: [
-          {
-            name: 'mistral-large',
-            capabilities: ['推理', '分析', '专业'],
-            description: '最强大的 Mistral 模型'
-          },
-          {
-            name: 'mistral-medium',
-            capabilities: ['平衡', '经济', '可靠'],
-            description: '性能与成本平衡的选择'
-          },
-          {
-            name: 'mistral-small',
-            capabilities: ['快速', '经济', '轻量'],
-            description: '轻量级快速响应模型'
-          }
-        ]
-      }
-    ]
-  },
-  deepseek: {
-    apiKey: 'sk-5f86865628c54c4f954090aae9395d3a',
-    baseUrl: 'https://api.deepseek.com/v1',
-    modelGroups: [
-      {
-        name: 'Deepseek',
-        description: 'Deepseek 的高性能模型系列',
-        models: [
-          {
-            name: 'deepseek-large',
-            capabilities: ['推理', '分析', '专业'],
-            description: '最强大的 Deepseek 模型'
-          },
-          {
-            name: 'deepseek-medium',
-            capabilities: ['平衡', '经济', '可靠'],
-            description: '性能与成本平衡的选择'
-          },
-          {
-            name: 'deepseek-small',
-            capabilities: ['快速', '经济', '轻量'],
-            description: '轻量级快速响应模型'
-          }
-        ]
-      }
-    ]
-  }
+  apiKey: 'sk-5f86865628c54c4f954090aae9395d3a',
+  baseUrl: '',
+  config: {},
+  state: false,
+  info: {}
 })
 
 // 测试连接
@@ -189,9 +57,9 @@ async function testConnection(provider: string) {
   testLoading.value = true
   try {
     const config = {
-      apiKey: apiConfig[provider].apiKey,
-      baseUrl: apiConfig[provider].baseUrl,
-      models: apiConfig[provider].modelGroups,
+      apiKey: apiConfig.apiKey,
+      baseUrl: apiConfig.baseUrl,
+      models: models.value,
     }
     const res = await llmApi.testConnection(provider, config)
     if (res) {
@@ -217,9 +85,9 @@ async function testConnection(provider: string) {
 async function saveConfig(provider: string) {
   saveLoading.value = true
   const config = {
-    apiKey: apiConfig[provider].apiKey,
-    baseUrl: apiConfig[provider].baseUrl,
-    models: apiConfig[provider].modelGroups,
+    apiKey: apiConfig.apiKey,
+    baseUrl: apiConfig.baseUrl,
+    models: models.value,
   }
   try {
     // 先测试连接
@@ -248,33 +116,41 @@ async function saveConfig(provider: string) {
 }
 
 // 获取提供商列表
+const defaultProvider = 'deepseek'
 async function getProviders() {
   const res = await llmApi.getProviders()
   providers.value = res
   console.log(providers.value)
+  handleProviderChange(defaultProvider, res[defaultProvider])
 }
 getProviders()
 
-const handleProviderClick = (provider: string) => {
+const handleProviderChange = (provider: string, value: object) => {
   currentProvider.value = provider
+  apiConfig.baseUrl = value.api.url
+  apiConfig.info = value
+  console.log(apiConfig);
   getModels(provider)
 }
 
+const modelsArray = ref([])
 const models = ref({})
 const getModels = async (provider: string) => {
   const res = await llmApi.getModels(provider)
-  console.log(res);
   const data = {}
+  modelsArray.value = res
+  currentCheckModel.value = res[0]?.name
   res.forEach(item => {
-    if (!data[item.group]) {
-      data[item.group] = []
+    if (!data[item.group_name]) {
+      data[item.group_name] = []
     }
-    data[item.group].push(item)
+    if (typeof item.apiKey == 'undefined') item.apiKey = ''
+    data[item.group_name].push(item)
   });
-  models.value = data
   console.log(data);
-
+  models.value = data
 }
+const currentCheckModel = ref('')
 
 </script>
 
@@ -282,11 +158,11 @@ const getModels = async (provider: string) => {
   <Toaster />
   <div class="flex h-full">
     <!-- 左侧 Sidebar -->
-    <div class="w-[180px]">
+    <div class="w-40">
       <div class="font-bold mb-4">模型提供商</div>
-      <ScrollArea class="h-[calc(100vh-8rem)] border p-4 rounded-md">
+      <ScrollArea class="h-[calc(100vh-8rem)] ">
         <div class="space-y-2">
-          <div v-for="(value, provider) in providers" :key="provider" @click="handleProviderClick(provider)"
+          <div v-for="(value, provider) in providers" :key="provider" @click="handleProviderChange(provider, value)"
             class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer"
             :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }">
             <Icon :name="provider" :size="24" />
@@ -300,36 +176,68 @@ const getModels = async (provider: string) => {
     <div class="flex-1 flex flex-col h-full">
       <div v-if="currentProvider" class="flex flex-col h-full p-4 pt-0">
         <!-- 头部 -->
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-4 border-b pb-4">
           <div class="font-bold flex items-center space-x-2">
-            <!-- <Icon :name="providers.find(p => p.id === currentProvider)?.icon" :size="24" />
-            <span>{{providers.find(p => p.id === currentProvider)?.name}}</span> -->
+            <Icon :name="currentProvider" :size="24" />
+            <span>{{ currentProvider }}</span>
           </div>
-          <div class="flex space-x-2">
-            <Button :disabled="testLoading" @click="testConnection(currentProvider)">
+          <div class="flex space-x-2 items-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Switch v-model="apiConfig.state" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>开启后可在聊天中使用该服务商</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <!-- <Button :disabled="testLoading" @click="testConnection(currentProvider)">
               <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
               <CheckCircle2 v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
               {{ testLoading ? '测试中...' : '测试连接' }}
-            </Button>
-            <Button :disabled="saveLoading" @click="saveConfig(currentProvider)">
+            </Button> -->
+            <!-- <Button :disabled="saveLoading" @click="saveConfig(currentProvider)">
               <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
               {{ saveLoading ? '保存中...' : '保存配置' }}
-            </Button>
+            </Button> -->
           </div>
         </div>
 
         <!-- 配置表单 -->
         <div class="space-y-4">
+          <Label>模型配置</Label>
           <div class="grid gap-2">
-            <Label>API Key</Label>
-            <Input v-model="apiConfig[currentProvider].apiKey" type="password"
+            <Label class="font-bold">API Key</Label>
+            <Input v-model="apiConfig.apiKey" type="password"
               :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`" />
           </div>
 
           <div class="grid gap-2">
-            <Label>API Base URL</Label>
-            <Input v-model="apiConfig[currentProvider].baseUrl"
+            <Label class="font-bold">API URL</Label>
+            <Input v-model="apiConfig.baseUrl"
               :placeholder="`https://api.${currentProvider}.com${currentProvider === 'openai' ? '/v1' : ''}`" />
+          </div>
+          <div class="grid gap-2">
+            <Label>连通性检查</Label>
+            <div class="flex items-center space-x-2">
+              <Select class="w-full flex-1" v-model="currentCheckModel">
+                <SelectTrigger class="w-full flex-1">
+                  <SelectValue placeholder="选择要测试连通性的模型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem :value="item.name" v-for="item in modelsArray" :key="item.name">
+                    {{ item.name }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <Button :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
+                @click="testConnection(currentProvider)">
+                <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
+                <Check v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
+                {{ testLoading ? '测试中...' : '测试连接' }}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -337,22 +245,33 @@ const getModels = async (provider: string) => {
         <div class="flex-1 pt-6 min-h-0 overflow-hidden">
           <Label>可用模型</Label>
           <ScrollArea class="h-full w-full rounded-md pb-8">
-            <!-- <div class="space-y-6 p-4 pb-8"> -->
-            <div v-for="(group, key) in models" :key="key" class="space-y-4">
+            <!-- {{ models['DeepSeek Chat'] }} -->
+            <div v-for="(group, key) in models" :key="key" class="space-y-4 ">
               <!-- 组标题 -->
               <div class="flex items-center space-x-2 pt-6">
-                <h3 class="font-semibold text-lg">{{ key }}</h3>
+                <div class="font-semibold font-bold">{{ key }}</div>
                 <!-- <span class="text-sm text-gray-500">{{ group.description }}</span> -->
               </div>
 
               <!-- 组内模型 -->
-              <div class="flex flex-col space-y-4 mt-0">
+              <div class="flex flex-col mt-0 border rounded-md">
                 <div v-for="model in group" :key="model.name"
-                  class="flex flex-col space-y-2 p-4 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border">
-                  <div class="flex items-center space-x-2">
-                    <Icon :name="model.provider" :size="24" />
-                    <div class="font-medium">{{ model.name }}</div>
-                    <!-- <Button variant="outline" size="sm">选择</Button> -->
+                  class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <div class="flex items-center space-x-2 justify-between">
+                    <div class="flex items-center space-x-2">
+                      <Icon :name="model.provider" :size="24" />
+                      <div class="font-medium">{{ model.name }}</div>
+                    </div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Switch v-model="model.state"></Switch>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>开启后可在聊天中使用该模型</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <!-- <div class="flex space-x-2">
                   <Badge variant="secondary" v-for="capability in model.capabilities" :key="capability">

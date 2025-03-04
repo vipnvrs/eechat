@@ -33,19 +33,16 @@ module.exports = appInfo => {
   const path = require('path')
   config.sequelize = {
     dialect: 'sqlite',
-    storage: path.join(__dirname, '../database/chat.db'),
+    storage: path.join(__dirname, '../database/database.db'),
     define: {
       freezeTableName: true,
       timestamps: true,
       paranoid: true,
       underscored: true,
+      constraints: false, // 禁用外键约束
     },
     logging: console.log,
-    sync: {
-      // 启用同步
-      force: false, // 不强制重建表
-      alter: true, // 允许修改表结构
-    },
+    sync: process.env.NODE_ENV !== 'production', // 非生产环境下自动同步
   }
 
   return config

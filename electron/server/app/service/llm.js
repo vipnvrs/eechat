@@ -1,9 +1,8 @@
 const BaseLLMService = require('./llm/base')
 const DeepseekService = require('./llm/deepseek')
-const providers = require('../../tools/providers.js')
-const models = require('../../tools/models.js')
+const { Service } = require('egg')
 
-class LLMService extends BaseLLMService {
+class LLMService extends Service {
   constructor(ctx) {
     super(ctx)
     this.providers = {
@@ -14,31 +13,23 @@ class LLMService extends BaseLLMService {
   }
 
   async testConnection(provider, config) {
-    // const config = await this.getConfig(provider)
-    // if (!config || !config.apiKey) {
-    //   throw new Error('API 配置未完成')
-    // }
-
     const service = this.providers[provider]
     if (!service) {
       throw new Error('暂不支持该模型提供商，请尝试通用模型')
     }
-
     return service.testConnection(config)
   }
 
   async listModels(provider) {
-    const config = await this.getConfig(provider)
-    // if (!config || !config.apiKey) {
-    //   throw new Error('API 配置未完成')
-    // }
-
-    // const service = this.providers[provider]
-    // if (!service) {
-    //   throw new Error('不支持的模型提供商')
-    // }
-
-    return models[provider]
+    const { ctx } = this
+    const models = await this.ctx.model.LlmModel.findAll({
+      where: { provider_id: provider },
+      order: [
+        ['state', 'DESC'],
+        ['sort', 'ASC'],
+      ],
+    })
+    return models
   }
 
   async saveConfig(provider, config) {
@@ -46,7 +37,33 @@ class LLMService extends BaseLLMService {
   }
 
   async listProviders() {
-    return providers
+    const { ctx } = this
+    try {
+      console.log(ctx.model)
+
+      const providers = await ctx.model.LlmProvider.findAll({
+        where: { state: true },
+        order: [['id', 'ASC']],
+      })
+
+      // 转换为前端需要的格式
+      return providers.reduce((acc, provider) => {
+        acc[provider.id] = {
+          name: provider.name,
+          api: { url: provider.api_url },
+          websites: {
+            official: provider.official_url,
+            apiKey: provider.api_key_url,
+            docs: provider.docs_url,
+            models: provider.models_url,
+          },
+        }
+        return acc
+      }, {})
+    } catch (error) {
+      console.error('获取提供商失败:', error)
+      throw new Error('获取提供商失败: ' + error.message)
+    }
   }
 }
 
