@@ -259,7 +259,7 @@ const currentCheckModel = ref('')
                   class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800">
                   <div class="flex items-center space-x-2 justify-between">
                     <div class="flex items-center space-x-2">
-                      <Icon :name="model.provider" :size="24" />
+                      <Icon :name="model.provider_id" :size="24" />
                       <div class="font-medium">{{ model.name }}</div>
                     </div>
                     <TooltipProvider>

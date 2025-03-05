@@ -43,7 +43,10 @@ class LLMService extends Service {
 
       const providers = await ctx.model.LlmProvider.findAll({
         where: { state: true },
-        order: [['id', 'ASC']],
+        order: [
+          ['state', 'DESC'],
+          ['sort', 'ASC'],
+        ],
       })
 
       // 转换为前端需要的格式
