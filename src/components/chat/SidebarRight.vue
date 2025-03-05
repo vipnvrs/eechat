@@ -44,10 +44,10 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <Sidebar side="right" class="p-2">
-    <SidebarHeader>对话设置</SidebarHeader>
+  <Sidebar side="right">
+    <SidebarHeader class="p-4">对话设置</SidebarHeader>
     <SidebarContent>
-      <form class="p-2 space-y-8">
+      <form class="p-4 space-y-8">
         <!-- <FormField name="title"> -->
         <div class="grid gap-2">
           <Label>对话名称</Label>

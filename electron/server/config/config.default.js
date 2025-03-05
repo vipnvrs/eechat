@@ -44,6 +44,12 @@ module.exports = appInfo => {
     logging: console.log,
     sync: process.env.NODE_ENV !== 'production', // 非生产环境下自动同步
   }
+  config.cors = {
+    // credentials: true,
+    // origin: ctx => ctx.get('origin'),
+    origin: '*',
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
+  }
 
   return config
 }

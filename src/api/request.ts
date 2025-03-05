@@ -4,7 +4,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 
 export const API_BASE_URL =
   process.env.NODE_ENV === 'production'
-    ? 'http://your-server.com:7001' // 生产环境服务器地址
+    ? 'http://127.0.0.1:7002' // 生产环境服务器地址
     : 'http://localhost:7002' // 开发环境地址
 
 // 请求配置接口

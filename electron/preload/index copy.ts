@@ -18,13 +18,14 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
     const [channel, ...omit] = args
     return ipcRenderer.invoke(channel, ...omit)
   },
+
+  // You can expose other APTs you need here.
+  // ...
 })
 
 // --------- Preload scripts loading ---------
-function domReady(
-  condition: DocumentReadyState[] = ['complete', 'interactive'],
-) {
-  return new Promise(resolve => {
+function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
+  return new Promise((resolve) => {
     if (condition.includes(document.readyState)) {
       resolve(true)
     } else {
@@ -50,9 +51,28 @@ const safeDOM = {
   },
 }
 
-// 使用SVG作为加载图标，不使用动画以提高效率
+/**
+ * https://tobiasahlin.com/spinkit
+ * https://connoratherton.com/loaders
+ * https://projects.lukehaas.me/css-loaders
+ * https://matejkustec.github.io/SpinThatShit
+ */
 function useLoading() {
+  const className = `loaders-css__square-spin`
   const styleContent = `
+@keyframes square-spin {
+  25% { transform: perspective(100px) rotateX(180deg) rotateY(0); }
+  50% { transform: perspective(100px) rotateX(180deg) rotateY(180deg); }
+  75% { transform: perspective(100px) rotateX(0) rotateY(180deg); }
+  100% { transform: perspective(100px) rotateX(0) rotateY(0); }
+}
+.${className} > div {
+  animation-fill-mode: both;
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  animation: square-spin 3s 0s cubic-bezier(0.09, 0.57, 0.49, 0.9) infinite;
+}
 .app-loading-wrap {
   position: fixed;
   top: 0;
@@ -65,21 +85,14 @@ function useLoading() {
   background: #282c34;
   z-index: 9;
 }
-.app-loading-icon {
-  color: white;
-  width: 50px;
-  height: 50px;
-}
-  `
+    `
   const oStyle = document.createElement('style')
   const oDiv = document.createElement('div')
 
   oStyle.id = 'app-loading-style'
   oStyle.innerHTML = styleContent
   oDiv.className = 'app-loading-wrap'
-
-  // 使用提供的SVG作为加载图标
-  oDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="app-loading-icon"><path d="M5 15h14"/><path d="M5 9h14"/><path d="m14 20-5-5 6-6-5-5"/></svg>`
+  oDiv.innerHTML = `<div class="${className}"><div></div></div>`
 
   return {
     appendLoading() {
@@ -98,12 +111,8 @@ function useLoading() {
 const { appendLoading, removeLoading } = useLoading()
 domReady().then(appendLoading)
 
-window.onmessage = ev => {
+window.onmessage = (ev) => {
   ev.data.payload === 'removeLoading' && removeLoading()
 }
 
-// 减少超时时间以加快启动速度
-setTimeout(removeLoading, 1500)
-
-// 通知主进程预加载完成
-ipcRenderer.send('preload-ready')
+setTimeout(removeLoading, 4999)
