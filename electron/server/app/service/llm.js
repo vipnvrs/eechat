@@ -1,8 +1,7 @@
 const BaseLLMService = require('./llm/base')
 const DeepseekService = require('./llm/deepseek')
-const { Service } = require('egg')
 
-class LLMService extends Service {
+class LLMService extends BaseLLMService {
   constructor(ctx) {
     super(ctx)
     this.providers = {
@@ -22,14 +21,22 @@ class LLMService extends Service {
 
   async listModels(provider) {
     const { ctx } = this
-    const models = await this.ctx.model.LlmModel.findAll({
-      where: { provider_id: provider },
-      order: [
-        ['state', 'DESC'],
-        ['sort', 'ASC'],
-      ],
-    })
-    return models
+    const uid = 'default-user'
+    const configedModels = await this.getConfigModelList(uid, provider)
+    if (configedModels.length === 0) {
+      const models = await this.ctx.model.LlmModel.findAll({
+        where: { provider_id: provider },
+        order: [
+          ['state', 'DESC'],
+          ['sort', 'ASC'],
+        ],
+      })
+      models.forEach(item => {
+        item.dataValues.from = 'common'
+      })
+      return models
+    }
+    return configedModels
   }
 
   async saveConfig(provider, config) {
@@ -66,6 +73,214 @@ class LLMService extends Service {
     } catch (error) {
       console.error('获取提供商失败:', error)
       throw new Error('获取提供商失败: ' + error.message)
+    }
+  }
+
+  // 获取用户的模型配置
+  async getConfigProvider(uid, providerId) {
+    uid = 'default-user'
+    const { ctx } = this
+    try {
+      const res = await ctx.model.LlmConfigProvider.findOne({
+        where: {
+          uid,
+          provider_id: providerId,
+        },
+      })
+      return res
+    } catch (error) {
+      console.error('获取提供商配置失败:', error)
+      throw new Error('获取提供商配置失败: ' + error.message)
+    }
+  }
+
+  // 保持提供商模型配置
+  async saveConfigProvider(uid, providerId, config) {
+    uid = 'default-user'
+    const { ctx } = this
+    try {
+      // 准备保存的数据
+      const configData = {
+        uid,
+        provider_id: providerId,
+        api_key: config.apiKey,
+        base_url: config.baseUrl || null,
+        state: config.state || true,
+      }
+      // 检查是否已存在配置
+      let existingConfig = await ctx.model.LlmConfigProvider.findOne({
+        where: {
+          uid,
+          provider_id: providerId,
+        },
+      })
+      let res
+      if (existingConfig) {
+        // 更新现有配置
+        res = await existingConfig.update(configData)
+      } else {
+        // 创建新配置
+        res = await ctx.model.LlmConfigProvider.create(configData)
+      }
+      console.log(res)
+      return res
+    } catch (error) {
+      console.error('保存提供商配置失败:', error)
+      throw new Error('保存提供商配置失败: ' + error.message)
+    }
+  }
+
+  // 更新提供商开启状态
+  async saveConfigProviderState(uid, providerId, config) {
+    const { ctx } = this
+    try {
+      let res
+      let existingConfig = await ctx.model.LlmConfigProvider.findOne({
+        where: {
+          uid,
+          provider_id: providerId,
+        },
+      })
+      if (!existingConfig) {
+        const configData = {
+          uid,
+          provider_id: providerId,
+          api_key: config.apiKey,
+          base_url: config.baseUrl || null,
+          state: config.state,
+        }
+        res = await ctx.model.LlmConfigProvider.create({
+          ...configData,
+        })
+      } else {
+        res = await existingConfig.update({ state: config.state })
+      }
+
+      // 更新模型配置列表
+      const modelConfigList = []
+      config.models.forEach(model => {
+        modelConfigList.push({
+          uid,
+          provider_id: providerId,
+          model_id: model.model_id,
+          state: model.state,
+          name: model.name,
+          group_name: model.group_name,
+        })
+      })
+      await this.saveConfigModelList(uid, providerId, modelConfigList)
+      return res
+    } catch (error) {
+      throw new Error('保存提供商配置失败: ' + error.message)
+    }
+  }
+
+  // 获取指定模型配置信息
+  async getConfigModel(uid, providerId, modelId) {
+    uid = 'default-user'
+    const { ctx } = this
+    try {
+      const res = await ctx.model.LlmModel.findOne({
+        where: {
+          provider_id: providerId,
+          id: modelId,
+        },
+      })
+      return res
+    } catch (error) {
+      console.error('获取模型配置失败:', error)
+      throw new Error('获取模型配置失败:' + error.message)
+    }
+  }
+
+  // 获取提供商下模型配置列表
+  async getConfigModelList(uid, providerId) {
+    const { ctx } = this
+    uid = 'default-user'
+    try {
+      const res = await ctx.model.LlmConfigModel.findAll({
+        where: {
+          provider_id: providerId,
+        },
+      })
+      res.forEach(item => {
+        item.dataValues.from = 'config'
+      })
+      return res
+    } catch (error) {
+      console.error('获取模型配置列表失败:', error)
+      throw new Error('获取模型配置列表失败:' + error.message)
+    }
+  }
+  // 保存模型配置列表
+  async saveConfigModelList(uid, providerId, configList) {
+    const { ctx } = this
+    const transaction = await ctx.model.transaction()
+
+    try {
+      // 在事务中先删除该用户和提供商下的所有现有配置
+      await ctx.model.LlmConfigModel.destroy({
+        where: {
+          uid,
+          provider_id: providerId,
+        },
+        force: true,
+        transaction,
+      })
+
+      // 然后在同一事务中批量创建新配置
+      const result = await ctx.model.LlmConfigModel.bulkCreate(configList, {
+        transaction,
+      })
+
+      // 提交事务
+      await transaction.commit()
+
+      return {
+        success: true,
+        count: result.length,
+      }
+    } catch (error) {
+      // 发生错误时回滚事务
+      await transaction.rollback()
+      console.error('保存模型配置列表失败:', error)
+      throw new Error('保存模型配置列表失败:' + error.message)
+    }
+  }
+
+  //
+  async saveConfigModelState(uid, modelId, config) {
+    const { ctx } = this
+    try {
+      let res
+      let existingConfig = await ctx.model.LlmConfigModel.findOne({
+        where: {
+          uid,
+          model_id: modelId,
+        },
+      })
+      // res = await existingConfig.update({ state: config.state })
+      if (!existingConfig) {
+        // 更新模型配置列表
+        const modelConfigList = []
+        const providerId = config.models[0].provider_id
+        config.models.forEach(model => {
+          modelConfigList.push({
+            uid,
+            provider_id: providerId,
+            model_id: model.id,
+            state: model.state,
+            name: model.name,
+            group_name: model.group_name,
+          })
+        })
+        await this.saveConfigModelList(uid, providerId, modelConfigList)
+      } else {
+        res = await existingConfig.update({ state: config.state })
+      }
+      return res
+    } catch (error) {
+      throw new Error('保存模型配置失败:' + error.message)
     }
   }
 }

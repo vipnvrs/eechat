@@ -212,7 +212,7 @@ class OllamaService extends Service {
       })
       ctx.res.statusCode = 200
 
-      const reader = response.body?.getReader()
+      const reader = response.body && response.body.getReader()
       const decoder = new TextDecoder()
 
       while (reader) {

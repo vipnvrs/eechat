@@ -59,11 +59,12 @@ async function testConnection(provider: string) {
     const config = {
       apiKey: apiConfig.apiKey,
       baseUrl: apiConfig.baseUrl,
-      models: models.value,
+      // models: models.value,
     }
     const res = await llmApi.testConnection(provider, config)
     if (res) {
       testPassed[provider] = true
+      await llmApi.saveConfigProvider(provider, config)
       toast({
         title: '连接成功',
         description: '已成功连接到 API'
@@ -81,40 +82,6 @@ async function testConnection(provider: string) {
   }
 }
 
-// 保存配置
-async function saveConfig(provider: string) {
-  saveLoading.value = true
-  const config = {
-    apiKey: apiConfig.apiKey,
-    baseUrl: apiConfig.baseUrl,
-    models: models.value,
-  }
-  try {
-    // 先测试连接
-    const testRes = await llmApi.testConnection(provider, config)
-    if (!testRes) {
-      throw new Error('连接测试失败,请检查配置')
-    }
-    testPassed[provider] = true
-
-    // 测试通过后保存
-    await llmApi.saveConfig(provider, config)
-    toast({
-      title: '保存成功',
-      description: '配置已更新'
-    })
-  } catch (error: any) {
-    testPassed[provider] = false
-    toast({
-      title: '保存失败',
-      description: error.message,
-      variant: 'destructive'
-    })
-  } finally {
-    saveLoading.value = false
-  }
-}
-
 // 获取提供商列表
 const defaultProvider = 'deepseek'
 async function getProviders() {
@@ -125,17 +92,29 @@ async function getProviders() {
 }
 getProviders()
 
-const handleProviderChange = (provider: string, value: object) => {
+const handleProviderChange = async (provider: string, value: object) => {
   currentProvider.value = provider
-  apiConfig.baseUrl = value.api.url
+  getModels(provider)
+  // 查询配置
+  const res = await getConfigProvider()
+  if (res) {
+    apiConfig.apiKey = res.api_key ? 'sk-configed' : ''
+    apiConfig.baseUrl = res.base_url
+    apiConfig.state = res.state ? true : false
+  } else {
+    apiConfig.apiKey = ''
+    apiConfig.baseUrl = value.api.url
+    apiConfig.state = false
+  }
   apiConfig.info = value
   console.log(apiConfig);
-  getModels(provider)
 }
 
 const modelsArray = ref([])
 const models = ref({})
-const getModels = async (provider: string) => {
+
+const getModels = async () => {
+  const provider = currentProvider.value
   const res = await llmApi.getModels(provider)
   const data = {}
   modelsArray.value = res
@@ -152,6 +131,55 @@ const getModels = async (provider: string) => {
 }
 const currentCheckModel = ref('')
 
+// 模型配置
+const getConfigProvider = async () => {
+  const res = await llmApi.getConfigProvider(currentProvider.value)
+  return res
+}
+
+// 更新提供商是否开启
+const saveConfigProviderState = async state => {
+  const config = {
+    apiKey: apiConfig.apiKey,
+    baseUrl: apiConfig.baseUrl,
+    state,
+    models: _flattenModels(models.value),
+  }
+  config.models.forEach(item => item.model_id = item.id)
+  const res = await llmApi.saveConfigProviderState(currentProvider.value, config)
+  console.log(res);
+}
+
+// 更新模型是否开启
+const saveConfigModelState = async (state, models, modelItem) => {
+  models = _flattenModels(models)
+  const config = {
+    state,
+    models,
+  }
+  const model_id = modelItem.from === 'config' ? modelItem.model_id : modelItem.id
+  const res = await llmApi.saveConfigModelState(model_id, config)
+  console.log(res);
+  getModels()
+}
+
+// 获取模型配置
+// const getConfigModels = async () => {
+//   const res = await llmApi.getConfigModels(currentProvider.value)
+//   console.log(res);
+//   return res
+// }
+
+// 展开 Models 数据， groups
+const _flattenModels = (models) => {
+  const result = [];
+  for (const key in models) {
+    if (models.hasOwnProperty(key)) {
+      result.push(...models[key]);
+    }
+  }
+  return result;
+}
 </script>
 
 <template>
@@ -185,7 +213,7 @@ const currentCheckModel = ref('')
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Switch v-model="apiConfig.state" />
+                  <Switch v-model="apiConfig.state" @update:model-value="saveConfigProviderState" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>开启后可在聊天中使用该服务商</p>
@@ -265,7 +293,9 @@ const currentCheckModel = ref('')
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Switch v-model="model.state"></Switch>
+                          <Switch v-model="model.state"
+                            @update:model-value="saveConfigModelState($event, models, model)">
+                          </Switch>
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>开启后可在聊天中使用该模型</p>

@@ -22,8 +22,39 @@ module.exports = app => {
   router.delete('/api/ollama/remove/:name', controller.ollama.removeModel)
 
   // LLM API 路由
-  router.post('/api/llm/config/:provider', controller.llm.saveConfig)
+  // LLM 基础数据
+  // router.post('/api/llm/config/:provider', controller.llm.saveConfig)
   router.post('/api/llm/test/:provider', controller.llm.testConnection)
   router.get('/api/llm/models/:provider', controller.llm.listModels)
   router.get('/api/llm/providers', controller.llm.listProviders)
+
+  // LLM 模型配置
+  router.get(
+    '/api/llm/configProvider/:providerId',
+    controller.llm.getConfigProvider,
+  )
+  router.post(
+    '/api/llm/configProvider/:providerId',
+    controller.llm.saveConfigProvider,
+  )
+  router.post(
+    '/api/llm/configProvider/state/:providerId',
+    controller.llm.saveConfigProviderState,
+  )
+  // router.get(
+  //   '/api/llm/configModel/:providerId/:modelId',
+  //   controller.llm.getConfigModel,
+  // )
+  // router.get(
+  //   '/api/llm/configModel/:providerId',
+  //   controller.llm.getConfigModelList,
+  // )
+  // router.post(
+  //   '/api/llm/configModel/:providerId',
+  //   controller.llm.saveConfigModel,
+  // )
+  router.post(
+    '/api/llm/configModel/state/:modelId',
+    controller.llm.saveConfigModelState,
+  )
 }

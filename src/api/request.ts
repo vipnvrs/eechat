@@ -226,18 +226,33 @@ export const llmApi = {
     return request.post(`/api/llm/test/${provider}`, config)
   },
 
-  // 保存配置
-  async saveConfig(provider: string, config: any) {
-    return request.post(`/api/llm/config/${provider}`, config)
-  },
-
-  // 获取配置
-  async getConfig(provider: string) {
-    return request.get(`/api/llm/config/${provider}`)
-  },
-
   // 获取提供商列表
   async getProviders() {
     return request.get('/api/llm/providers')
+  },
+
+  // 获取提供商配置
+  async getConfigProvider(provider: string) {
+    return request.get(`/api/llm/configProvider/${provider}`)
+  },
+
+  // 保存提供商列表
+  async saveConfigProvider(provider, config) {
+    return request.post(`/api/llm/configProvider/${provider}`, config)
+  },
+
+  // 保存提供商列表
+  async saveConfigProviderState(provider, config) {
+    return request.post(`/api/llm/configProvider/state/${provider}`, config)
+  },
+
+  // 获取模型配置列表
+  // async getConfigModels(provider: string) {
+  //   return request.get(`/api/llm/configModel/${provider}`)
+  // },
+
+  // 更新模型状态
+  async saveConfigModelState(modelId: string, config: any) {
+    return request.post(`/api/llm/configModel/state/${modelId}`, config)
   },
 }
