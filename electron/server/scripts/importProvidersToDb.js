@@ -69,20 +69,20 @@ async function importProviders() {
 
           // 常用提供商列表，这些提供商将自动设置为启用状态
           const popularProviders = [
-            'openai',
-            'anthropic',
-            'gemini',
-            'deepseek',
-            'o3',
-            'aihubmix',
-            'moonshot',
-            'baichuan',
-            'zhipu',
-            'yi',
-            'mistral',
-            'groq',
-            'ollama',
-            'azure-openai',
+            // 'openai',
+            // 'anthropic',
+            // 'gemini',
+            // 'deepseek',
+            // 'o3',
+            // 'aihubmix',
+            // 'moonshot',
+            // 'baichuan',
+            // 'zhipu',
+            // 'yi',
+            // 'mistral',
+            // 'groq',
+            // 'ollama',
+            // 'azure-openai',
           ]
 
           // 获取所有提供商ID，保持原始顺序

@@ -84,13 +84,15 @@ async function testConnection(provider: string) {
 
 // 获取提供商列表
 const defaultProvider = 'deepseek'
-async function getProviders() {
+async function getProviders(refresh) {
   const res = await llmApi.getProviders()
   providers.value = res
   console.log(providers.value)
-  handleProviderChange(defaultProvider, res[defaultProvider])
+  if (refresh) {
+    handleProviderChange(defaultProvider, res[defaultProvider])
+  }
 }
-getProviders()
+getProviders(true)
 
 const handleProviderChange = async (provider: string, value: object) => {
   currentProvider.value = provider
@@ -147,7 +149,7 @@ const saveConfigProviderState = async state => {
   }
   config.models.forEach(item => item.model_id = item.id)
   const res = await llmApi.saveConfigProviderState(currentProvider.value, config)
-  console.log(res);
+  getProviders(false)
 }
 
 // 更新模型是否开启
@@ -186,15 +188,21 @@ const _flattenModels = (models) => {
   <Toaster />
   <div class="flex h-full">
     <!-- 左侧 Sidebar -->
-    <div class="w-40">
-      <div class="font-bold mb-4">模型提供商</div>
+    <div class="w-40 border-r pr-2">
+      <div class="font-bold mb-4 ml-6">模型提供商</div>
       <ScrollArea class="h-[calc(100vh-8rem)] ">
         <div class="space-y-2">
           <div v-for="(value, provider) in providers" :key="provider" @click="handleProviderChange(provider, value)"
-            class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer"
+            class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
             :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }">
-            <Icon :name="provider" :size="24" />
-            <span>{{ provider }}</span>
+
+            <div>
+              <div class="w-1.5 h-1.5 rounded-full" :class="value.state ? 'bg-green-400' : ''"></div>
+            </div>
+            <div class="flex-1 flex items-center space-x-2">
+              <Icon :name="provider" :size="24" />
+              <span>{{ provider }}</span>
+            </div>
           </div>
         </div>
       </ScrollArea>

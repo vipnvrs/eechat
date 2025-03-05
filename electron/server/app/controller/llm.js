@@ -49,7 +49,7 @@ class LLMController extends Controller {
     }
   }
 
-  // 获取用户所有模型配置
+  // 获取指定提供商的配置信息
   async getConfigProvider() {
     const { ctx } = this
     const uid = ctx.request.query.uid || 'default-user'

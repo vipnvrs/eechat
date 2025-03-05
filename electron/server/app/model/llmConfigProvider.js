@@ -32,7 +32,7 @@ module.exports = app => {
       },
       state: {
         type: BOOLEAN,
-        defaultValue: true,
+        defaultValue: false,
         comment: '是否开启',
       },
       created_at: DATE,

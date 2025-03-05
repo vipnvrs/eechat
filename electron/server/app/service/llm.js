@@ -1,3 +1,4 @@
+const { stat } = require('fs')
 const BaseLLMService = require('./llm/base')
 const DeepseekService = require('./llm/deepseek')
 
@@ -47,19 +48,32 @@ class LLMService extends BaseLLMService {
     const { ctx } = this
     try {
       console.log(ctx.model)
-
+      // 获取所有提供商
       const providers = await ctx.model.LlmProvider.findAll({
-        where: { state: true },
         order: [
           ['state', 'DESC'],
           ['sort', 'ASC'],
         ],
       })
-
+      // 获取已配置的提供商
+      const configedProviders = await ctx.model.LlmConfigProvider.findAll({
+        where: { uid: 'default-user' },
+      })
+      // 合并提供商数据
+      providers.forEach(provider => {
+        const configedProvider = configedProviders.find(
+          item => item.provider_id === provider.id,
+        )
+        if (configedProvider) {
+          provider.dataValues.state = configedProvider.state
+        }
+      })
       // 转换为前端需要的格式
-      return providers.reduce((acc, provider) => {
+      const data = providers.reduce((acc, provider) => {
         acc[provider.id] = {
           name: provider.name,
+          // state: typeof provider.state === 'boolean' ? provider.state : false,
+          state: provider.state,
           api: { url: provider.api_url },
           websites: {
             official: provider.official_url,
@@ -70,13 +84,14 @@ class LLMService extends BaseLLMService {
         }
         return acc
       }, {})
+      return data
     } catch (error) {
       console.error('获取提供商失败:', error)
       throw new Error('获取提供商失败: ' + error.message)
     }
   }
 
-  // 获取用户的模型配置
+  // 获取指定提供商
   async getConfigProvider(uid, providerId) {
     uid = 'default-user'
     const { ctx } = this
