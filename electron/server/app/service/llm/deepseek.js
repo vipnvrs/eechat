@@ -35,6 +35,26 @@ class DeepseekService extends BaseLLMService {
     // 使用基类的 listModels 方法
     return super.listModels()
   }
+
+  async chat(model, messages, config) {
+    try {
+      const configSaved = await this.getConfig('deepseek')
+      console.log(configSaved)
+      const client = await this.createClient(configSaved)
+      const response = await client.chat.completions.create({
+        // model: model.name,
+        model: 'deepseek-chat',
+        messages,
+        stream: true,
+        // max_tokens: 2048,
+        // temperature: 0.7,
+      })
+      // return response.choices[0].message.content
+      return response
+    } catch (error) {
+      throw new Error(`Deepseek 对话失败: ${error.message}`)
+    }
+  }
 }
 
 module.exports = DeepseekService

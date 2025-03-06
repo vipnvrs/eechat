@@ -39,6 +39,13 @@ const handleModelChange = (key, item) => {
   console.log(chatStore.model);
 }
 
+onMounted(() => {
+  const chatingModel = localStorage.getItem('chating_model')
+  if (chatingModel) {
+    chatStore.setModel(JSON.parse(chatingModel))
+  }
+})
+
 </script>
 
 <template>
@@ -46,7 +53,10 @@ const handleModelChange = (key, item) => {
     <Popover align="left" v-model:open="isShowModelSelect">
       <PopoverTrigger>
         <Button asChild size="sm" variant="outline" class="flex">
-          <span> {{ chatStore.model.name }} <ChevronsDownUp></ChevronsDownUp></span>
+          <span>
+            <Icon :name="chatStore.model.provider_id"></Icon> {{ chatStore.model.name }} <ChevronsDownUp>
+            </ChevronsDownUp>
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" class="w-auto px-2 py-2">

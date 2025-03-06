@@ -84,6 +84,62 @@ class ChatService extends Service {
     }
   }
 
+  async handleStream(stream, ctx, messages, sessionId, model) {
+    try {
+      console.log('handleStream')
+
+      // 保存用户最后一条消息
+      await this.saveMsg(
+        'default-user',
+        messages[messages.length - 1].role,
+        messages[messages.length - 1].content,
+        sessionId,
+      )
+
+      ctx.set({
+        'Content-Type': 'text/event-stream;charset=utf-8',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      })
+      ctx.res.statusCode = 200
+
+      let assistantMessage = '' // 用于累积助手的完整回复
+
+      for await (const chunk of stream) {
+        const content =
+          (chunk.choices[0] &&
+            chunk.choices[0].delta &&
+            chunk.choices[0].delta.content) ||
+          ''
+        assistantMessage += content // 累积回复内容
+
+        const data = {
+          code: 0,
+          data: {
+            content,
+            sessionId,
+          },
+        }
+        ctx.res.write(`data: ${JSON.stringify(data)}\n\n`)
+      }
+
+      // 保存助手的完整回复
+      if (assistantMessage) {
+        await this.saveMsg(
+          'default-user',
+          'assistant',
+          assistantMessage,
+          sessionId,
+        )
+      }
+
+      ctx.res.end()
+    } catch (error) {
+      ctx.logger.error('Chat service error:', error)
+      throw error
+    }
+  }
+
   /**
    * 保持为历史对话
    * @param {string} uid - 用户 ID

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useChatStore } from '@/stores/chatStore'
 import { LLMModel } from '@/types/llm'
 import SidebarLeft from '@/components/chat/SidebarLeft.vue'
@@ -20,7 +20,7 @@ import ChatInput from '@/components/chat/ChatInput.vue'
 import ModelSelect from '@/components/ModelSelect.vue'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import Theme from '@/components/Theme.vue'
-import { chatApi } from '@/api/request'
+import { chatApi, llmApi } from '@/api/request'
 import { PanelLeft, PanelRight } from 'lucide-vue-next'
 
 interface Message {
@@ -87,12 +87,58 @@ const sendMsgLocalOllama = async (model: LLMModel, msg: string) => {
   }
 }
 
+const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
+  if (loading.value) return
+  loading.value = true
+
+  try {
+    // 添加用户消息到历史记录
+    chatHistory.value.push({ role: 'user', content: msg })
+
+    // 添加空的助手消息
+    chatHistory.value.push({
+      role: 'assistant',
+      content: '',
+    })
+
+    // 发送消息并处理流式响应
+    await llmApi.sendMessageLlm(
+      model,
+      [
+        { role: 'system', content: '你是一个AI助手' },
+        ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
+      ],
+      activeSession.value.id,
+      (content: string) => {
+        // 更新最后一条消息的内容
+        const lastMessage = chatHistory.value[chatHistory.value.length - 1]
+        lastMessage.content += content
+      },
+    )
+  } catch (error) {
+    console.error('Error during chat:', error)
+    // 移除失败的助手消息
+    chatHistory.value.pop()
+  } finally {
+    loading.value = false
+  }
+}
+
 const sendMsg = async (msg: string) => {
   console.log(chatStore.model);
   if (chatStore.model.type === 'local') {
     sendMsgLocalOllama(chatStore.model, msg)
+  } else {
+    sendMsgLlmApi(chatStore.model, msg)
   }
 }
+
+// onMounted(() => {
+//   const chatingModel = localStorage.getItem('chating_model')
+//   if (chatingModel) {
+//     chatStore.setModel(JSON.parse(chatingModel))
+//   }
+// })
 </script>
 
 <template>

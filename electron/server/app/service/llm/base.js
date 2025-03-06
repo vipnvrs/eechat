@@ -7,27 +7,18 @@ class BaseLLMService extends Service {
     super(ctx)
   }
 
-  async getConfig(provider) {
+  async getConfig(provider_id) {
     try {
-      const config = await this.ctx.model.LlmConfig.findOne({
-        where: { provider },
+      const config = await this.ctx.model.LlmConfigProvider.findOne({
+        where: { provider_id },
         order: [['created_at', 'DESC']],
       })
 
       if (!config) return null
 
-      const models = JSON.parse(config.models)
-
       return {
         apiKey: this.decrypt(config.api_key),
         baseUrl: config.base_url,
-        modelGroups: [
-          {
-            name: provider.charAt(0).toUpperCase() + provider.slice(1),
-            description: `${provider} 模型系列`,
-            models,
-          },
-        ],
       }
     } catch (error) {
       this.ctx.logger.error('获取配置失败:', error)
@@ -39,7 +30,7 @@ class BaseLLMService extends Service {
     try {
       const { apiKey, baseUrl, models } = config
 
-      const existConfig = await this.ctx.model.LlmConfig.findOne({
+      const existConfig = await this.ctx.model.LlmConfigProvider.findOne({
         where: { provider },
       })
 
@@ -53,7 +44,7 @@ class BaseLLMService extends Service {
       if (existConfig) {
         await existConfig.update(data)
       } else {
-        await this.ctx.model.LlmConfig.create({
+        await this.ctx.model.LlmConfigProvider.create({
           provider,
           ...data,
           created_at: new Date(),

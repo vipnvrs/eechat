@@ -129,7 +129,7 @@ export const chatApi = {
     })
   },
 
-  // 发送消息
+  // 发送消息，本地
   async sendMessage(
     model: LLMModel,
     messages: Array<{ role: string; content: string }>,
@@ -137,7 +137,7 @@ export const chatApi = {
     onProgress?: (content: string) => void,
   ) {
     try {
-      const response = await fetch(API_BASE_URL + '/api/chat', {
+      const response = await fetch(API_BASE_URL + '/api/local/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -256,5 +256,51 @@ export const llmApi = {
   // 更新模型状态
   async saveConfigModelState(modelId: string, config: any) {
     return request.post(`/api/llm/configModel/state/${modelId}`, config)
+  },
+
+  // 发送消息，LLM API
+  async sendMessageLlm(
+    model: LLMModel,
+    messages: Array<{ role: string; content: string }>,
+    sessionId,
+    onProgress?: (content: string) => void,
+  ) {
+    const provider = model.provider_id
+    try {
+      const response = await fetch(API_BASE_URL + '/api/llm/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, provider, messages, sessionId }),
+      })
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+
+      while (reader) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value)
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (!line || !line.startsWith('data: ')) continue
+
+          try {
+            const data = JSON.parse(line.slice(5))
+            if (data.code === 0 && data.data?.content) {
+              onProgress?.(data.data.content)
+            }
+          } catch (e) {
+            console.error('Parse response error:', e)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Chat error:', error)
+      throw error
+    }
   },
 }

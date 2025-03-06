@@ -298,6 +298,32 @@ class LLMService extends BaseLLMService {
       throw new Error('保存模型配置失败:' + error.message)
     }
   }
+
+  /**
+   *
+   * @param {*} model
+   * @param {*} provider
+   * @param {*} messages
+   * @param {*} config
+   */
+  async chat(model, provider, messages, sessionId, config) {
+    const { ctx } = this
+    try {
+      const service = this.providers[provider]
+      const stream = await service.chat(model, messages, config)
+
+      // 使用 ChatService 的 handleStream 处理流数据
+      const chatService = ctx.service.chat
+      await chatService.handleStream(stream, ctx, messages, sessionId, model)
+    } catch (error) {
+      console.error('模型请求失败:', error)
+      throw error
+    }
+  }
+
+  async getConfig(provider) {
+    return await super.getConfig(provider)
+  }
 }
 
 module.exports = LLMService

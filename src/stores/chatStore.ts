@@ -12,6 +12,7 @@ export const useChatStore = defineStore('chat', {
 
   actions: {
     setModel(payload) {
+      localStorage.setItem('chating_model', JSON.stringify(payload))
       this.model = payload
     },
   },
