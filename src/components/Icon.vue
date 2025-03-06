@@ -13,6 +13,7 @@
 </template>
 
 <script setup>
+import { ref, onMounted, watch, computed, defineProps, defineEmits } from 'vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 const emit = defineEmits()
 const props = defineProps({
@@ -26,12 +27,16 @@ const props = defineProps({
     default: 24,
   },
 })
-// const baseUrl =
-//   'https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/light/'
-// const src = baseUrl + props.name + '.png'
-const baseUrl =
-  'https://registry.npmmirror.com/@lobehub/icons-static-svg/1.25.0/files/icons/'
-const src = baseUrl + props.name + '.svg'
+
+const baseUrl = 'https://registry.npmmirror.com/@lobehub/icons-static-svg/1.25.0/files/icons/'
+
+const src = ref('')
+watch(
+  () => props.name, val => {
+    src.value = baseUrl + val + '.svg'
+  }, {
+  immediate: true,
+},)
 
 // onMounted(() => {
 //   //console.log('onMounted')
