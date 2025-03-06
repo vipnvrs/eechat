@@ -255,7 +255,7 @@ export const llmApi = {
 
   // 更新模型状态
   async saveConfigModelState(modelId: string, config: any) {
-    return request.post(`/api/llm/configModel/state/${modelId}`, config)
+    return request.post(`/api/llm/configModel/state`, { modelId, config })
   },
 
   // 发送消息，LLM API

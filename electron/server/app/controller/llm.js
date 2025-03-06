@@ -141,8 +141,7 @@ class LLMController extends Controller {
   // 更新模型开启状态
   async saveConfigModelState() {
     const { ctx } = this
-    const { modelId } = ctx.params
-    const config = ctx.request.body
+    const { modelId, config } = ctx.request.body
     const uid = ctx.request.query.uid || 'default-user'
     try {
       const res = await ctx.service.llm.saveConfigModelState(

@@ -23,21 +23,45 @@ class LLMService extends BaseLLMService {
   async listModels(provider) {
     const { ctx } = this
     const uid = 'default-user'
+
+    // 获取所有模型
+    const allModels = await this.ctx.model.LlmModel.findAll({
+      where: { provider_id: provider },
+      order: [
+        ['state', 'DESC'],
+        ['sort', 'ASC'],
+      ],
+    })
+
+    // 获取配置过的模型
     const configedModels = await this.getConfigModelList(uid, provider)
-    if (configedModels.length === 0) {
-      const models = await this.ctx.model.LlmModel.findAll({
-        where: { provider_id: provider },
-        order: [
-          ['state', 'DESC'],
-          ['sort', 'ASC'],
-        ],
-      })
-      models.forEach(item => {
-        item.dataValues.from = 'common'
-      })
-      return models
-    }
-    return configedModels
+
+    // 使用配置数据更新模型信息
+    const result = allModels.map(model => {
+      // 查找对应的配置模型
+      const configModel = configedModels.find(
+        config => config.model_id === model.id,
+      )
+
+      if (configModel) {
+        // 如果有配置，使用配置数据覆盖默认值
+        return {
+          ...model.dataValues,
+          state: configModel.state,
+          name: configModel.name,
+          group_name: configModel.group_name,
+          from: 'config',
+        }
+      } else {
+        // 没有配置则使用默认值
+        return {
+          ...model.dataValues,
+          from: 'common',
+        }
+      }
+    })
+
+    return result
   }
 
   async saveConfig(provider, config) {
@@ -308,15 +332,16 @@ class LLMService extends BaseLLMService {
    */
   async chat(model, provider, messages, sessionId, config) {
     const { ctx } = this
+    const chatService = ctx.service.chat
     try {
       const service = this.providers[provider]
       const stream = await service.chat(model, messages, config)
 
       // 使用 ChatService 的 handleStream 处理流数据
-      const chatService = ctx.service.chat
       await chatService.handleStream(stream, ctx, messages, sessionId, model)
     } catch (error) {
       console.error('模型请求失败:', error)
+      await chatService.handleStreamError(error, ctx, sessionId)
       throw error
     }
   }

@@ -53,10 +53,7 @@ module.exports = app => {
   //   '/api/llm/configModel/:providerId',
   //   controller.llm.saveConfigModel,
   // )
-  router.post(
-    '/api/llm/configModel/state/:modelId',
-    controller.llm.saveConfigModelState,
-  )
+  router.post('/api/llm/configModel/state', controller.llm.saveConfigModelState)
 
   router.post('/api/llm/chat', controller.llm.chat)
 }

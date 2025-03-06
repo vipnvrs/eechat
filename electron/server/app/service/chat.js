@@ -141,6 +141,24 @@ class ChatService extends Service {
     }
   }
 
+  async handleStreamError(error, ctx) {
+    console.error('handleStreamError', error)
+    ctx.set({
+      'Content-Type': 'text/event-stream;charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+    ctx.res.statusCode = 200
+    const data = {
+      code: 0,
+      data: {
+        content: `<div class="msg_error">${error.message}</div>`,
+      },
+    }
+    ctx.res.write(`data: ${JSON.stringify(data)}\n\n`)
+    ctx.res.end()
+  }
+
   /**
    * 保持为历史对话
    * @param {string} uid - 用户 ID
