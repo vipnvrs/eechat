@@ -14,6 +14,12 @@ import {
   SidebarMenuItem,
   type SidebarProps,
 } from '@/components/ui/sidebar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
@@ -24,7 +30,9 @@ import {
   Inbox,
   SlidersHorizontal,
   Trash2,
+  Copy,
   Plus,
+  EllipsisVertical,
 } from 'lucide-vue-next'
 import { h, ref, onMounted } from 'vue'
 import { chatApi } from '@/api/request'
@@ -158,19 +166,33 @@ onMounted(() => {
               @click="handleSessionChange(item)"
               :key="item.id"
               href="#"
-              class="flex flex-col items-start gap-1 whitespace-nowrap border-b p-4 leading-tight hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              class="group/item flex items-center whitespace-nowrap border-b p-4 leading-tight hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               :class="
                 item.id === activeSessionId
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                   : ''
               "
             >
-              <div class="flex w-full items-center gap-2">
+            <span class="flex flex-col items-center gap-1 ">
+              <span class="flex w-full items-center gap-2">
                 <span class="font-bold">{{ item.title }}</span>
-              </div>
+              </span>
               <span class="line-clamp-1 w- whitespace-break-spaces text-sm text-gray-500">你好，我是 梦境画家，一位能将你的梦想变成现实的梦境艺术家。，让我们开始对话吧！
                 <!-- {{ item.title }} -->
               </span>
+            </span>
+              <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                  <Button class="invisible group-hover/item:visible" size="icon" variant="ghost" v-on:click.stop="">
+                    <EllipsisVertical class=""></EllipsisVertical>
+                  </Button>
+                </DropdownMenuTrigger>
+                <!-- <DropdownMenuContent algin="start" side="right" as-child> -->
+                <DropdownMenuContent algin="start" side="right">
+                  <DropdownMenuItem> <Copy></Copy> 复制</DropdownMenuItem>
+                  <DropdownMenuItem class="text-red-600 hover:text-red-500"> <Trash2></Trash2> 删除</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </a>
           </SidebarGroupContent>
         </template>
