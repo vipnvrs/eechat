@@ -97,24 +97,13 @@ const sendMsg = async (msg: string) => {
 
 <template>
   <div class="flex relative overflow-hidden">
-    <SidebarProvider
-      class="w-auto"
-      :style="{ '--sidebar-width': '240px' }"
-      v-model:open="sidebarLeftOpen"
-    >
+    <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '240px' }" v-model:open="sidebarLeftOpen">
       <SidebarLeft @session-change="handleSessionChange" />
     </SidebarProvider>
     <div class="w-full h-[100vh] max-h-[100vh] flex flex-col grow">
-      <header
-        class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between"
-      >
+      <header class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between">
         <div class="flex items-center gap-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            class="h-7 w-7"
-            @click="sidebarLeftOpen = !sidebarLeftOpen"
-          >
+          <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarLeftOpen = !sidebarLeftOpen">
             <PanelLeft></PanelLeft>
           </Button>
           <Separator orientation="vertical" class="mr-2 h-4" />
@@ -133,36 +122,23 @@ const sendMsg = async (msg: string) => {
         <div class="flex items-center gap-2">
           <Theme></Theme>
           <Separator orientation="vertical" class="mx-2 h-4" />
-          <Button
-            size="icon"
-            variant="ghost"
-            class="h-7 w-7"
-            @click="sidebarRightOpen = !sidebarRightOpen"
-          >
+          <Button size="icon" variant="ghost" class="h-7 w-7" @click="sidebarRightOpen = !sidebarRightOpen">
             <PanelRight></PanelRight>
           </Button>
         </div>
       </header>
-      <ScrollArea
-        class="h-full w-full px-4 flex-1 "
-      >
-      <!-- <ScrollArea
+      <ScrollArea class="h-full w-full px-4 flex-1 ">
+        <!-- <ScrollArea
         class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
       > -->
-        <Message :messages="chatHistory" class="py-4" />
+        <Message :messages="chatHistory" class="py-4 xl:max-w-[1024px] xl:mx-auto" />
         <ScrollBar />
       </ScrollArea>
-      <div
-        class="sticky bottom-0 h-[100px] content-center shrink-0 items-center gap-2 border-b bg-background"
-      >
+      <div class="sticky bottom-0 h-[100px] content-center shrink-0 items-center gap-2 border-b bg-background">
         <ChatInput @sendMsg="sendMsg" :disabled="loading" />
       </div>
     </div>
-    <SidebarProvider
-      class="w-auto"
-      :style="{ '--sidebar-width': '300px' }"
-      v-model:open="sidebarRightOpen"
-    >
+    <SidebarProvider class="w-auto" :style="{ '--sidebar-width': '300px' }" v-model:open="sidebarRightOpen">
       <SidebarRight :activeSession="activeSession" />
     </SidebarProvider>
   </div>
