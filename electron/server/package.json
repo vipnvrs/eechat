@@ -7,21 +7,20 @@
     "declarations": true
   },
   "dependencies": {
-    "better-sqlite3": "^11.8.1",
     "egg": "^3.17.5",
+    "egg-cors": "^3.0.1",
     "egg-scripts": "2",
     "egg-sequelize": "^6.0.0",
-    "sqlite3": "^5.1.7",
-    "sequelize-cli": "^6.6.2"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "egg-bin": "6",
     "egg-mock": "5",
     "eslint": "8",
-    "eslint-config-egg": "13"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "eslint-config-egg": "13",
+    "pkg": "^5.8.1",
+    "pkg-fetch": "^3.5.2",
+    "sequelize-cli": "^6.6.2"
   },
   "scripts": {
     "start": "egg-scripts start --daemon --title=egg-server-server",
@@ -36,15 +35,20 @@
     "migrate:up": "sequelize db:migrate",
     "migrate:down": "sequelize db:migrate:undo",
     "migrate:undo": "sequelize db:migrate:undo",
-    "migrate:undo:all": "sequelize db:migrate:undo:all"
+    "migrate:undo:all": "sequelize db:migrate:undo:all",
+    "pkg": "pkg . --targets node18-macos-x64 --output dist/server"
   },
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "author": "",
-  "license": "MIT",
-  "sequelize": {
-    "config": "database/config.json"
+  "bin": "index.js",
+  "pkg": {
+    "scripts": [
+      "app/**/*.js",
+      "config/**/*.js",
+      "lib/**/*.js"
+    ],
+    "assets": [
+      "app/**/*",
+      "config/**/*",
+      "database/**/*"
+    ]
   }
 }
