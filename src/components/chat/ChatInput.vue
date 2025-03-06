@@ -6,7 +6,7 @@ import { ArrowUpToLine } from 'lucide-vue-next'
 import { CornerDownLeft } from 'lucide-vue-next'
 
 const count = ref(0)
-const msg = ref('给我写一个企业网站')
+const msg = ref('')
 const emit = defineEmits(['sendMsg'])
 
 const handleSendMsg = (e: Event) => {

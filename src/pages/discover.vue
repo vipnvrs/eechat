@@ -215,8 +215,10 @@ const handleChange = e => {
 const handleFilterChange = (values) => {
   console.log('change', values)
   if (values.length === 0) {
-    dataList.value = dataList
+    // @ts-ignore
+    dataList.value = [...dataList]
   } else {
+    // @ts-ignore
     dataList.value = dataList.filter(item => {
       return values.some(value => item.tags.includes(value.value))
     })

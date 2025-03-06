@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useChatStore } from '@/stores/chatStore'
+import { LLMModel } from '@/types/llm'
 import SidebarLeft from '@/components/chat/SidebarLeft.vue'
 import SidebarRight from '@/components/chat/SidebarRight.vue'
 import { Button } from '@/components/ui/button'
@@ -13,7 +15,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
-
 import Message from '@/components/chat/Message.vue'
 import ChatInput from '@/components/chat/ChatInput.vue'
 import ModelSelect from '@/components/ModelSelect.vue'
@@ -26,12 +27,13 @@ interface Message {
   role: 'system' | 'user' | 'assistant'
   content: string
 }
-const activeSession = ref({})
+const chatStore = useChatStore()
+const activeSession = ref({ title: '', id: '' })
 const chatHistory = ref<Message[]>([])
 const loading = ref(false)
 const currentAssistantMessage = ref('')
 const sidebarLeftOpen = ref(true)
-const sidebarRightOpen = ref(true)
+const sidebarRightOpen = ref(false)
 
 const handleSessionChange = async session => {
   activeSession.value = session
@@ -48,7 +50,7 @@ const handleSessionChange = async session => {
     })
 }
 
-const sendMsg = async (msg: string) => {
+const sendMsgLocalOllama = async (model: LLMModel, msg: string) => {
   if (loading.value) return
   loading.value = true
 
@@ -64,6 +66,7 @@ const sendMsg = async (msg: string) => {
 
     // 发送消息并处理流式响应
     await chatApi.sendMessage(
+      model,
       [
         { role: 'system', content: '你是一个AI助手' },
         ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
@@ -81,6 +84,13 @@ const sendMsg = async (msg: string) => {
     chatHistory.value.pop()
   } finally {
     loading.value = false
+  }
+}
+
+const sendMsg = async (msg: string) => {
+  console.log(chatStore.model);
+  if (chatStore.model.type === 'local') {
+    sendMsgLocalOllama(chatStore.model, msg)
   }
 }
 </script>

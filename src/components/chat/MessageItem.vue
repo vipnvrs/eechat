@@ -89,7 +89,7 @@ const processMessagePart = async (part: string) => {
     return result.toString()
   } catch (error) {
     console.error('Error processing message part:', error)
-    return `<div class="text-red-500">Error: ${error.message}</div>`
+    return `<div class="text-red-500">Error: ${(error as Error).message}</div>`
   }
 }
 
@@ -103,24 +103,26 @@ const processThinkTag = async (message: string) => {
 
   while ((match = thinkRegex.exec(message)) !== null) {
     // 添加标签前的内容
+
     if (match.index > lastIndex) {
+      // @ts-ignore
       parts.push({
         type: 'normal',
         content: message.substring(lastIndex, match.index)
       })
     }
-
     // 添加思考内容
+    // @ts-ignore
     parts.push({
       type: 'think',
       content: match[1]
     })
-
     lastIndex = match.index + match[0].length
   }
 
   // 添加剩余内容
   if (lastIndex < message.length) {
+    // @ts-ignore
     parts.push({
       type: 'normal',
       content: message.substring(lastIndex)
@@ -145,11 +147,11 @@ const incrementalProcessMessage = async (message: string) => {
     if (needFullRerender.value || message.length < lastProcessedLength.value) {
       const parts = await processThinkTag(message)
       const htmlParts = await Promise.all(parts.map(async part => {
-        if (part.type === 'think') {
-          const thinkHtml = await processMessagePart(part.content.trim())
+        if ((part as { type: string; content: string }).type === 'think') {
+          const thinkHtml = await processMessagePart((part as { type: string; content: string }).content.trim())
           return `<details><summary class="bg-gray-50 rounded my-2 pl-2 text-gray-400 dark:bg-primary-foreground dark:text-white"> 思考过程</summary><div class="think">${thinkHtml}</div></details>`
         } else {
-          return await processMessagePart(part.content)
+          return await processMessagePart((part as { type: string; content: string }).content)
         }
       }))
 
@@ -238,7 +240,7 @@ const renderMarkdown = async (message: string) => {
     return htmlParts.join('')
   } catch (error) {
     console.error('Markdown rendering error:', error)
-    return `<div class="text-red-500">Error rendering markdown: ${error.message}</div>`
+    return `<div class="text-red-500">Error rendering markdown: ${(error as Error).message}</div>`
   }
 }
 

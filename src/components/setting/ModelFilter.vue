@@ -115,7 +115,8 @@ const handleSearchChange = (value: string) => {
     </ToggleGroup>
 
     <div class="relative max-w-sm items-center flex justify-end w-[220px] pr-[1px]">
-      <Input id="search" type="text" :model-value="searchQuery" @update:model-value="handleSearchChange"
+      <Input id="search" type="text" :model-value="searchQuery"
+        @update:model-value="(payload: string | number) => handleSearchChange(payload.toString())"
         placeholder="deepseek..." class="pl-10 w-[220px]" />
       <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
         <Search class="size-6 text-muted-foreground" />

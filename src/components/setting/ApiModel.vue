@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useModelStore } from '@/stores/model'
+
 import {
   Select,
   SelectContent,
@@ -25,26 +27,27 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import Icon from '@/components/Icon.vue'
 import { llmApi } from '@/api/request'
-import type { LLMProvider } from '@/types/llm'
+import type { LLMProvider, LLMModel, LLMModelArray, APIConfig, ProviderConfig } from '@/types/llm'
 import { Loader2, Check } from 'lucide-vue-next'
 import { Switch } from '@/components/ui/switch'
 
 const { toast } = useToast()
 const testLoading = ref(false)
 const saveLoading = ref(false)
-const testPassed = reactive({
+const testPassed = reactive<Record<string, boolean>>({
   openai: false,
   anthropic: false,
   deepseek: false
 })
+const modelStore = useModelStore()
 
 // 添加当前选中的提供商
 const currentProvider = ref('deepseek')
 
-const providers = ref({})
+const providers = ref<Record<string, LLMProvider>>({})
 
 // API 模型配置状态
-const apiConfig = reactive({
+const apiConfig = reactive<APIConfig>({
   apiKey: 'sk-5f86865628c54c4f954090aae9395d3a',
   baseUrl: '',
   config: {},
@@ -56,10 +59,11 @@ const apiConfig = reactive({
 async function testConnection(provider: string) {
   testLoading.value = true
   try {
-    const config = {
+    const config: ProviderConfig = {
+      models: _flattenModels(models.value),
       apiKey: apiConfig.apiKey,
       baseUrl: apiConfig.baseUrl,
-      // models: models.value,
+      state: apiConfig.state
     }
     const res = await llmApi.testConnection(provider, config)
     if (res) {
@@ -87,7 +91,6 @@ const defaultProvider = 'deepseek'
 async function getProviders(refresh) {
   const res = await llmApi.getProviders()
   providers.value = res
-  console.log(providers.value)
   if (refresh) {
     handleProviderChange(defaultProvider, res[defaultProvider])
   }
@@ -96,7 +99,7 @@ getProviders(true)
 
 const handleProviderChange = async (provider: string, value: object) => {
   currentProvider.value = provider
-  getModels(provider)
+  getModels()
   // 查询配置
   const res = await getConfigProvider()
   if (res) {
@@ -105,14 +108,14 @@ const handleProviderChange = async (provider: string, value: object) => {
     apiConfig.state = res.state ? true : false
   } else {
     apiConfig.apiKey = ''
-    apiConfig.baseUrl = value.api.url
+    apiConfig.baseUrl = (value as any).api?.url || ''
     apiConfig.state = false
   }
   apiConfig.info = value
   console.log(apiConfig);
 }
 
-const modelsArray = ref([])
+const modelsArray = ref<LLMModel[]>([])
 const models = ref({})
 
 const getModels = async () => {
@@ -140,47 +143,48 @@ const getConfigProvider = async () => {
 }
 
 // 更新提供商是否开启
-const saveConfigProviderState = async state => {
-  const config = {
+const saveConfigProviderState = async (state: boolean) => {
+  const config: ProviderConfig = {
     apiKey: apiConfig.apiKey,
     baseUrl: apiConfig.baseUrl,
     state,
     models: _flattenModels(models.value),
   }
-  config.models.forEach(item => item.model_id = item.id)
+  config.models?.forEach((item: any) => {
+    if (item && typeof item === 'object') {
+      item.model_id = item.id
+    }
+  })
   const res = await llmApi.saveConfigProviderState(currentProvider.value, config)
+  modelStore.updateProviderState(currentProvider.value, state)
+  console.log(modelStore);
+
   getProviders(false)
 }
 
 // 更新模型是否开启
-const saveConfigModelState = async (state, models, modelItem) => {
-  models = _flattenModels(models)
+const saveConfigModelState = async (state: boolean, models: Record<string, LLMModel[]>, modelItem: LLMModel) => {
+  const flattenedModels = _flattenModels(models)
   const config = {
     state,
-    models,
+    models: flattenedModels,
   }
   const model_id = modelItem.from === 'config' ? modelItem.model_id : modelItem.id
+  // @ts-ignore
   const res = await llmApi.saveConfigModelState(model_id, config)
-  console.log(res);
+  console.log(res)
   getModels()
 }
 
-// 获取模型配置
-// const getConfigModels = async () => {
-//   const res = await llmApi.getConfigModels(currentProvider.value)
-//   console.log(res);
-//   return res
-// }
-
-// 展开 Models 数据， groups
-const _flattenModels = (models) => {
-  const result = [];
+// 展开 Models 数据
+const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
+  const result: LLMModel[] = []
   for (const key in models) {
     if (models.hasOwnProperty(key)) {
-      result.push(...models[key]);
+      result.push(...models[key])
     }
   }
-  return result;
+  return result
 }
 </script>
 
@@ -197,7 +201,7 @@ const _flattenModels = (models) => {
             :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }">
 
             <div>
-              <div class="w-1.5 h-1.5 rounded-full" :class="value.state ? 'bg-green-400' : ''"></div>
+              <div class="w-1.5 h-1.5 rounded-full" :class="(value as any).state ? 'bg-green-400' : ''"></div>
             </div>
             <div class="flex-1 flex items-center space-x-2">
               <Icon :name="provider" :size="24" />
@@ -262,7 +266,7 @@ const _flattenModels = (models) => {
                   <SelectValue placeholder="选择要测试连通性的模型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem :value="item.name" v-for="item in modelsArray" :key="item.name">
+                  <SelectItem v-for="item in modelsArray" :value="item?.name" :key="item?.name">
                     {{ item.name }}
                   </SelectItem>
                 </SelectContent>
@@ -291,18 +295,21 @@ const _flattenModels = (models) => {
 
               <!-- 组内模型 -->
               <div class="flex flex-col mt-0 border rounded-md">
-                <div v-for="model in group" :key="model.name"
-                  class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <div v-for="model in group" :key="//@ts-ignore
+            model.name" class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800">
                   <div class="flex items-center space-x-2 justify-between">
                     <div class="flex items-center space-x-2">
-                      <Icon :name="model.provider_id" :size="24" />
-                      <div class="font-medium">{{ model.name }}</div>
+                      <Icon :name="//@ts-ignore
+            model.provider_id" :size="24" />
+                      <div class="font-medium">{{//@ts-ignore
+            model.name }}</div>
                     </div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Switch v-model="model.state"
-                            @update:model-value="saveConfigModelState($event, models, model)">
+                          <Switch v-model="//@ts-ignore
+            model.state" @update:model-value="//@ts-ignore
+            saveConfigModelState($event, models, model)">
                           </Switch>
                         </TooltipTrigger>
                         <TooltipContent>

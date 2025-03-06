@@ -8,7 +8,7 @@ class ChatService extends Service {
    * @param {string} sessionId - 会话ID
    * @reurns {Promise<string>} - 返回聊天结果
    */
-  async sendMessage(messages, sessionId) {
+  async sendMessage(model, messages, sessionId) {
     const { ctx } = this
     try {
       // 如果没有会话ID,创建新会话
@@ -35,7 +35,7 @@ class ChatService extends Service {
       )
 
       const requestParams = {
-        model: 'deepseek-r1',
+        model: model.id,
         messages,
         stream: true,
       }

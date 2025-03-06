@@ -1,6 +1,7 @@
-import { LLMConfig } from '@/types/llm'
+// import { LLMConfig } from '@/types/llm'
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { LLMModel } from '@/types/llm'
 
 export const API_BASE_URL =
   process.env.NODE_ENV === 'production'
@@ -130,6 +131,7 @@ export const chatApi = {
 
   // 发送消息
   async sendMessage(
+    model: LLMModel,
     messages: Array<{ role: string; content: string }>,
     sessionId,
     onProgress?: (content: string) => void,
@@ -140,7 +142,7 @@ export const chatApi = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ messages, sessionId }),
+        body: JSON.stringify({ model, messages, sessionId }),
       })
 
       const reader = response.body?.getReader()

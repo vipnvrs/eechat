@@ -3,9 +3,13 @@ const { Controller } = require('egg')
 class ChatController extends Controller {
   async sendMessage() {
     const { ctx } = this
-    const { messages, sessionId } = ctx.request.body
+    const { model, messages, sessionId } = ctx.request.body
     try {
-      const result = await ctx.service.chat.sendMessage(messages, sessionId)
+      const result = await ctx.service.chat.sendMessage(
+        model,
+        messages,
+        sessionId,
+      )
       ctx.body = ctx.helper.success(result)
     } catch (error) {
       ctx.helper.streamError(ctx, error, sessionId)
