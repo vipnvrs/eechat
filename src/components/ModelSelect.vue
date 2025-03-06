@@ -52,11 +52,11 @@ onMounted(() => {
   <div>
     <Popover align="left" v-model:open="isShowModelSelect">
       <PopoverTrigger>
-        <Button asChild size="sm" variant="outline" class="flex">
-          <span>
-            <Icon :name="chatStore.model.provider_id"></Icon> {{ chatStore.model.name }} <ChevronsDownUp>
+        <Button asChild variant="outline" class="flex">
+          <div>
+            <Icon :size="18" :name="chatStore.model.provider_id"></Icon> {{ chatStore.model.name }} <ChevronsDownUp>
             </ChevronsDownUp>
-          </span>
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" class="w-auto px-2 py-2">

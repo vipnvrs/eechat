@@ -5,7 +5,7 @@
         width: props.size + 'px',
         height: props.size + 'px',
       }">
-        <img v-if="props.name.length > 1" :src="src" alt="">
+        <img class="block" v-if="props.name.length > 1" :src="src" alt="">
         <div v-else>{{ props.name }}</div>
       </div>
     </div>

@@ -40,8 +40,7 @@ class AppBootHook {
         `[App] 数据库中共有 ${providerCount} 个提供商和 ${modelCount} 个模型`,
       )
     } catch (error) {
-      console.error('[App] 数据库同步出错:', error)
-
+      console.error('[App] 数据库同步出错:')
       // 如果出现错误，尝试使用更安全的方式同步
       try {
         console.log('[App] 尝试使用备用方式同步数据库...')

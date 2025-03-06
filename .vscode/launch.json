@@ -46,20 +46,5 @@
         "http://127.0.0.1:3344/**"
       ]
     },
-    {
-      "name": "Debug Electron Server",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "${workspaceFolder}/electron/server",
-      "envFile": "${workspaceFolder}/.vscode/.debug.env",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": [
-        "<node_internals>/**",
-        "${workspaceRoot}/node_modules/**"
-      ]
-    }
   ]
 }

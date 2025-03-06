@@ -4,7 +4,7 @@ const util = require('util')
 const { sleep } = require('openai/core')
 const { read } = require('fs')
 const execAsync = util.promisify(exec)
-
+const ollamaBaseUrl = 'http://127.0.0.1:11434'
 class OllamaService extends Service {
   /**
    * 检查 Ollama 状态
@@ -20,13 +20,10 @@ class OllamaService extends Service {
 
       // 检查是否运行中
       try {
-        const response = await this.ctx.curl(
-          'http://localhost:11434/api/version',
-          {
-            timeout: 3000,
-            dataType: 'json',
-          },
-        )
+        const response = await this.ctx.curl(`${ollamaBaseUrl}/api/version`, {
+          timeout: 3000,
+          dataType: 'json',
+        })
 
         if (response.status === 200) {
           return {
@@ -88,13 +85,13 @@ class OllamaService extends Service {
 
     // 等待服务启动
     let attempts = 0
-    const maxAttempts = 5 // 最多尝试5次
+    const maxAttempts = 10 // 最多尝试5次
 
     while (attempts < maxAttempts) {
       try {
-        const response = await ctx.curl('http://localhost:11434/api/version', {
+        const response = await fetch(`${ollamaBaseUrl}/api/version`, {
           timeout: 3000,
-          dataType: 'json',
+          // dataType: 'json',
         })
         console.log(attempts, response)
 
@@ -102,6 +99,7 @@ class OllamaService extends Service {
           return // 服务已启动
         }
       } catch (error) {
+        console.log(error)
         // 忽略错误,继续重试
       }
 
@@ -172,7 +170,7 @@ class OllamaService extends Service {
     try {
       if (platform === 'win32') {
         // 通过 HTTP 请求通知渲染进程打开下载页面
-        return {data: 'https://ollama.com/download/OllamaSetup.exe'}
+        return { data: 'https://ollama.com/download/OllamaSetup.exe' }
       } else {
         // macOS 和 Linux 继续使用包管理器安装
         const installCmd = 'brew install ollama'
@@ -180,7 +178,9 @@ class OllamaService extends Service {
       }
     } catch (error) {
       if (platform === 'win32') {
-        throw new Error('请从官网下载并手动安装 Ollama: https://ollama.ai/download/windows')
+        throw new Error(
+          '请从官网下载并手动安装 Ollama: https://ollama.ai/download/windows',
+        )
       } else {
         throw new Error('安装模型管理器失败，请手动安装')
       }
@@ -201,10 +201,7 @@ class OllamaService extends Service {
       }),
     }
     try {
-      const response = await fetch(
-        'http://localhost:11434/api/pull',
-        requestOptions,
-      )
+      const response = await fetch(`${ollamaBaseUrl}/api/pull`, requestOptions)
       ctx.set({
         'Content-Type': 'text/event-stream;charset=utf-8',
         'Cache-Control': 'no-cache',
@@ -298,7 +295,7 @@ class OllamaService extends Service {
    */
   async listModel() {
     try {
-      const response = await this.ctx.curl('http://localhost:11434/api/tags', {
+      const response = await this.ctx.curl(`${ollamaBaseUrl}/api/tags`, {
         timeout: 3000,
         dataType: 'json',
       })
@@ -317,7 +314,7 @@ class OllamaService extends Service {
     const { ctx } = this
 
     try {
-      const response = await ctx.curl(`http://localhost:11434/api/delete`, {
+      const response = await ctx.curl(`${ollamaBaseUrl}/api/delete`, {
         method: 'DELETE',
         contentType: 'application/json',
         dataType: 'json',

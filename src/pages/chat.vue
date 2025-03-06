@@ -173,7 +173,7 @@ const sendMsg = async (msg: string) => {
           </Button>
         </div>
       </header>
-      <ScrollArea class="h-full w-full px-4 flex-1 ">
+      <ScrollArea class="h-full w-full px-6 flex-1 ">
         <!-- <ScrollArea
         class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
       > -->

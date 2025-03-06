@@ -1,5 +1,6 @@
 const { Service } = require('egg')
 const OpenAI = require('openai')
+const ollamaBaseUrl = 'http://127.0.0.1:11434'
 
 class ChatService extends Service {
   /**
@@ -22,7 +23,7 @@ class ChatService extends Service {
       console.log('sendMessage', messages, sessionId)
 
       const openai = new OpenAI({
-        baseURL: 'http://localhost:11434/v1',
+        baseURL: `${ollamaBaseUrl}/v1`,
         apiKey: 'dummy',
       })
 

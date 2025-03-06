@@ -41,7 +41,8 @@ module.exports = appInfo => {
       underscored: true,
       constraints: false, // 禁用外键约束
     },
-    logging: console.log,
+    logging: false, // 关闭 SQL 日志
+    // logging: console.log,
     sync: process.env.NODE_ENV !== 'production', // 非生产环境下自动同步
   }
   config.cors = {
