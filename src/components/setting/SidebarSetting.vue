@@ -19,6 +19,7 @@ import Icon from '@/components/icon.vue'
 import { Brain, HardDrive } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
+import About from '@/components/setting/About.vue'
 
 // const props = withDefaults(defineProps<SidebarProps>(), {
 //   collapsible: 'icon',
@@ -56,26 +57,29 @@ const menuData = [
         label: '关于',
         icon: Brain,
         key: 'about',
+        component: markRaw(About),
       },
     ],
   },
-  {
-    label: '数据',
-    icon: Brain,
-    items: [
-      {
-        label: '备份/恢复',
-        icon: HardDrive,
-        key: 'interface',
-        component: markRaw(LocalModel),
-      },
-    ],
-  },
+  // {
+  //   label: '数据',
+  //   icon: Brain,
+  //   items: [
+  //     {
+  //       label: '备份/恢复',
+  //       icon: HardDrive,
+  //       key: 'interface',
+  //       component: markRaw(LocalModel),
+  //     },
+  //   ],
+  // },
 ]
 const emit = defineEmits(['change'])
 
+const activeKey = ref('LocalModel')
 const handleMenuClick = e => {
   emit('change', e)
+  activeKey.value = e.key
 }
 </script>
 
@@ -96,7 +100,7 @@ const handleMenuClick = e => {
           <SidebarGroupLabel>{{ group.label }}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem v-for="item in group.items" :key="item.label">
-              <SidebarMenuButton @click="handleMenuClick(item)" as-child>
+              <SidebarMenuButton class="cursor-pointer w-full" @click="handleMenuClick(item)" as-child :is-active="item.key == activeKey">
                 <div class="flex items-center">
                   <component :is="item.icon"></component>
                   <span class="ml-2">{{ item.label }}</span>
