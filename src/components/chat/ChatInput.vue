@@ -22,32 +22,37 @@ const initEvent = () => {
     }
   })
 }
-initEvent()
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault()
+    handleSendMsg(e)
+  } else if (e.key === "Enter" && e.shiftKey) {
+    // 允许默认换行行为
+    e.stopPropagation() // 添加这行防止事件冒泡
+  }
+}
 
-defineProps<{
-  disabled?: boolean
-}>()
+// 删除 initEvent 函数及其调用
 </script>
 
 <template>
   <div class="relative l-footer">
-    <Textarea
-      v-model="msg"
-      class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
-      placeholder="输入您要发送的消息"
-    ></Textarea>
-    <!-- <Button @click="handleSendMsg" class="absolute bottom-2 right-2" variant="" size="icon">
-      <ArrowUpToLine />
-    </Button> -->
-    <Button
-      @click="handleSendMsg"
-      :disabled="disabled"
-      type="submit"
-      size="sm"
-      class="ml-auto gap-1.5 absolute bottom-2 right-2"
-    >
-      发送
-      <CornerDownLeft class="size-3.5" />
-    </Button>
+    <form @submit.prevent="handleSendMsg">
+      <Textarea
+        v-model="msg"
+        class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
+        placeholder="输入消息，使用 Enter 发送, Shift + Enter 换行"
+        @keydown="handleKeyDown"
+      ></Textarea>
+      <Button
+        type="submit"
+        :disabled="disabled"
+        size="sm"
+        class="ml-auto gap-1.5 absolute bottom-2 right-2"
+      >
+        发送
+        <CornerDownLeft class="size-3.5" />
+      </Button>
+    </form>
   </div>
 </template>
