@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Skeleton } from '@/components/ui/skeleton'
-import { LoaderCircle} from 'lucide-vue-next'
-import { unified } from 'unified'
-import remarkParse from 'remark-parse'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
-import rehypeKatex from 'rehype-katex'
-import 'katex/dist/katex.min.css'
-import rehypeRaw from 'rehype-raw'
-import rehypeStringify from 'rehype-stringify'
-import remarkRehype from 'remark-rehype'
-import rehypeHighlight from 'rehype-highlight'
-import rehypeMermaid from 'rehype-mermaid'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/atom-one-dark.css'
-import { ref, onMounted, computed, watch, callWithErrorHandling, nextTick } from 'vue'
-import type { RehypeMermaidOptions } from 'rehype-mermaid'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
+import { LoaderCircle } from "lucide-vue-next"
+import { unified } from "unified"
+import remarkParse from "remark-parse"
+import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import rehypeKatex from "rehype-katex"
+import "katex/dist/katex.min.css"
+import rehypeRaw from "rehype-raw"
+import rehypeStringify from "rehype-stringify"
+import remarkRehype from "remark-rehype"
+import rehypeHighlight from "rehype-highlight"
+import rehypeMermaid from "rehype-mermaid"
+import hljs from "highlight.js"
+import "highlight.js/styles/atom-one-dark.css"
+import { ref, onMounted, computed, watch, callWithErrorHandling, nextTick } from "vue"
+import type { RehypeMermaidOptions } from "rehype-mermaid"
 
 interface Props {
   message: string
@@ -28,35 +28,44 @@ const props = defineProps<Props>()
 // 添加错误处理函数
 const handleMermaidError = () => {
   // 移除所有 mermaid 错误信息元素
-  const errorElements = document.querySelectorAll('div[style*="font-family: trebuchet ms"]')
-  errorElements.forEach(el => el.remove())
+  const errorElements = document.querySelectorAll(
+    'div[style*="font-family: trebuchet ms"]'
+  )
+  errorElements.forEach((el) => el.remove())
 }
 
 const mermaidOptions: RehypeMermaidOptions = {
-  strategy: 'img-svg',
+  strategy: "img-svg",
   errorFallback(el, diagram, error) {
-    console.error('Mermaid rendering error:', error)
+    console.error("Mermaid rendering error:", error)
     return {
-      type: 'element',
-      tagName: 'div',
+      type: "element",
+      tagName: "div",
       properties: {
-        className: ['mermaid-error', 'p-4', 'text-red-500', 'bg-red-50', 'dark:bg-red-900/10', 'rounded-lg']
+        className: [
+          "mermaid-error",
+          "p-4",
+          "text-red-500",
+          "bg-red-50",
+          "dark:bg-red-900/10",
+          "rounded-lg",
+        ],
       },
       children: [
         {
-          type: 'element',
-          tagName: 'pre',
-          properties: { className: ['mt-2', 'text-sm'] },
-          children: [{ type: 'text', value: diagram }]
-        }
-      ]
+          type: "element",
+          tagName: "pre",
+          properties: { className: ["mt-2", "text-sm"] },
+          children: [{ type: "text", value: diagram }],
+        },
+      ],
     }
   },
   mermaidConfig: {
-    theme: 'default',
-    securityLevel: 'loose',
-    startOnLoad: false
-  }
+    theme: "default",
+    securityLevel: "loose",
+    startOnLoad: false,
+  },
 }
 
 // 使用 remark 处理 Markdown
@@ -72,7 +81,7 @@ const processor = unified()
   .use(rehypeStringify) // 输出 HTML 字符串
 
 // 创建响应式变量存储渲染后的HTML
-const renderedHTML = ref('')
+const renderedHTML = ref("")
 // 存储上一次处理的消息长度
 const lastProcessedLength = ref(0)
 // 存储消息的各个部分
@@ -88,7 +97,7 @@ const processMessagePart = async (part: string) => {
     const result = await processor.process(part)
     return result.toString()
   } catch (error) {
-    console.error('Error processing message part:', error)
+    console.error("Error processing message part:", error)
     return `<div class="text-red-500">Error: ${(error as Error).message}</div>`
   }
 }
@@ -107,15 +116,15 @@ const processThinkTag = async (message: string) => {
     if (match.index > lastIndex) {
       // @ts-ignore
       parts.push({
-        type: 'normal',
-        content: message.substring(lastIndex, match.index)
+        type: "normal",
+        content: message.substring(lastIndex, match.index),
       })
     }
     // 添加思考内容
     // @ts-ignore
     parts.push({
-      type: 'think',
-      content: match[1]
+      type: "think",
+      content: match[1],
     })
     lastIndex = match.index + match[0].length
   }
@@ -124,8 +133,8 @@ const processThinkTag = async (message: string) => {
   if (lastIndex < message.length) {
     // @ts-ignore
     parts.push({
-      type: 'normal',
-      content: message.substring(lastIndex)
+      type: "normal",
+      content: message.substring(lastIndex),
     })
   }
 
@@ -139,23 +148,29 @@ const incrementalProcessMessage = async (message: string) => {
 
   try {
     // 检查消息是否包含思考标签，如果有则需要完整重新渲染
-    if (message.includes('<think>') || message.includes('</think>')) {
+    if (message.includes("<think>") || message.includes("</think>")) {
       needFullRerender.value = true
     }
 
     // 如果需要完整重新渲染或者消息长度减少（编辑情况），则重新处理整个消息
     if (needFullRerender.value || message.length < lastProcessedLength.value) {
       const parts = await processThinkTag(message)
-      const htmlParts = await Promise.all(parts.map(async part => {
-        if ((part as { type: string; content: string }).type === 'think') {
-          const thinkHtml = await processMessagePart((part as { type: string; content: string }).content.trim())
-          return `<details><summary class="bg-gray-50 rounded my-2 pl-2 text-gray-400 dark:bg-primary-foreground dark:text-white"> 思考过程</summary><div class="think">${thinkHtml}</div></details>`
-        } else {
-          return await processMessagePart((part as { type: string; content: string }).content)
-        }
-      }))
+      const htmlParts = await Promise.all(
+        parts.map(async (part) => {
+          if ((part as { type: string; content: string }).type === "think") {
+            const thinkHtml = await processMessagePart(
+              (part as { type: string; content: string }).content.trim()
+            )
+            return `<details><summary class="bg-gray-50 rounded my-2 pl-2 text-gray-400 dark:bg-primary-foreground dark:text-white"> 思考过程</summary><div class="think">${thinkHtml}</div></details>`
+          } else {
+            return await processMessagePart(
+              (part as { type: string; content: string }).content
+            )
+          }
+        })
+      )
 
-      renderedHTML.value = htmlParts.join('')
+      renderedHTML.value = htmlParts.join("")
       lastProcessedLength.value = message.length
       needFullRerender.value = false
     }
@@ -173,19 +188,29 @@ const incrementalProcessMessage = async (message: string) => {
       // 否则追加到现有HTML
       else {
         // 检查是否需要合并代码块
-        if (renderedHTML.value.endsWith('</pre>') && newHtml.startsWith('<pre>')) {
+        if (renderedHTML.value.endsWith("</pre>") && newHtml.startsWith("<pre>")) {
           // 提取现有代码块内容和新代码块内容
-          const existingCodeMatch = renderedHTML.value.match(/<pre><code[^>]*>([\s\S]*)<\/code><\/pre>$/)
+          const existingCodeMatch = renderedHTML.value.match(
+            /<pre><code[^>]*>([\s\S]*)<\/code><\/pre>$/
+          )
           const newCodeMatch = newHtml.match(/^<pre><code[^>]*>([\s\S]*)<\/code><\/pre>/)
 
           if (existingCodeMatch && newCodeMatch) {
             // 合并代码块内容
             const mergedContent = existingCodeMatch[1] + newCodeMatch[1]
             // 移除现有代码块
-            renderedHTML.value = renderedHTML.value.substring(0, renderedHTML.value.length - existingCodeMatch[0].length)
+            renderedHTML.value = renderedHTML.value.substring(
+              0,
+              renderedHTML.value.length - existingCodeMatch[0].length
+            )
             // 添加合并后的代码块
-            const codeClass = newHtml.match(/^<pre><code[^>]*class="([^"]*)"[^>]*>/) || ['', '']
-            renderedHTML.value += `<pre><code class="${codeClass[1]}">${mergedContent}</code></pre>${newHtml.substring(newCodeMatch[0].length)}`
+            const codeClass = newHtml.match(/^<pre><code[^>]*class="([^"]*)"[^>]*>/) || [
+              "",
+              "",
+            ]
+            renderedHTML.value += `<pre><code class="${
+              codeClass[1]
+            }">${mergedContent}</code></pre>${newHtml.substring(newCodeMatch[0].length)}`
           } else {
             renderedHTML.value += newHtml
           }
@@ -200,7 +225,7 @@ const incrementalProcessMessage = async (message: string) => {
     // 处理完成后，确保DOM更新
     await nextTick()
   } catch (error) {
-    console.error('Incremental processing error:', error)
+    console.error("Incremental processing error:", error)
     // 出错时回退到完整渲染
     renderedHTML.value = await renderMarkdown(message)
   } finally {
@@ -210,7 +235,7 @@ const incrementalProcessMessage = async (message: string) => {
 
 // 保留原始的完整渲染函数作为备用
 const renderMarkdown = async (message: string) => {
-  if (!message) return ''
+  if (!message) return ""
 
   try {
     // 正则匹配提取 <think></think> 标签中的内容
@@ -218,68 +243,85 @@ const renderMarkdown = async (message: string) => {
     const parts = message.split(thinkReg)
 
     // 处理每个部分
-    const htmlParts = await Promise.all(parts.map(async (part, index) => {
-      if (index % 2 === 1) {
-        // 奇数索引部分是 <think> 标签中的内容
-        const content = part.trim()
-        if (content) {
-          // 处理思考过程中的 Markdown
-          const thinkHtml = await processor.process(content)
-          return `<details><summary>思考过程</summary><div class="think">${thinkHtml.toString()}</div></details>`
+    const htmlParts = await Promise.all(
+      parts.map(async (part, index) => {
+        if (index % 2 === 1) {
+          // 奇数索引部分是 <think> 标签中的内容
+          const content = part.trim()
+          if (content) {
+            // 处理思考过程中的 Markdown
+            const thinkHtml = await processor.process(content)
+            return `<details><summary>思考过程</summary><div class="think">${thinkHtml.toString()}</div></details>`
+          } else {
+            return ""
+          }
         } else {
-          return ''
+          // 偶数索引部分是普通 Markdown 内容
+          const result = await processor.process(part)
+          return result.toString()
         }
-      } else {
-        // 偶数索引部分是普通 Markdown 内容
-        const result = await processor.process(part)
-        return result.toString()
-      }
-    }))
+      })
+    )
 
     // 合并所有部分
-    return htmlParts.join('')
+    return htmlParts.join("")
   } catch (error) {
-    console.error('Markdown rendering error:', error)
-    return `<div class="text-red-500">Error rendering markdown: ${(error as Error).message}</div>`
+    console.error("Markdown rendering error:", error)
+    return `<div class="text-red-500">Error rendering markdown: ${
+      (error as Error).message
+    }</div>`
   }
 }
 
 // 监听消息变化，使用增量更新
-watch(() => props.message, async (newMessage) => {
-  if (newMessage) {
-    await incrementalProcessMessage(newMessage)
-  } else {
-    renderedHTML.value = ''
-    lastProcessedLength.value = 0
-    needFullRerender.value = false
-  }
-}, { immediate: true })
+watch(
+  () => props.message,
+  async (newMessage) => {
+    if (newMessage) {
+      await incrementalProcessMessage(newMessage)
+    } else {
+      renderedHTML.value = ""
+      lastProcessedLength.value = 0
+      needFullRerender.value = false
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
-  <div v-if="message == ''"
-    class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center">
-    <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
-    <span class="ml-2 text-[14px]">思考中...</span>
-  </div>
-  <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
-    <!-- <Avatar>
-      <AvatarImage 
-        :src="role === 'user' 
-          ? 'https://github.com/shadcn.png' 
-          : 'https://github.com/radix-vue.png'" 
-        :alt="role === 'user' ? '@user' : '@ai'" 
-      />
-      <AvatarFallback>{{ role === 'user' ? 'U' : 'AI' }}</AvatarFallback>
-    </Avatar> -->
+  <div class="last:min-h-[calc(100dvh-258px)]">
+    <div
+      v-if="message == ''"
+      class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
+    >
+      <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
+      <span class="ml-2 text-[14px]">思考中...</span>
+    </div>
+    <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
+      <!-- <Avatar>
+        <AvatarImage 
+          :src="role === 'user' 
+            ? 'https://github.com/shadcn.png' 
+            : 'https://github.com/radix-vue.png'" 
+          :alt="role === 'user' ? '@user' : '@ai'" 
+        />
+        <AvatarFallback>{{ role === 'user' ? 'U' : 'AI' }}</AvatarFallback>
+      </Avatar> -->
 
-    <div class="flex flex-col max-w-[80%]">
-      <!-- <div class="text-sm text-muted-foreground">
-        {{ role === 'user' ? '用户' : 'AI助手' }}
-      </div> -->
-      <div class="rounded-lg px-4 py-2 list-disc text-[14px]" :class="role === 'user'
-    ? 'bg-primary text-primary-foreground'
-    : 'bg-gray-100 dark:bg-primary-foreground dark:text-white'" v-html="renderedHTML">
+      <div class="flex flex-col max-w-[80%]">
+        <!-- <div class="text-sm text-muted-foreground">
+          {{ role === 'user' ? '用户' : 'AI助手' }}
+        </div> -->
+        <div
+          class="rounded-lg px-4 py-2 list-disc text-[14px]"
+          :class="
+            role === 'user'
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-gray-100 dark:bg-primary-foreground dark:text-white'
+          "
+          v-html="renderedHTML"
+        ></div>
       </div>
     </div>
   </div>

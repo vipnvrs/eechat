@@ -1,23 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { ArrowUpToLine } from 'lucide-vue-next'
-import { CornerDownLeft } from 'lucide-vue-next'
+import { ref } from "vue"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { ArrowUpToLine } from "lucide-vue-next"
+import { CornerDownLeft } from "lucide-vue-next"
 
 const count = ref(0)
-const msg = ref('')
-const emit = defineEmits(['sendMsg'])
+const msg = ref("")
+const emit = defineEmits(["sendMsg"])
 
 const handleSendMsg = (e: Event) => {
-  emit('sendMsg', msg.value)
-  msg.value = ''
+  emit("sendMsg", msg.value)
+  msg.value = ""
 }
 
 // 监听回车键
 const initEvent = () => {
-  window.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       handleSendMsg(e)
     }
   })
@@ -30,10 +30,9 @@ defineProps<{
 </script>
 
 <template>
-  <div class="relative">
+  <div class="relative l-footer">
     <Textarea
       v-model="msg"
-      :disabled="disabled"
       class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
       placeholder="输入您要发送的消息"
     ></Textarea>
