@@ -8,6 +8,12 @@ import { CornerDownLeft } from "lucide-vue-next"
 const count = ref(0)
 const msg = ref("")
 const emit = defineEmits(["sendMsg"])
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+})
 
 const handleSendMsg = (e: Event) => {
   emit("sendMsg", msg.value)

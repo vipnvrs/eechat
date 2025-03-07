@@ -30,6 +30,21 @@ module.exports = app => {
         allowNull: false,
         comment: '消息内容',
       },
+      model: {
+        type: STRING(255),
+        allowNull: true,
+        comment: '模型名称',
+      },
+      usage: {
+        type: TEXT,
+        allowNull: true,
+        comment: '使用情况',
+      },
+      object: {
+        type: TEXT,
+        allowNull: true,
+        comment: '对象名称',
+      },
       created_at: {
         type: DATE,
         allowNull: false,

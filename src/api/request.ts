@@ -144,30 +144,7 @@ export const chatApi = {
         },
         body: JSON.stringify({ model, messages, sessionId }),
       })
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-
-        for (const line of lines) {
-          if (!line || !line.startsWith('data: ')) continue
-
-          try {
-            const data = JSON.parse(line.slice(5))
-            if (data.code === 0 && data.data?.content) {
-              onProgress?.(data.data.content)
-            }
-          } catch (e) {
-            console.error('Parse response error:', e)
-          }
-        }
-      }
+      handleStream(response, onProgress)
     } catch (error) {
       console.error('Chat error:', error)
       throw error
@@ -274,33 +251,39 @@ export const llmApi = {
         },
         body: JSON.stringify({ model, provider, messages, sessionId }),
       })
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      while (reader) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-
-        for (const line of lines) {
-          if (!line || !line.startsWith('data: ')) continue
-
-          try {
-            const data = JSON.parse(line.slice(5))
-            if (data.code === 0 && data.data?.content) {
-              onProgress?.(data.data.content)
-            }
-          } catch (e) {
-            console.error('Parse response error:', e)
-          }
-        }
-      }
+      handleStream(response, onProgress)
     } catch (error) {
       console.error('Chat error:', error)
       throw error
     }
   },
+}
+
+const handleStream = async (response, onProgress) => {
+  const reader = response.body?.getReader()
+  const decoder = new TextDecoder()
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const chunk = decoder.decode(value)
+      const lines = chunk.split('\n')
+
+      for (const line of lines) {
+        if (!line) continue
+        try {
+          const data = JSON.parse(line)
+          if (data.choices[0]?.delta?.content) {
+            onProgress?.(data.choices[0]?.delta?.content)
+          }
+        } catch (e) {
+          console.error('Parse response error:', e)
+        }
+      }
+    }
+  } finally {
+    reader?.releaseLock()
+  }
 }

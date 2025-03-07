@@ -1,3 +1,4 @@
+const Transform = require('stream').Transform
 const { Service } = require('egg')
 const OpenAI = require('openai')
 const ollamaBaseUrl = 'http://127.0.0.1:11434'
@@ -41,44 +42,7 @@ class ChatService extends Service {
         stream: true,
       }
       const stream = await openai.chat.completions.create(requestParams)
-      ctx.set({
-        'Content-Type': 'text/event-stream;charset=utf-8',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      })
-      ctx.res.statusCode = 200
-
-      let assistantMessage = '' // 用于累积助手的完整回复
-
-      for await (const chunk of stream) {
-        const content =
-          (chunk.choices[0] &&
-            chunk.choices[0].delta &&
-            chunk.choices[0].delta.content) ||
-          ''
-        assistantMessage += content // 累积回复内容
-
-        const data = {
-          code: 0,
-          data: {
-            content,
-            sessionId,
-          },
-        }
-        ctx.res.write(`data: ${JSON.stringify(data)}\n\n`)
-      }
-
-      // 保存助手的完整回复
-      if (assistantMessage) {
-        await this.saveMsg(
-          'default-user',
-          'assistant',
-          assistantMessage,
-          sessionId,
-        )
-      }
-
-      ctx.res.end()
+      await this.handleStream(stream, ctx, messages, sessionId, model)
     } catch (error) {
       ctx.logger.error('Chat service error:', error)
       throw error
@@ -86,9 +50,27 @@ class ChatService extends Service {
   }
 
   async handleStream(stream, ctx, messages, sessionId, model) {
+    // console.log('handleStream')
+    ctx.set({
+      'Content-Type': 'text/event-stream;charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+    ctx.res.statusCode = 200
+    let assistantMessage = ''
     try {
-      console.log('handleStream')
-
+      for await (const chunk of stream) {
+        // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
+        ctx.res.write(JSON.stringify(chunk) + '\n')
+        const content =
+          (chunk.choices[0] &&
+            chunk.choices[0].delta &&
+            chunk.choices[0].delta.content) ||
+          ''
+        assistantMessage += content
+        // todo: 用量信息
+        // todo: session 会话信息
+      }
       // 保存用户最后一条消息
       await this.saveMsg(
         'default-user',
@@ -96,34 +78,6 @@ class ChatService extends Service {
         messages[messages.length - 1].content,
         sessionId,
       )
-
-      ctx.set({
-        'Content-Type': 'text/event-stream;charset=utf-8',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-      })
-      ctx.res.statusCode = 200
-
-      let assistantMessage = '' // 用于累积助手的完整回复
-
-      for await (const chunk of stream) {
-        const content =
-          (chunk.choices[0] &&
-            chunk.choices[0].delta &&
-            chunk.choices[0].delta.content) ||
-          ''
-        assistantMessage += content // 累积回复内容
-
-        const data = {
-          code: 0,
-          data: {
-            content,
-            sessionId,
-          },
-        }
-        ctx.res.write(`data: ${JSON.stringify(data)}\n\n`)
-      }
-
       // 保存助手的完整回复
       if (assistantMessage) {
         await this.saveMsg(
@@ -133,11 +87,13 @@ class ChatService extends Service {
           sessionId,
         )
       }
-
       ctx.res.end()
     } catch (error) {
-      ctx.logger.error('Chat service error:', error)
+      ctx.logger.error('Stream error:', error)
+      ctx.res.end()
       throw error
+    } finally {
+      ctx.res.end()
     }
   }
 
