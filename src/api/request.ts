@@ -129,6 +129,11 @@ export const chatApi = {
     })
   },
 
+  // 删除会话
+  async removeSession(sessionId: number) {
+    return request.delete(`/api/session/${sessionId}`)
+  },
+
   // 发送消息，本地
   async sendMessage(
     model: LLMModel,

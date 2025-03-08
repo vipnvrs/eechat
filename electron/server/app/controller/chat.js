@@ -63,6 +63,18 @@ class ChatController extends Controller {
       ctx.body = ctx.helper.error(error.message)
     }
   }
+  
+  async removeSession() {
+    const { ctx } = this
+    const { id } = ctx.params
+
+    try {
+      const result = await ctx.service.chat.removeSession(id)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
 }
 
 module.exports = ChatController

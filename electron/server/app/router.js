@@ -11,6 +11,7 @@ module.exports = app => {
   router.get('/api/chat/:id', controller.chat.history)
   router.post('/api/session/new', controller.chat.createSession)
   router.get('/api/session/list', controller.chat.listSession)
+  router.delete('/api/session/:id', controller.chat.removeSession)
 
   router.get('/api/ollama/state', controller.ollama.state)
   router.post('/api/ollama/start', controller.ollama.start)

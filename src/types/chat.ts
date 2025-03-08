@@ -13,3 +13,12 @@ export interface ChatHistoryResponse {
   pageSize: number
   data: Message[]
 }
+
+export interface ChatSession {
+  id: number
+  uid: string
+  title: string
+  model: string
+  updated_at: string
+  created_at: string
+}

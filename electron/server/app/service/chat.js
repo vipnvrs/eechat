@@ -294,6 +294,31 @@ class ChatService extends Service {
       throw new Error('获取会话列表失败: ' + error.message)
     }
   }
+
+  async removeSession(id) {
+    const { ctx } = this
+
+    if (!id) {
+      throw new Error('会话ID不能为空')
+    }
+
+    try {
+      const session = await ctx.model.ChatSession.findByPk(id)
+      if (!session) {
+        throw new Error('会话不存在')
+      }
+      await session.destroy()
+      await ctx.model.Message.destroy({
+        where: {
+          session_id: id,
+        },
+      })
+      return true
+    } catch (error) {
+      ctx.logger.error('删除会话失败:', error)
+      throw new Error('删除会话失败:'+ error.message)
+    }
+  }
 }
 
 module.exports = ChatService
