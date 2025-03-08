@@ -26,7 +26,7 @@ class Request {
   constructor(config?: AxiosRequestConfig) {
     this.instance = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 60000,
+      timeout: 60 * 60 * 1000,
       ...config,
     })
 
@@ -132,6 +132,11 @@ export const chatApi = {
   // 删除会话
   async removeSession(sessionId: number) {
     return request.delete(`/api/session/${sessionId}`)
+  },
+
+  // 对话总结
+  async summarySession(config) {
+    return request.post(`/api/session/summary`, config)
   },
 
   // 发送消息，本地

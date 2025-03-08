@@ -12,6 +12,8 @@ module.exports = app => {
   router.post('/api/session/new', controller.chat.createSession)
   router.get('/api/session/list', controller.chat.listSession)
   router.delete('/api/session/:id', controller.chat.removeSession)
+  // 对话总结标题
+  router.post('/api/session/summary', controller.chat.summary)
 
   router.get('/api/ollama/state', controller.ollama.state)
   router.post('/api/ollama/start', controller.ollama.start)

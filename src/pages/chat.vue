@@ -134,6 +134,16 @@ const sendMsg = async (msg: string) => {
     sendMsgLlmApi(chatStore.model, msg)
   }
   scrollToBottom(true)
+  // todo 对话总结
+  // if(msg.length == 2) {
+    const config = {
+      model:chatStore.model,
+      messages: chatHistory.value, 
+      sessionId: activeSession.value,
+    }
+    const summaryRes = await chatApi.summarySession(config)
+    console.log(summaryRes);
+  // }
 }
 
 const scrollAreaRef = ref(null)

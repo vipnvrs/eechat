@@ -346,6 +346,18 @@ class LLMService extends BaseLLMService {
     }
   }
 
+  async chatNoStream(messages, modelName, provider_id) {
+    const { ctx } = this
+    try {
+      const providerService = this.providers[provider_id]
+      const res = await providerService.chatNoStream(messages, modelName)
+      return res.choices[0].message.content
+    } catch (error) {
+      ctx.logger.error('Chat error:', error)
+      throw new Error(error.message)
+    }
+  }
+
   async getConfig(provider) {
     return await super.getConfig(provider)
   }

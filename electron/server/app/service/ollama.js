@@ -1,4 +1,5 @@
 const { Service } = require('egg')
+const OpenAI = require('openai')
 const { exec } = require('child_process')
 const util = require('util')
 const { sleep } = require('openai/core')
@@ -327,6 +328,26 @@ class OllamaService extends Service {
       throw new Error(response.data.error)
     } catch (error) {
       ctx.logger.error(error)
+      throw new Error(error.message)
+    }
+  }
+
+  async chatNoStream(messages, modelName) {
+    const { ctx } = this
+    const openai = new OpenAI({
+      baseURL: `${ollamaBaseUrl}/v1`,
+      apiKey: 'dummy',
+    })
+    try {
+      const response = await openai.chat.completions.create({
+        model: modelName,
+        messages: messages,
+      })
+      // console.log(JSON.stringify(messages))
+      console.log(response.choices[0].message.content)
+      return response.choices[0].message.content
+    } catch (error) {
+      ctx.logger.error('Chat error:', error)
       throw new Error(error.message)
     }
   }

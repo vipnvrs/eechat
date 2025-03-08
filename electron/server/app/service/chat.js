@@ -21,7 +21,7 @@ class ChatService extends Service {
       //   })
       //   sessionId = session.id
       // }
-      console.log('sendMessage', messages, sessionId)
+      // console.log('sendMessage', messages, sessionId)
 
       const openai = new OpenAI({
         baseURL: `${ollamaBaseUrl}/v1`,
@@ -52,7 +52,7 @@ class ChatService extends Service {
     ctx.res.statusCode = 200
     let assistantMessage = ''
     let hasEnded = false
-    
+
     try {
       for await (const chunk of stream) {
         // 检查响应是否已结束
@@ -105,12 +105,12 @@ class ChatService extends Service {
   }
   async handleStreamError(error, ctx) {
     console.error('handleStreamError', error)
-    
+
     // 检查响应是否已结束
     if (ctx.res.writableEnded) {
       return
     }
-    
+
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -129,7 +129,7 @@ class ChatService extends Service {
       ],
     }
     ctx.res.write(JSON.stringify(data) + '\n')
-    
+
     // 确保只结束一次响应
     if (!ctx.res.writableEnded) {
       ctx.res.end()
@@ -146,7 +146,6 @@ class ChatService extends Service {
    */
   async saveMsg(uid, role, content, sessionId) {
     const { ctx } = this
-    console.log('saveMsg', uid, role, content, sessionId)
 
     // 参数验证
     if (!uid || !role || !content || !sessionId) {
@@ -185,7 +184,7 @@ class ChatService extends Service {
    * @returns
    */
   async getHistory(sessionId, uid, page = 1, pageSize = 20) {
-    console.log('getHistory', sessionId, uid, page, pageSize)
+    // console.log('getHistory', sessionId, uid, page, pageSize)
 
     const { ctx } = this
 
@@ -316,7 +315,43 @@ class ChatService extends Service {
       return true
     } catch (error) {
       ctx.logger.error('删除会话失败:', error)
-      throw new Error('删除会话失败:'+ error.message)
+      throw new Error('删除会话失败:' + error.message)
+    }
+  }
+
+  async summary(model, messages, sessionId) {
+    const { ctx } = this
+    if (!sessionId || !messages) {
+      throw new Error('参数不完整')
+    }
+    let messagesStr = ''
+    messages.forEach((item) => {
+      messagesStr += item.role + ': ' + item.content + '\n'
+    })
+    const prompt = [
+        { 
+          role: "system", 
+          // content: "You are a concise summarizer. Always provide summaries in exactly 10 words." 
+          content: "你是一个对话标题总结器。总是以10个字的文字总结标题, 无需思考过程。" 
+        },
+        {
+          role: "user",
+          // content: `Summarize the following conversation in 10 words: ${messagesStr}`,
+          content: `用10个总结以下对话内容的标题: ${messagesStr}`,
+        }
+      ]
+    try {
+      const provider_id = model.provider_id
+      if(provider_id == 'local') {
+        const res = await ctx.service.ollama.chatNoStream(prompt, model.id)
+        return res
+      } else {
+        const res = await ctx.service.llm.chatNoStream(prompt, model.id, provider_id)
+        return res
+      }
+    } catch (error) {
+      ctx.logger.error('修改会话标题失败:', error)
+      throw new Error('修改会话标题失败:' + error.message)
     }
   }
 }
