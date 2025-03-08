@@ -45,10 +45,11 @@ class ChatService extends Service {
       await this.handleStream(stream, ctx, messages, sessionId, model)
     } catch (error) {
       ctx.logger.error('Chat service error:', error)
-      throw error
+      await this.handleStreamError(error, ctx)
+      // 移除这里的 throw error，因为错误已经在 handleStreamError 中处理
     }
+    // 移除这里的 finally 块，让 handleStream 或 handleStreamError 负责结束响应
   }
-
   async handleStream(stream, ctx, messages, sessionId, model) {
     // console.log('handleStream')
     ctx.set({
@@ -58,8 +59,15 @@ class ChatService extends Service {
     })
     ctx.res.statusCode = 200
     let assistantMessage = ''
+    let hasEnded = false
+    
     try {
       for await (const chunk of stream) {
+        // 检查响应是否已结束
+        if (ctx.res.writableEnded) {
+          break
+        }
+        
         // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
@@ -71,13 +79,7 @@ class ChatService extends Service {
         // todo: 用量信息
         // todo: session 会话信息
       }
-      // 保存用户最后一条消息
-      await this.saveMsg(
-        'default-user',
-        messages[messages.length - 1].role,
-        messages[messages.length - 1].content,
-        sessionId,
-      )
+      
       // 保存助手的完整回复
       if (assistantMessage) {
         await this.saveMsg(
@@ -87,18 +89,28 @@ class ChatService extends Service {
           sessionId,
         )
       }
-      ctx.res.end()
+      
+      // 只有在响应尚未结束时才结束它
+      if (!ctx.res.writableEnded) {
+        ctx.res.end()
+        hasEnded = true
+      }
     } catch (error) {
       ctx.logger.error('Stream error:', error)
-      ctx.res.end()
-      throw error
-    } finally {
-      ctx.res.end()
+      // 只在响应尚未结束时处理错误
+      if (!ctx.res.writableEnded && !hasEnded) {
+        await this.handleStreamError(error, ctx)
+      }
     }
   }
-
   async handleStreamError(error, ctx) {
     console.error('handleStreamError', error)
+    
+    // 检查响应是否已结束
+    if (ctx.res.writableEnded) {
+      return
+    }
+    
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -106,13 +118,22 @@ class ChatService extends Service {
     })
     ctx.res.statusCode = 200
     const data = {
-      code: 0,
-      data: {
-        content: `<div class="msg_error">${error.message}</div>`,
-      },
+      choices: [
+        {
+          delta: {
+            content: error.message,
+          },
+          finish_reason: 'stop',
+          index: 0,
+        },
+      ],
     }
-    ctx.res.write(`data: ${JSON.stringify(data)}\n\n`)
-    ctx.res.end()
+    ctx.res.write(JSON.stringify(data) + '\n')
+    
+    // 确保只结束一次响应
+    if (!ctx.res.writableEnded) {
+      ctx.res.end()
+    }
   }
 
   /**
