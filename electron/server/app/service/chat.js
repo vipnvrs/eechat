@@ -28,14 +28,6 @@ class ChatService extends Service {
         apiKey: 'dummy',
       })
 
-      // 保存用户最后一条消息
-      await this.saveMsg(
-        'default-user',
-        messages[messages.length - 1].role,
-        messages[messages.length - 1].content,
-        sessionId,
-      )
-
       const requestParams = {
         model: model.id,
         messages,
@@ -67,7 +59,7 @@ class ChatService extends Service {
         if (ctx.res.writableEnded) {
           break
         }
-        
+
         // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
@@ -79,7 +71,15 @@ class ChatService extends Service {
         // todo: 用量信息
         // todo: session 会话信息
       }
-      
+
+      // 保存用户最后一条消息
+      await this.saveMsg(
+        'default-user',
+        messages[messages.length - 1].role,
+        messages[messages.length - 1].content,
+        sessionId,
+      )
+
       // 保存助手的完整回复
       if (assistantMessage) {
         await this.saveMsg(
@@ -89,7 +89,7 @@ class ChatService extends Service {
           sessionId,
         )
       }
-      
+
       // 只有在响应尚未结束时才结束它
       if (!ctx.res.writableEnded) {
         ctx.res.end()
