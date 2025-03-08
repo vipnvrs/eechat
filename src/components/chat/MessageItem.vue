@@ -1,11 +1,40 @@
 <script setup lang="ts">
-import { ref, defineProps } from "vue"
+import { ref, defineProps, computed, nextTick, onBeforeUnmount} from "vue"
+import {LoaderCircle} from 'lucide-vue-next'
+import remarkParse from "remark-parse"
+import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import rehypeKatex from "rehype-katex"
+import "katex/dist/katex.min.css"
+import rehypeRaw from "rehype-raw"
+import rehypeStringify from "rehype-stringify"
+import remarkRehype from "remark-rehype"
+import rehypeHighlight from "rehype-highlight"
+import "highlight.js/styles/atom-one-dark.css"
+import { unified } from "unified"
 
 const props = defineProps<{
   message: string
   role: string
 }>()
 const renderedHTML = ref("")
+// 使用 remark 处理 Markdown
+const processor = unified()
+  .use(remarkParse) // 解析 Markdown
+  .use(remarkGfm) // 支持 GFM (GitHub Flavored Markdown)
+  .use(remarkMath) // 支持数学公式
+  .use(remarkRehype, { allowDangerousHtml: true }) // 转换为 HTML，允许原始 HTML
+  .use(rehypeRaw) // 处理原始 HTML
+  .use(rehypeHighlight) // 使用默认配置
+  .use(rehypeKatex) // 渲染数学公式
+  // .use(rehypeMermaid, mermaidOptions) // 简化配置
+  .use(rehypeStringify) // 输出 HTML 字符串
+
+
+// 安全处理后的内容
+const sanitizedContent = computed(() => 
+  processor.processSync(props.message).toString()
+)
 </script>
 
 <template>
@@ -18,20 +47,7 @@ const renderedHTML = ref("")
       <span class="ml-2 text-[14px]">思考中...</span>
     </div>
     <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
-      <!-- <Avatar>
-        <AvatarImage 
-          :src="role === 'user' 
-            ? 'https://github.com/shadcn.png' 
-            : 'https://github.com/radix-vue.png'" 
-          :alt="role === 'user' ? '@user' : '@ai'" 
-        />
-        <AvatarFallback>{{ role === 'user' ? 'U' : 'AI' }}</AvatarFallback>
-      </Avatar> -->
-
       <div class="flex flex-col max-w-[80%]">
-        <!-- <div class="text-sm text-muted-foreground">
-          {{ role === 'user' ? '用户' : 'AI助手' }}
-        </div> -->
         <div
           class="rounded-lg px-4 py-2 list-disc text-[14px]"
           :class="
@@ -39,7 +55,7 @@ const renderedHTML = ref("")
               ? 'bg-primary text-primary-foreground'
               : 'bg-gray-100 dark:bg-primary-foreground dark:text-white'
           "
-          v-html="renderedHTML"
+          v-html="sanitizedContent"
         ></div>
       </div>
     </div>

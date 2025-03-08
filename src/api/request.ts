@@ -267,28 +267,46 @@ export const llmApi = {
 const handleStream = async (response, onProgress) => {
   const reader = response.body?.getReader()
   const decoder = new TextDecoder()
+  let buffer = ''
 
   try {
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
 
-      const chunk = decoder.decode(value)
-      const lines = chunk.split('\n')
+      const processChunk = chunk => {
+        buffer += chunk
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
 
-      for (const line of lines) {
-        if (!line) continue
-        try {
-          const data = JSON.parse(line)
-          if (data.choices[0]?.delta?.content) {
-            onProgress?.(data.choices[0]?.delta?.content)
+        lines.forEach(line => {
+          try {
+            const data = JSON.parse(line)
+            onProgress?.(data.choices[0]?.delta?.content || '')
+          } catch (e) {
+            console.error('解析错误:', e)
           }
-        } catch (e) {
-          console.error('Parse response error:', e)
-        }
+        })
       }
+      processChunk(decoder.decode(value, { stream: true }))
+
+      // const chunk = decoder.decode(value)
+      // const lines = chunk.split('\n')
+
+      // for (const line of lines) {
+      //   if (!line) continue
+      //   try {
+      //     const data = JSON.parse(line)
+      //     if (data.choices[0]?.delta?.content) {
+      //       onProgress?.(data.choices[0]?.delta?.content)
+      //     }
+      //   } catch (e) {
+      //     console.error('Parse response error:', e)
+      //   }
+      // }
     }
   } finally {
     reader?.releaseLock()
   }
 }
+
