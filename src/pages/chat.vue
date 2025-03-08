@@ -168,7 +168,7 @@ const handleScroll = () => {
 }
 
 onMounted(() => {
-  const viewport = scrollAreaRef.value?.$el.querySelector(
+  const viewport = (scrollAreaRef.value as any)?.$el?.querySelector(
     "[data-radix-scroll-area-viewport]"
   )
   if (viewport) {
