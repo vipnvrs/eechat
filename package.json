@@ -53,7 +53,6 @@
     "clsx": "^2.1.1",
     "electron-google-analytics4": "^1.2.1",
     "highlight.js": "^11.11.1",
-    "lucide-vue": "^0.475.0",
     "lucide-vue-next": "^0.475.0",
     "markdown-it": "^14.1.0",
     "markdown-it-deflist": "^3.0.0",
