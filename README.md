@@ -1,79 +1,82 @@
-# electron-vite-vue
+<div align="center">
+  <h1>EE Chat</h1>
+  <p>🚀 Powerful locally deployed AI chat application</p>
 
-🥳 Really simple `Electron` + `Vue` + `Vite` boilerplate.
-
-<!-- [![awesome-vite](https://awesome.re/mentioned-badge.svg)](https://github.com/vitejs/awesome-vite) -->
-<!-- [![Netlify Status](https://api.netlify.com/api/v1/badges/ae3863e3-1aec-4eb1-8f9f-1890af56929d/deploy-status)](https://app.netlify.com/sites/electron-vite/deploys) -->
-<!-- [![GitHub license](https://img.shields.io/github/license/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue/blob/main/LICENSE) -->
-<!-- [![GitHub stars](https://img.shields.io/github/stars/caoxiemeihao/electron-vite-vue?color=fa6470)](https://github.com/electron-vite/electron-vite-vue) -->
-<!-- [![GitHub forks](https://img.shields.io/github/forks/caoxiemeihao/electron-vite-vue)](https://github.com/electron-vite/electron-vite-vue) -->
-[![GitHub Build](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml/badge.svg)](https://github.com/electron-vite/electron-vite-vue/actions/workflows/build.yml)
-[![GitHub Discord](https://img.shields.io/badge/chat-discord-blue?logo=discord)](https://discord.gg/sRqjYpEAUK)
+  <p>
+    <a href="#features">Features</a> •
+    <a href="#local-deployment">Local Deployment</a> •
+    <a href="#quick-start">Quick Start</a> •
+    <a href="#tech-stack">Tech Stack</a> •
+    <a href="#contribution">Contribution</a> •
+    <a href="#license">License</a>
+  </p>
+  
+  <img src="./resources/chat.png" alt="EE Chat Application Screenshot" width="800" />
+</div>
 
 ## Features
 
-📦 Out of the box  
-🎯 Based on the official [template-vue-ts](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-vue-ts), less invasive  
-🌱 Extensible, really simple directory structure  
-💪 Support using Node.js API in Electron-Renderer  
-🔩 Support C/C++ native addons  
-🖥 It's easy to implement multiple windows  
+EE Chat is an AI chat application focused on local deployment, providing users with secure, private, and efficient AI conversation experiences.
 
-## Quick Setup
+### 🔒 Fully Local Deployment
 
-```sh
-# clone the project
-git clone https://github.com/electron-vite/electron-vite-vue.git
+- **Data Privacy Protection**: All conversation data is stored locally, eliminating privacy concerns
+- **Offline Usage**: Once configured, continuous internet connection is not required
+- **Custom API**: Connect to your own AI model API or third-party services
 
-# enter the project directory
-cd electron-vite-vue
+### 💬 Powerful Conversation Features
 
-# install dependency
+- **Multi-Session Management**: Easily create and manage multiple independent conversations
+- **History Records**: Automatically save all conversation history, view and continue previous conversations anytime
+- **Markdown Support**: Perfect rendering of Markdown format, including code blocks, tables, and mathematical formulas
+- **Code Highlighting**: Automatically identify and highlight code blocks, supporting multiple programming languages
+
+### 🎨 Personalized Experience
+
+- **Theme Switching**: Built-in light and dark themes to meet different usage scenarios
+- **Custom Prompts**: Save and manage frequently used prompts to improve conversation efficiency
+- **Model Parameter Adjustment**: Flexibly adjust temperature, maximum output, and other parameters for optimal responses
+
+### 🔌 Extensibility
+
+- **Plugin System**: Support for extended functionality to meet specific scenario requirements
+- **API Integration**: Easily integrate various AI model APIs, such as OpenAI, Anthropic, etc.
+- **Custom Models**: Configure and use custom local or remote AI models
+
+## Local Deployment
+
+EE Chat is designed for local deployment, ensuring your data security and user experience.
+
+### System Requirements
+
+- Windows 10/11 64-bit
+- macOS 10.15+
+- Linux (Ubuntu 18.04+, Debian 10+)
+- At least 4GB RAM
+- 500MB available disk space
+
+### Installation Methods
+
+#### Download Pre-built Packages
+
+Download the installation package suitable for your system from the [release page](https://github.com/yourusername/chater/releases):
+
+- Windows: `EEChat-Setup-x.x.x.exe`
+- macOS: `EEChat-x.x.x.dmg`
+- Linux: `EEChat-x.x.x.AppImage` or `.deb`
+
+#### Build from Source
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/chater.git
+cd chater
+
+# Install dependencies
 npm install
 
-# develop
+# Run in development mode
 npm run dev
-```
 
-## Debug
-
-![electron-vite-react-debug.gif](https://github.com/electron-vite/electron-vite-react/blob/main/electron-vite-react-debug.gif?raw=true)
-
-## Directory
-
-```diff
-+ ├─┬ electron
-+ │ ├─┬ main
-+ │ │ └── index.ts    entry of Electron-Main
-+ │ └─┬ preload
-+ │   └── index.ts    entry of Preload-Scripts
-  ├─┬ src
-  │ └── main.ts       entry of Electron-Renderer
-  ├── index.html
-  ├── package.json
-  └── vite.config.ts
-```
-
-<!--
-## Be aware
-
-🚨 By default, this template integrates Node.js in the Renderer process. If you don't need it, you just remove the option below. [Because it will modify the default config of Vite](https://github.com/electron-vite/vite-plugin-electron-renderer#config-presets-opinionated).
-
-```diff
-# vite.config.ts
-
-export default {
-  plugins: [
--   // Use Node.js API in the Renderer-process
--   renderer({
--     nodeIntegration: true,
--   }),
-  ],
-}
-```
--->
-
-## FAQ
-
-- [C/C++ addons, Node.js modules - Pre-Bundling](https://github.com/electron-vite/vite-plugin-electron-renderer#dependency-pre-bundling)
-- [dependencies vs devDependencies](https://github.com/electron-vite/vite-plugin-electron-renderer#dependencies-vs-devdependencies)
+# Build application
+npm run build
