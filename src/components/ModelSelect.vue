@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, reactive, computed } from 'vue'
-import { useModelStore } from '@/stores/model'
-import { useChatStore } from '@/stores/chatStore'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { ref, onMounted, watch, reactive, computed } from "vue"
+import { useModelStore } from "@/stores/model"
+import { useChatStore } from "@/stores/chatStore"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
-import { Button } from '@/components/ui/button'
-import { ChevronsDownUp, SlidersHorizontal, ArrowUpDown, Pin } from 'lucide-vue-next'
-import Icon from '@/components/icon.vue'
+import { Button } from "@/components/ui/button"
+import { ChevronsDownUp, SlidersHorizontal, ArrowUpDown, Pin } from "lucide-vue-next"
+import Icon from "@/components/Icon.vue"
 const modelStore = useModelStore()
 const chatStore = useChatStore()
 
@@ -20,9 +16,9 @@ const groupedModels = computed(() => {
   const providersArray = Array.from(modelStore.providers.values())
   const groups: Record<string, any> = {}
 
-  providersArray.forEach(provider => {
+  providersArray.forEach((provider) => {
     if (provider.state) {
-      groups[provider.name] = provider.models.filter(model => model.state)
+      groups[provider.name] = provider.models.filter((model) => model.state)
     }
   })
 
@@ -36,16 +32,15 @@ const isShowModelSelect = ref(false)
 const handleModelChange = (key, item) => {
   isShowModelSelect.value = false
   chatStore.setModel(item)
-  console.log(chatStore.model);
+  console.log(chatStore.model)
 }
 
 onMounted(() => {
-  const chatingModel = localStorage.getItem('chating_model')
+  const chatingModel = localStorage.getItem("chating_model")
   if (chatingModel) {
     chatStore.setModel(JSON.parse(chatingModel))
   }
 })
-
 </script>
 
 <template>
@@ -54,21 +49,26 @@ onMounted(() => {
       <PopoverTrigger>
         <Button asChild variant="outline" class="flex">
           <div>
-            <Icon :size="18" :name="chatStore.model.provider_id"></Icon> {{ chatStore.model.name }} <ChevronsDownUp>
-            </ChevronsDownUp>
+            <Icon :size="18" :name="chatStore.model.provider_id"></Icon>
+            {{ chatStore.model.name }} <ChevronsDownUp> </ChevronsDownUp>
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" class="w-auto px-2 py-2">
         <!-- group -->
         <ScrollArea class="h-[500px] max-h-[500px] w-[350px]" :class="groupedModels.size">
-
           <!-- <ScrollArea class="max-h-[400px] w-full"> -->
           <div class="" v-for="(value, key) in groupedModels" :key="key">
-            <div class="text-sm px-4 py-2 text-gray-400">{{ key == 'Local' ? '本地模型' : key }}</div>
+            <div class="text-sm px-4 py-2 text-gray-400">
+              {{ key == "Local" ? "本地模型" : key }}
+            </div>
             <!-- model -->
             <div v-for="item in value" class="flex items-center" :key="key + item.name">
-              <Button @click="handleModelChange(key, item)" class="w-full items-center justify-start" variant="ghost">
+              <Button
+                @click="handleModelChange(key, item)"
+                class="w-full items-center justify-start"
+                variant="ghost"
+              >
                 <Icon :name="item.provider_id"></Icon> <span>{{ item.name }}</span>
                 <!-- <Pin class="w-4 h-4 text-gray-300"></Pin> -->
               </Button>
