@@ -55,6 +55,25 @@ class DeepseekService extends BaseLLMService {
       throw new Error(`Deepseek 对话失败: ${error.message}`)
     }
   }
+
+  async chatNoStream(messages, modelName) {
+    const { ctx } = this
+    try {
+      const configSaved = await this.getConfig('deepseek')
+      const client = await this.createClient(configSaved)
+      const response = await client.chat.completions.create({
+        model: 'deepseek-chat',
+        messages,
+        stream: false,
+        // max_tokens: 2048,
+        // temperature: 0.7,
+      })
+      return response
+    } catch (error) {
+      ctx.logger.error(error)
+      throw new Error(error.message)
+    }
+  }
 }
 
 module.exports = DeepseekService

@@ -26,7 +26,7 @@ class Request {
   constructor(config?: AxiosRequestConfig) {
     this.instance = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 60000,
+      timeout: 60 * 60 * 1000,
       ...config,
     })
 
@@ -132,6 +132,11 @@ export const chatApi = {
   // 删除会话
   async removeSession(sessionId: number) {
     return request.delete(`/api/session/${sessionId}`)
+  },
+
+  // 对话总结
+  async summarySession(config) {
+    return request.post(`/api/session/summary`, config)
   },
 
   // 发送消息，本地
@@ -267,28 +272,46 @@ export const llmApi = {
 const handleStream = async (response, onProgress) => {
   const reader = response.body?.getReader()
   const decoder = new TextDecoder()
+  let buffer = ''
 
   try {
     while (true) {
       const { done, value } = await reader.read()
       if (done) break
 
-      const chunk = decoder.decode(value)
-      const lines = chunk.split('\n')
+      const processChunk = chunk => {
+        buffer += chunk
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
 
-      for (const line of lines) {
-        if (!line) continue
-        try {
-          const data = JSON.parse(line)
-          if (data.choices[0]?.delta?.content) {
-            onProgress?.(data.choices[0]?.delta?.content)
+        lines.forEach(line => {
+          try {
+            const data = JSON.parse(line)
+            onProgress?.(data.choices[0]?.delta?.content || '')
+          } catch (e) {
+            console.error('解析错误:', e)
           }
-        } catch (e) {
-          console.error('Parse response error:', e)
-        }
+        })
       }
+      processChunk(decoder.decode(value, { stream: true }))
+
+      // const chunk = decoder.decode(value)
+      // const lines = chunk.split('\n')
+
+      // for (const line of lines) {
+      //   if (!line) continue
+      //   try {
+      //     const data = JSON.parse(line)
+      //     if (data.choices[0]?.delta?.content) {
+      //       onProgress?.(data.choices[0]?.delta?.content)
+      //     }
+      //   } catch (e) {
+      //     console.error('Parse response error:', e)
+      //   }
+      // }
     }
   } finally {
     reader?.releaseLock()
   }
 }
+
