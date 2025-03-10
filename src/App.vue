@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-import { onMounted } from 'vue'
-import Layout from '@/components/Layout.vue'
-import { useModelStore } from '@/stores/model'
-import { llmApi, ollamaApi } from '@/api/request'
+import HelloWorld from "./components/HelloWorld.vue"
+import { onMounted } from "vue"
+import Layout from "@/components/Layout.vue"
+import { useModelStore } from "@/stores/model"
+import { llmApi, ollamaApi } from "@/api/request"
+import { LLMProvider, ModelProvider } from "@/types/llm"
 const modelStore = useModelStore()
 
 // 初始化模型配置
@@ -18,7 +19,10 @@ async function initModelConfig() {
     const providers = await llmApi.getProviders()
 
     // 3. 遍历处理每个提供商
-    for (const [providerId, providerInfo] of Object.entries(providers)) {
+    for (const [providerId, providerInfo] of Object.entries(providers) as [
+      string,
+      LLMProvider
+    ][]) {
       // 获取提供商配置
       const config = await llmApi.getConfigProvider(providerId)
 
@@ -26,53 +30,52 @@ async function initModelConfig() {
       const models = await llmApi.getModels(providerId)
 
       // 构建提供商对象
-      const provider = {
+      const provider: ModelProvider = {
         id: providerId,
         name: providerInfo.name || providerId,
-        type: 'api',
+        type: "api",
         // 使用服务端返回的状态
         state: providerInfo.state,
-        models: models.map(model => ({
+        models: models.map((model) => ({
           ...model,
           // 使用服务端返回的模型状态
-          state: model.state
+          state: model.state,
         })),
         config: {
-          apiKey: config?.api_key || '',
-          baseUrl: config?.base_url || providerInfo.api?.url || ''
+          apiKey: config?.api_key || "",
+          baseUrl: config?.base_url || providerInfo.api_url || "",
         },
         description: providerInfo.description,
-        icon: providerId
+        icon: providerId,
       }
 
       // 更新到 store
       modelStore.setProvider(providerId, provider)
     }
 
-    console.log(modelStore.providers);
-
+    console.log(modelStore.providers)
 
     // 4. 获取本地模型配置
     const localModels = await ollamaApi.listModel()
     const modelsData = localModels.data.models
     if (modelsData?.length) {
       // 转换本地模型格式
-      const formattedModels = modelsData.map(model => ({
+      const formattedModels = modelsData.map((model) => ({
         id: model.name,
         name: model.name,
-        provider_id: 'local',
-        group_name: 'Local',
-        state: true,  // 本地模型默认启用
-        type: 'local',
-        capabilities: ['chat', 'completion'],
-        from: 'local'
+        provider_id: "local",
+        group_name: "Local",
+        state: true, // 本地模型默认启用
+        type: "local",
+        capabilities: ["chat", "completion"],
+        from: "local",
       }))
       modelStore.updateLocalModels(formattedModels)
     }
   } catch (error) {
-    console.log(error);
+    console.log(error)
 
-    modelStore.error = error.message
+    modelStore.error = (error as Error).message
   } finally {
     modelStore.isLoading = false
   }
@@ -81,7 +84,6 @@ async function initModelConfig() {
 onMounted(() => {
   initModelConfig()
 })
-
 </script>
 
 <template>
@@ -103,7 +105,7 @@ onMounted(() => {
 }
 
 .logo.electron:hover {
-  filter: drop-shadow(0 0 2em #9FEAF9);
+  filter: drop-shadow(0 0 2em #9feaf9);
 }
 
 .logo:hover {

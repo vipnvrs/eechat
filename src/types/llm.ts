@@ -7,6 +7,7 @@ export interface LLMProvider {
   api_key_url?: string
   docs_url?: string
   models_url?: string
+  description?: string
 }
 
 export interface LLMModel {
