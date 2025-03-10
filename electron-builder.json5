@@ -12,7 +12,7 @@
     "dist-electron"
   ],
   "mac": {
-    "icon": "icon/icons/mac/icon.icns",
+    "icon": "icon/icons/mac/AppIcon.icns",
     // "target": [
     //   "dmg",
     // ],
@@ -20,8 +20,8 @@
       {
         "target": "zip",
         "arch": [
-          "x64",
-          "arm64"
+          // "x64",
+          'arm64',
         ]
       }
     ],

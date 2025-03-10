@@ -270,7 +270,7 @@ class ChatService extends Service {
     }
   }
 
-  async listSession(page = 1, pageSize = 20) {
+  async listSession(page = 1, pageSize = 2000) {
     const { ctx } = this
 
     try {
@@ -325,7 +325,7 @@ class ChatService extends Service {
       throw new Error('参数不完整')
     }
     let messagesStr = ''
-    messages.forEach((item) => {
+    messages.forEach(item => {
       messagesStr += item.role + ': ' + item.content + '\n'
     })
     const prompt = [
@@ -364,17 +364,17 @@ class ChatService extends Service {
       if (!session) {
         throw new Error('会话不存在')
       }
-      
-      // 移除思考过程的内容 
-      if(res && res.includes('<think>')) {
-        const pattern = /<think>[\s\S]*?<\/think>/g;
-        res = res.replace(pattern, '').trim();
+
+      // 移除思考过程的内容
+      if (res && res.includes('<think>')) {
+        const pattern = /<think>[\s\S]*?<\/think>/g
+        res = res.replace(pattern, '').trim()
       }
 
       // 使用 emojiHelper 为标题添加 emoji
       // const emojiHelper = require('../extend/emojiHelper');
       // res = emojiHelper.addEmojiToTitle(res);
-       
+
       await session.update({
         title: res,
       })
