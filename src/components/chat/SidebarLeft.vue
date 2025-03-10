@@ -263,7 +263,7 @@ onMounted(() => {
                   </DropdownMenuTrigger>
                   <!-- <DropdownMenuContent algin="start" side="right" as-child> -->
                   <DropdownMenuContent align="start" side="right">
-                    <DropdownMenuItem> <Copy></Copy> 复制 </DropdownMenuItem>
+                    <!-- <DropdownMenuItem> <Copy></Copy> 复制 </DropdownMenuItem> -->
                     <DropdownMenuItem
                       @click.stop="handleRemoveSession(item)"
                       class="text-red-600 hover:text-red-500"

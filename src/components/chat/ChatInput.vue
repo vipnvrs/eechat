@@ -46,17 +46,16 @@ const handleKeyDown = (e: KeyboardEvent) => {
     <form @submit.prevent="handleSendMsg">
       <Textarea
         v-model="msg"
-        class="h-[100px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
+        class="h-[120px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0"
         placeholder="输入消息，使用 Enter 发送, Shift + Enter 换行"
         @keydown="handleKeyDown"
       ></Textarea>
       <Button
         type="submit"
         :disabled="disabled"
-        size="sm"
-        class="ml-auto gap-1.5 absolute bottom-2 right-2"
+        size="icon"
+        class="ml-auto gap-1.5 absolute bottom-12 right-4"
       >
-        发送
         <CornerDownLeft class="size-3.5" />
       </Button>
     </form>

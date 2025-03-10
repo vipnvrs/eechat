@@ -62,7 +62,7 @@ function useLoading() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #282c34;
+  background: #999;
   z-index: 9;
 }
 .app-loading-icon {
@@ -79,7 +79,13 @@ function useLoading() {
   oDiv.className = 'app-loading-wrap'
 
   // 使用提供的SVG作为加载图标
-  oDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="app-loading-icon"><path d="M5 15h14"/><path d="M5 9h14"/><path d="m14 20-5-5 6-6-5-5"/></svg>`
+  oDiv.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64.000000" height="64.000000" viewBox="0 0 1024 1024" fill="none">
+	<defs/>
+	<rect id="矩形 4" y="0.000031" rx="180.000000" width="1024.000000" height="1024.000000" fill="#000000" fill-opacity="1.000000"/>
+	<rect id="矩形 1" x="192.000000" y="200.000061" rx="5.000000" width="399.333344" height="73.333336" fill="#FFFFFF" fill-opacity="1.000000"/>
+	<rect id="矩形 2" x="192.000000" y="332.000031" rx="5.000000" width="399.333344" height="73.333336" fill="#FFFFFF" fill-opacity="1.000000"/>
+	<rect id="矩形 3" x="192.000244" y="464.000031" rx="5.000000" width="245.589996" height="73.333336" fill="#FFFFFF" fill-opacity="1.000000"/>
+</svg>`
 
   return {
     appendLoading() {

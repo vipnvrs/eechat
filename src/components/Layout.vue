@@ -7,9 +7,11 @@ import SidebarMain from '@/components/SidebarMain.vue'
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
 })
+import TitleBar from '@/components/TitleBar.vue'
 </script>
 
 <template>
+  <TitleBar></TitleBar>
   <div class="flex w-full h-full">
     <SidebarProvider class="w-auto" v-model:open="sidebarLeftOpenMain">
       <SidebarMain></SidebarMain>

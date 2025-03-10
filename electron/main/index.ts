@@ -56,6 +56,12 @@ async function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
     width: windowWidth,
     height: windowHeight,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#00000000',
+      symbolColor: '#666666',
+      // height: 64,
+    },
     webPreferences: {
       preload,
       webSecurity: false,

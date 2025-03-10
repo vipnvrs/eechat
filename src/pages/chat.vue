@@ -192,14 +192,14 @@ onMounted(() => {
   <div class="flex relative overflow-hidden">
     <SidebarProvider
       class="w-auto"
-      :style="{ '--sidebar-width': '240px' }"
+      :style="{ '--sidebar-width': '200px' }"
       v-model:open="sidebarLeftOpen"
     >
       <SidebarLeft @session-change="handleSessionChange" />
     </SidebarProvider>
     <div class="w-full h-[100vh] max-h-[100vh] flex flex-col grow">
       <header
-        class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between"
+        class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between h-[64px] py-0"
       >
         <div class="flex items-center gap-2">
           <Button
@@ -207,6 +207,7 @@ onMounted(() => {
             variant="ghost"
             class="h-7 w-7"
             @click="sidebarLeftOpen = !sidebarLeftOpen"
+            style="-webkit-app-region: no-drag"
           >
             <PanelLeft></PanelLeft>
           </Button>
@@ -253,7 +254,7 @@ onMounted(() => {
         <ScrollBar />
       </ScrollArea>
       <div
-        class="sticky bottom-0 h-[100px] content-center shrink-0 items-center gap-2 border-b bg-background"
+        class="sticky bottom-0 h-[120px] content-center shrink-0 items-center gap-2 border-b bg-background"
       >
         <ChatInput @sendMsg="sendMsg" :disabled="loading" />
       </div>
