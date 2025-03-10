@@ -135,7 +135,7 @@ const sendMsg = async (msg: string) => {
   }
   scrollToBottom(true)
   // todo 对话总结
-  // if(msg.length == 2) {
+  if(chatHistory.value.length == 4) {
     const config = {
       model:chatStore.model,
       messages: chatHistory.value, 
@@ -143,7 +143,8 @@ const sendMsg = async (msg: string) => {
     }
     const summaryRes = await chatApi.summarySession(config)
     console.log(summaryRes);
-  // }
+    activeSession.value.title = summaryRes.title
+  }
 }
 
 const scrollAreaRef = ref(null)

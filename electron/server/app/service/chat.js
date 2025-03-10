@@ -329,26 +329,36 @@ class ChatService extends Service {
       messagesStr += item.role + ': ' + item.content + '\n'
     })
     const prompt = [
-        { 
-          role: "system", 
-          // content: "You are a concise summarizer. Always provide summaries in exactly 10 words." 
-          content: "你是一个对话标题总结器。总是以10个字的文字总结标题, 无需思考过程。" 
-        },
-        {
-          role: "user",
-          // content: `Summarize the following conversation in 10 words: ${messagesStr}`,
-          content: `用10个总结以下对话内容的标题: ${messagesStr}`,
-        }
-      ]
+      // {
+      //   role: "system",
+      //   // content: "You are a concise summarizer. Always provide summaries in exactly 10 words."
+      //   content: "你是一个对话标题总结器。总是以10个字的文字总结标题, 无需思考过程。"
+      // },
+      {
+        role: 'user',
+        // content: `Summarize the following conversation in 10 words: ${messagesStr}`,
+        content: `
+我想让你充当对话标题生成器。我将向你提供对话内容，你将生成一个吸引人的标题。请保持标题简洁，不超过 10 个字，并确保保持其含义, 标题内容不能包含特殊符号。答复时直接给出结果, 无需思考过程。答复时要利用题目的语言类型。我的第一个对话内容是： ${messagesStr}
+`,
+      },
+    ]
     try {
+      let res = ''
       const provider_id = model.provider_id
-      if(provider_id == 'local') {
-        const res = await ctx.service.ollama.chatNoStream(prompt, model.id)
-        return res
+      if (provider_id == 'local') {
+        res = await ctx.service.ollama.chatNoStream(prompt, model.id)
       } else {
-        const res = await ctx.service.llm.chatNoStream(prompt, model.id, provider_id)
-        return res
+        res = await ctx.service.llm.chatNoStream(prompt, model.id, provider_id)
       }
+      const session = await ctx.model.ChatSession.findByPk(sessionId.id)
+      if (!session) {
+        throw new Error('会话不存在')
+      }
+      await session.update({
+        title: res,
+      })
+      await session.reload()
+      return session
     } catch (error) {
       ctx.logger.error('修改会话标题失败:', error)
       throw new Error('修改会话标题失败:' + error.message)
