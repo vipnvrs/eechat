@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
   AlertDialog,
@@ -50,6 +51,7 @@ import {
 } from 'lucide-vue-next'
 import { h, ref, onMounted, toRaw } from 'vue'
 import { chatApi } from '@/api/request'
+import Icon from '@/components/Icon.vue'
 import router from '@/router'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
@@ -223,7 +225,9 @@ onMounted(() => {
       <ScrollArea class="h-full w-full">
         <SidebarGroup class="px-0">
           <template v-for="(item, index) in sessions">
-            <SidebarGroupLabel v-if="index % 4 == 0" class="pl-4 mt-6"
+            <SidebarGroupLabel
+              v-if="index % 4 == 0"
+              class="pl-4 mt-2 text-xs text-gray-400"
               >最近 {{ index + 7 }} 天</SidebarGroupLabel
             >
             <SidebarGroupContent>
@@ -231,24 +235,21 @@ onMounted(() => {
                 @click="handleSessionChange(item)"
                 :key="item.id"
                 href="#"
-                class="group/item flex items-center whitespace-nowrap border-b p-4 leading-tight hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                class="group/item flex justify-between items-center px-4 py-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 :class="
                   item.id === activeSessionId
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : ''
                 "
               >
-                <span class="flex flex-col items-center gap-1">
-                  <span class="flex w-full items-center gap-2">
-                    <span class="font-bold">{{ item.title }}</span>
-                  </span>
-                  <span
-                    class="line-clamp-1 w- whitespace-break-spaces text-sm text-gray-500"
-                    >你好，我是
-                    梦境画家，一位能将你的梦想变成现实的梦境艺术家。，让我们开始对话吧！
-                    <!-- {{ item.title }} -->
-                  </span>
-                </span>
+                <div class="flex-1 max-w-[80%] space-y-2">
+                  <div
+                    class="truncate text-gray-950 dark:text-white"
+                    :class="item.id === activeSessionId ? 'font-bold' : 'font-normal'"
+                  >
+                    {{ item.title }}
+                  </div>
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button

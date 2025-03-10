@@ -135,14 +135,14 @@ const sendMsg = async (msg: string) => {
   }
   scrollToBottom(true)
   // todo 对话总结
-  if(chatHistory.value.length == 4) {
+  if (chatHistory.value.length == 2) {
     const config = {
-      model:chatStore.model,
-      messages: chatHistory.value, 
+      model: chatStore.model,
+      messages: chatHistory.value,
       sessionId: activeSession.value,
     }
     const summaryRes = await chatApi.summarySession(config)
-    console.log(summaryRes);
+    console.log(summaryRes)
     activeSession.value.title = summaryRes.title
   }
 }

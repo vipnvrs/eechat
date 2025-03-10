@@ -338,7 +338,16 @@ class ChatService extends Service {
         role: 'user',
         // content: `Summarize the following conversation in 10 words: ${messagesStr}`,
         content: `
-我想让你充当对话标题生成器。我将向你提供对话内容，你将生成一个吸引人的标题。请保持标题简洁，不超过 10 个字，并确保保持其含义, 标题内容不能包含特殊符号。答复时直接给出结果, 无需思考过程。答复时要利用题目的语言类型。我的第一个对话内容是： ${messagesStr}
+我想让你充当对话标题生成器。我将向你提供对话内容，你将生成一个吸引人的标题。请严格遵循以下规则：
+
+1. 请保持标题简洁，不超过 10 个字，并确保保持其含义。
+2. 标题内容不能包含标点符号和特殊符号。
+3. 答复时直接给出结果, 无需思考过程。
+4. 答复时要利用对话的语言类型, 如对话内容为英语则生成英语标题，对话内容是中文则生成中文标题。
+5. 标题内容不能为空。
+6. 标题的开头必须使用适合当前对话内容的 emoji。
+
+我的第一个对话内容是： ${messagesStr}
 `,
       },
     ]
@@ -354,6 +363,17 @@ class ChatService extends Service {
       if (!session) {
         throw new Error('会话不存在')
       }
+      
+      // 移除思考过程的内容 
+      if(res && res.includes('<think>')) {
+        const pattern = /<think>[\s\S]*?<\/think>/g;
+        res = res.replace(pattern, '').trim();
+      }
+
+      // 使用 emojiHelper 为标题添加 emoji
+      // const emojiHelper = require('../extend/emojiHelper');
+      // res = emojiHelper.addEmojiToTitle(res);
+       
       await session.update({
         title: res,
       })

@@ -36,7 +36,7 @@ class ChatController extends Controller {
 
   async createSession() {
     const { ctx } = this
-    const { title = '新对话' } = ctx.request.body
+    const { title = '👋 新对话' } = ctx.request.body
 
     try {
       // 创建新会话

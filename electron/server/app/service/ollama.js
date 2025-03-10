@@ -346,7 +346,7 @@ class OllamaService extends Service {
 
       console.log(JSON.stringify(messages))
       console.log(response.choices[0].message.content)
-      return res.choices[0].message.content
+      return response.choices[0].message.content
     } catch (error) {
       ctx.logger.error('Chat error:', error)
       throw new Error(error.message)
