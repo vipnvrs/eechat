@@ -106,13 +106,13 @@ const activeItem = ref(data.navMain[0])
     </SidebarHeader>
     <SidebarContent>
       <SidebarGroup>
-        <SidebarGroupContent class="px-1.5 md:px-0">
+        <SidebarGroupContent class="px-0">
           <SidebarMenu>
             <SidebarMenuItem v-for="item in data.navMain" :key="item.title">
               <SidebarMenuButton
                 :tooltip="h('div', { hidden: false }, item.title)"
                 :is-active="activeItem.title === item.title"
-                class="px-2.5 md:px-2"
+                class="px-2.5 px-2"
                 @click="
                   () => {
                     activeItem = item
@@ -129,7 +129,7 @@ const activeItem = ref(data.navMain[0])
       </SidebarGroup>
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <!-- <NavUser :user="data.user" /> -->
     </SidebarFooter>
   </Sidebar>
 </template>
