@@ -1,9 +1,9 @@
 // @see https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "ee.ee.chat",
   "asar": true,
-  "productName": "YourAppName",
+  "productName": "EE Chat",
   "directories": {
     "output": "release/${version}"
   },
@@ -12,12 +12,23 @@
     "dist-electron"
   ],
   "mac": {
+    "icon": "icon/icons/mac/icon.icns",
+    // "target": [
+    //   "dmg",
+    // ],
     "target": [
-      "dmg"
+      {
+        "target": "zip",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
     ],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
+    "icon": "icon/icons/win/icon.ico",
     "target": [
       {
         "target": "nsis",
@@ -39,5 +50,13 @@
       "AppImage"
     ],
     "artifactName": "${productName}-Linux-${version}.${ext}"
-  }
+  },
+  "releaseInfo": {
+    "releaseNotes": "更新日志： \n1.使用新的地址",
+    "releaseDate": "2025-3-10"
+  },
+  "publish": [{
+    "provider": "generic",
+    "url": "https://g-electron-updater.oss-accelerate.aliyuncs.com/g-electron-updater"
+  }]
 }

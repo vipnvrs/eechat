@@ -73,16 +73,13 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 const activeItem = ref(data.navMain[0])
 </script>
 <template>
-  <Sidebar
-    collapsible="none"
-    class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
-  >
+  <Sidebar collapsible="none" class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r">
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child class="md:h-8 md:p-0">
             <a href="#">
-              <div
+              <!-- <div
                 class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
               >
                 <Command class="size-4" />
@@ -91,6 +88,17 @@ const activeItem = ref(data.navMain[0])
                 <span class="truncate font-semibold">Acme Inc</span>
                 <span class="truncate text-xs">Enterprise</span>
               </div>
+              -->
+              <img
+                class="block w-full size-6 rounded-lg dark:hidden block"
+                src="../assets/icon.svg"
+                alt=""
+              />
+              <img
+                class="w-full size-6 rounded-lg hidden dark:block"
+                src="../assets/icon_dark.svg"
+                alt=""
+              />
             </a>
           </SidebarMenuButton>
         </SidebarMenuItem>
