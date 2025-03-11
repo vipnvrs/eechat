@@ -6,52 +6,85 @@ on:
       - 'v*'
 
 jobs:
-  release:
+  build:
+    name: 构建 ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
+      fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
-      - name: Checkout Code
+      - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm install
+      - name: 安装依赖
+        run: npm ci
 
-      - name: Build Release Files
+      - name: 构建应用
         run: npm run build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Add a step to debug the output directory
-      - name: List Release Files
-        run: |
-          ls -la release/
-          find release -type f -name "*.*" | sort
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
         with:
-          draft: false
-          prerelease: false
-          files: |
+          name: release-${{ matrix.os }}
+          path: |
             release/**/*.exe
+            release/**/*.msi
             release/**/*.dmg
             release/**/*.AppImage
-            release/**/*.snap
             release/**/*.deb
             release/**/*.rpm
             release/**/*.zip
             release/**/*.tar.gz
             release/**/*.yml
             release/**/*.blockmap
+          if-no-files-found: warn
+
+  release:
+    name: 发布 Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 获取版本号
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: 下载所有构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: 显示下载的文件
+        run: ls -R artifacts
+        shell: bash
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: artifacts/**/*
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
