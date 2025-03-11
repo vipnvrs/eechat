@@ -4,8 +4,8 @@ export default {}
 <template>
   <div
     style="-webkit-app-region: drag"
-    class="bg-sidebar h-[30px] flex items-center justify-center text-center border-b text-xs"
+    class="bg-sidebar h-[30px] flex items-center justify-center text-center border-b text-xs font-bold"
   >
-    EE Chat
+    ee.chat
   </div>
 </template>

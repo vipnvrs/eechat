@@ -41,9 +41,15 @@ class DeepseekService extends BaseLLMService {
       const configSaved = await this.getConfig('deepseek')
       console.log(configSaved)
       const client = await this.createClient(configSaved)
+      let model_id = ''
+      if(model && model.id && model.id.includes(":")) {
+        model_id = model.id.split(':')[1]
+      } else {
+        model_id = model.id
+      }
       const response = await client.chat.completions.create({
-        // model: model.name,
-        model: 'deepseek-chat',
+        model: model_id,
+        // model: 'deepseek-chat',
         messages,
         stream: true,
         // max_tokens: 2048,

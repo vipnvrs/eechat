@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useModelStore } from '@/stores/model'
+import { ref, reactive, onMounted, defineProps, watch } from "vue"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { useModelStore } from "@/stores/model"
 
 import {
   Select,
@@ -16,20 +16,34 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { useToast } from '@/components/ui/toast/use-toast'
-import { Toaster } from '@/components/ui/toast'
-import Icon from '@/components/Icon.vue'
-import { llmApi } from '@/api/request'
-import type { LLMProvider, LLMModel, LLMModelArray, APIConfig, ProviderConfig } from '@/types/llm'
-import { Loader2, Check } from 'lucide-vue-next'
-import { Switch } from '@/components/ui/switch'
+} from "@/components/ui/tooltip"
+import { useToast } from "@/components/ui/toast/use-toast"
+import { Toaster } from "@/components/ui/toast"
+import Icon from "@/components/Icon.vue"
+import { llmApi } from "@/api/request"
+import type {
+  LLMProvider,
+  LLMModel,
+  LLMModelArray,
+  APIConfig,
+  ProviderConfig,
+} from "@/types/llm"
+import { Loader2, Check } from "lucide-vue-next"
+import { Switch } from "@/components/ui/switch"
+
+// 定义props接收providerId
+const props = defineProps({
+  providerId: {
+    type: String,
+    default: "",
+  },
+})
 
 const { toast } = useToast()
 const testLoading = ref(false)
@@ -37,22 +51,22 @@ const saveLoading = ref(false)
 const testPassed = reactive<Record<string, boolean>>({
   openai: false,
   anthropic: false,
-  deepseek: false
+  deepseek: false,
 })
 const modelStore = useModelStore()
 
 // 添加当前选中的提供商
-const currentProvider = ref('deepseek')
+const currentProvider = ref("deepseek")
 
 const providers = ref<Record<string, LLMProvider>>({})
 
 // API 模型配置状态
 const apiConfig = reactive<APIConfig>({
-  apiKey: 'sk-5f86865628c54c4f954090aae9395d3a',
-  baseUrl: '',
+  apiKey: "sk-5f86865628c54c4f954090aae9395d3a",
+  baseUrl: "",
   config: {},
   state: false,
-  info: {}
+  info: {},
 })
 
 // 测试连接
@@ -63,23 +77,23 @@ async function testConnection(provider: string) {
       models: _flattenModels(models.value),
       apiKey: apiConfig.apiKey,
       baseUrl: apiConfig.baseUrl,
-      state: apiConfig.state
+      state: apiConfig.state,
     }
     const res = await llmApi.testConnection(provider, config)
     if (res) {
       testPassed[provider] = true
       await llmApi.saveConfigProvider(provider, config)
       toast({
-        title: '连接成功',
-        description: '已成功连接到 API'
+        title: "连接成功",
+        description: "已成功连接到 API",
       })
     }
   } catch (error: any) {
     testPassed[provider] = false
     toast({
-      title: '连接失败',
+      title: "连接失败",
       description: error.message,
-      variant: 'destructive'
+      variant: "destructive",
     })
   } finally {
     testLoading.value = false
@@ -87,15 +101,33 @@ async function testConnection(provider: string) {
 }
 
 // 获取提供商列表
-const defaultProvider = 'deepseek'
+const defaultProvider = "deepseek"
 async function getProviders(refresh) {
   const res = await llmApi.getProviders()
   providers.value = res
-  if (refresh) {
+
+  // 如果有传入的providerId，则优先使用它
+  if (props.providerId && res[props.providerId]) {
+    handleProviderChange(props.providerId, res[props.providerId])
+  } else if (refresh) {
     handleProviderChange(defaultProvider, res[defaultProvider])
   }
 }
-getProviders(true)
+
+// 监听providerId变化
+watch(
+  () => props.providerId,
+  (newVal) => {
+    if (newVal && providers.value && providers.value[newVal]) {
+      handleProviderChange(newVal, providers.value[newVal])
+    }
+  }
+)
+
+// 组件挂载时初始化
+onMounted(() => {
+  getProviders(true)
+})
 
 const handleProviderChange = async (provider: string, value: object) => {
   currentProvider.value = provider
@@ -103,16 +135,16 @@ const handleProviderChange = async (provider: string, value: object) => {
   // 查询配置
   const res = await getConfigProvider()
   if (res) {
-    apiConfig.apiKey = res.api_key ? 'sk-configed' : ''
+    apiConfig.apiKey = res.api_key ? "sk-configed" : ""
     apiConfig.baseUrl = res.base_url
     apiConfig.state = res.state ? true : false
   } else {
-    apiConfig.apiKey = ''
-    apiConfig.baseUrl = (value as any).api?.url || ''
+    apiConfig.apiKey = ""
+    apiConfig.baseUrl = (value as any).api?.url || ""
     apiConfig.state = false
   }
   apiConfig.info = value
-  console.log(apiConfig);
+  console.log(apiConfig)
 }
 
 const modelsArray = ref<LLMModel[]>([])
@@ -124,17 +156,17 @@ const getModels = async () => {
   const data = {}
   modelsArray.value = res
   currentCheckModel.value = res[0]?.name
-  res.forEach(item => {
+  res.forEach((item) => {
     if (!data[item.group_name]) {
       data[item.group_name] = []
     }
-    if (typeof item.apiKey == 'undefined') item.apiKey = ''
+    if (typeof item.apiKey == "undefined") item.apiKey = ""
     data[item.group_name].push(item)
-  });
-  console.log(data);
+  })
+  console.log(data)
   models.value = data
 }
-const currentCheckModel = ref('')
+const currentCheckModel = ref("")
 
 // 模型配置
 const getConfigProvider = async () => {
@@ -151,25 +183,29 @@ const saveConfigProviderState = async (state: boolean) => {
     models: _flattenModels(models.value),
   }
   config.models?.forEach((item: any) => {
-    if (item && typeof item === 'object') {
+    if (item && typeof item === "object") {
       item.model_id = item.id
     }
   })
   const res = await llmApi.saveConfigProviderState(currentProvider.value, config)
   modelStore.updateProviderState(currentProvider.value, state)
-  console.log(modelStore);
+  console.log(modelStore)
 
   getProviders(false)
 }
 
 // 更新模型是否开启
-const saveConfigModelState = async (state: boolean, models: Record<string, LLMModel[]>, modelItem: LLMModel) => {
+const saveConfigModelState = async (
+  state: boolean,
+  models: Record<string, LLMModel[]>,
+  modelItem: LLMModel
+) => {
   const flattenedModels = _flattenModels(models)
   const config = {
     state,
     models: flattenedModels,
   }
-  const model_id = modelItem.from === 'config' ? modelItem.model_id : modelItem.id
+  const model_id = modelItem.from === "config" ? modelItem.model_id : modelItem.id
   // @ts-ignore
   const res = await llmApi.saveConfigModelState(model_id, config)
   console.log(res)
@@ -194,14 +230,20 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
     <!-- 左侧 Sidebar -->
     <div class="w-40 border-r pr-2">
       <div class="font-bold mb-4 ml-6">模型提供商</div>
-      <ScrollArea class="h-[calc(100vh-8rem)] ">
+      <ScrollArea class="h-[calc(100vh-8rem)]">
         <div class="space-y-2">
-          <div v-for="(value, provider) in providers" :key="provider" @click="handleProviderChange(provider, value)"
+          <div
+            v-for="(value, provider) in providers"
+            :key="provider"
+            @click="handleProviderChange(provider, value)"
             class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
-            :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }">
-
+            :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }"
+          >
             <div>
-              <div class="w-1.5 h-1.5 rounded-full" :class="(value as any).state ? 'bg-green-400' : ''"></div>
+              <div
+                class="w-1.5 h-1.5 rounded-full"
+                :class="(value as any).state ? 'bg-green-400' : ''"
+              ></div>
             </div>
             <div class="flex-1 flex items-center space-x-2">
               <Icon :name="provider" :size="24" />
@@ -225,7 +267,10 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Switch v-model="apiConfig.state" @update:model-value="saveConfigProviderState" />
+                  <Switch
+                    v-model="apiConfig.state"
+                    @update:model-value="saveConfigProviderState"
+                  />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>开启后可在聊天中使用该服务商</p>
@@ -249,14 +294,21 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
           <Label>模型配置</Label>
           <div class="grid gap-2">
             <Label class="font-bold">API Key</Label>
-            <Input v-model="apiConfig.apiKey" type="password"
-              :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`" />
+            <Input
+              v-model="apiConfig.apiKey"
+              type="password"
+              :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
+            />
           </div>
 
           <div class="grid gap-2">
             <Label class="font-bold">API URL</Label>
-            <Input v-model="apiConfig.baseUrl"
-              :placeholder="`https://api.${currentProvider}.com${currentProvider === 'openai' ? '/v1' : ''}`" />
+            <Input
+              v-model="apiConfig.baseUrl"
+              :placeholder="`https://api.${currentProvider}.com${
+                currentProvider === 'openai' ? '/v1' : ''
+              }`"
+            />
           </div>
           <div class="grid gap-2">
             <Label>连通性检查</Label>
@@ -266,16 +318,25 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
                   <SelectValue placeholder="选择要测试连通性的模型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="item in modelsArray" :value="item?.name" :key="item?.name">
+                  <SelectItem
+                    v-for="item in modelsArray"
+                    :value="item?.name"
+                    :key="item?.name"
+                  >
                     {{ item.name }}
                   </SelectItem>
                 </SelectContent>
               </Select>
-              <Button :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
-                @click="testConnection(currentProvider)">
+              <Button
+                :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
+                @click="testConnection(currentProvider)"
+              >
                 <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
-                <Check v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
-                {{ testLoading ? '测试中...' : '测试连接' }}
+                <Check
+                  v-else-if="testPassed[currentProvider]"
+                  class="mr-1 h-4 w-4 text-green-500"
+                />
+                {{ testLoading ? "测试中..." : "测试连接" }}
               </Button>
             </div>
           </div>
@@ -286,7 +347,7 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
           <Label>可用模型</Label>
           <ScrollArea class="h-full w-full rounded-md pb-8">
             <!-- {{ models['DeepSeek Chat'] }} -->
-            <div v-for="(group, key) in models" :key="key" class="space-y-4 ">
+            <div v-for="(group, key) in models" :key="key" class="space-y-4">
               <!-- 组标题 -->
               <div class="flex items-center space-x-2 pt-6">
                 <div class="font-semibold font-bold">{{ key }}</div>
@@ -295,21 +356,43 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
 
               <!-- 组内模型 -->
               <div class="flex flex-col mt-0 border rounded-md">
-                <div v-for="model in group" :key="//@ts-ignore
-            model.name" class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <div
+                  v-for="model in group"
+                  :key="
+                    //@ts-ignore
+                    model.name
+                  "
+                  class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
                   <div class="flex items-center space-x-2 justify-between">
                     <div class="flex items-center space-x-2">
-                      <Icon :name="//@ts-ignore
-            model.provider_id" :size="24" />
-                      <div class="font-medium">{{//@ts-ignore
-            model.name }}</div>
+                      <Icon
+                        :name="
+                          //@ts-ignore
+                          model.provider_id
+                        "
+                        :size="24"
+                      />
+                      <div class="font-medium">
+                        {{
+                          //@ts-ignore
+                          model.name
+                        }}
+                      </div>
                     </div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <Switch v-model="//@ts-ignore
-            model.state" @update:model-value="//@ts-ignore
-            saveConfigModelState($event, models, model)">
+                          <Switch
+                            v-model="
+                              //@ts-ignore
+                              model.state
+                            "
+                            @update:model-value="
+                              //@ts-ignore
+                              saveConfigModelState($event, models, model)
+                            "
+                          >
                           </Switch>
                         </TooltipTrigger>
                         <TooltipContent>

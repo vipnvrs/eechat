@@ -24,10 +24,14 @@ const groupedModels = computed(() => {
 
   providersArray.forEach((provider) => {
     if (provider.state) {
-      groups[provider.name] = provider.models.filter((model) => model.state)
+      // 使用provider.id作为key，确保一致性
+      groups[provider.id] = {
+        models: provider.models.filter((model) => model.state),
+        name: provider.name, // 保存name用于显示
+      }
     }
   })
-
+  // 移除debugger
   return groups
 })
 
@@ -42,6 +46,8 @@ const handleModelChange = (key, item) => {
 }
 
 const handleConfigModel = (key) => {
+  console.log(key)
+
   router.push({ path: "/setting", query: { action: key } })
 }
 
@@ -70,7 +76,7 @@ onMounted(() => {
           <!-- <ScrollArea class="max-h-[400px] w-full"> -->
           <div class="" v-for="(value, key) in groupedModels" :key="key">
             <div class="text-sm px-4 py-2 text-gray-400 flex items-center">
-              <div>{{ key == "Local" ? "本地模型" : key }}</div>
+              <div>{{ key === "local" ? "本地模型" : value.name }}</div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -89,7 +95,11 @@ onMounted(() => {
               </TooltipProvider>
             </div>
             <!-- model -->
-            <div v-for="item in value" class="flex items-center" :key="key + item.name">
+            <div
+              v-for="item in value.models"
+              class="flex items-center"
+              :key="key + item.name"
+            >
               <Button
                 @click="handleModelChange(key, item)"
                 class="w-full items-center justify-start"
