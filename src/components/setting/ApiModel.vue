@@ -79,7 +79,8 @@ async function testConnection(provider: string) {
       baseUrl: apiConfig.baseUrl,
       state: apiConfig.state,
     }
-    const res = await llmApi.testConnection(provider, config)
+    const model = currentCheckModelObject.value
+    const res = await llmApi.testConnection(provider, config, model)
     if (res) {
       testPassed[provider] = true
       await llmApi.saveConfigProvider(provider, config)
@@ -155,7 +156,8 @@ const getModels = async () => {
   const res = await llmApi.getModels(provider)
   const data = {}
   modelsArray.value = res
-  currentCheckModel.value = res[0]?.name
+  currentCheckModel.value = res[0]?.id
+  currentCheckModelObject.value = res[0]
   res.forEach((item) => {
     if (!data[item.group_name]) {
       data[item.group_name] = []
@@ -221,6 +223,12 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
     }
   }
   return result
+}
+
+const currentCheckModelObject = ref<LLMModel | undefined>({} as LLMModel)
+const handleCurrentCheckModelUpdate = (modelId: string) => {
+  const selectedModel = modelsArray.value.find((model) => model.id === modelId)
+  currentCheckModelObject.value = selectedModel
 }
 </script>
 
@@ -313,16 +321,16 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
           <div class="grid gap-2">
             <Label>连通性检查</Label>
             <div class="flex items-center space-x-2">
-              <Select class="w-full flex-1" v-model="currentCheckModel">
+              <Select
+                class="w-full flex-1"
+                v-model="currentCheckModel"
+                @update:modelValue="handleCurrentCheckModelUpdate"
+              >
                 <SelectTrigger class="w-full flex-1">
                   <SelectValue placeholder="选择要测试连通性的模型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem
-                    v-for="item in modelsArray"
-                    :value="item?.name"
-                    :key="item?.name"
-                  >
+                  <SelectItem v-for="item in modelsArray" :value="item.id" :key="item.id">
                     {{ item.name }}
                   </SelectItem>
                 </SelectContent>

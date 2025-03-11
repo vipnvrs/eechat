@@ -11,16 +11,15 @@ class DeepseekService extends BaseLLMService {
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),
       apiKey: config.apiKey,
-      baseURL: config.baseUrl || 'https://api.deepseek.com/v1',
+      baseURL: config.baseUrl,
     })
   }
 
-  async testConnection(config) {
+  async testConnection(config, model) {
     try {
       console.log(config)
-
       const client = await this.createClient(config)
-      const model_id = model.id.includes(':') ? model.id.split(':').pop()  : model.id
+      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
       const response = await client.chat.completions.create({
         model: model_id,
         messages: [{ role: 'user', content: 'test' }],
@@ -28,7 +27,11 @@ class DeepseekService extends BaseLLMService {
       })
       return response.choices.length > 0
     } catch (error) {
-      throw new Error(`连接测试失败: ${error.message}`)
+      if(error.status == 401) {
+        throw new Error('连接失败，请检查您的 ApiKey')
+      } else {
+        throw new Error(`连接测试失败: ${error.message}`)
+      }
     }
   }
 
@@ -39,12 +42,13 @@ class DeepseekService extends BaseLLMService {
 
   async chat(model, messages, config) {
     try {
-      const configSaved = await this.getConfig('deepseek')
+      const configSaved = await this.getConfig(model.provider_id)
       console.log(configSaved)
       const client = await this.createClient(configSaved)
-      const model_id = model.id.includes(':') ? model.id.split(':').pop()  : model.id
+      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
       const response = await client.chat.completions.create({
         model: model_id,
+        // model: 'deepseek-chat',
         messages,
         stream: true,
         // max_tokens: 2048,
@@ -53,17 +57,18 @@ class DeepseekService extends BaseLLMService {
       // return response.choices[0].message.content
       return response
     } catch (error) {
-      throw new Error(`Deepseek 对话失败: ${error.message}`)
+      throw new Error(`对话失败: ${error.message}`)
     }
   }
 
-  async chatNoStream(messages, modelName) {
+  async chatNoStream(messages, model, provider_id) {
     const { ctx } = this
     try {
-      const configSaved = await this.getConfig('deepseek')
+      const configSaved = await this.getConfig(model.provider_id)
       const client = await this.createClient(configSaved)
+      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
       const response = await client.chat.completions.create({
-        model: 'deepseek-chat',
+        model: model_id,
         messages,
         stream: false,
         // max_tokens: 2048,

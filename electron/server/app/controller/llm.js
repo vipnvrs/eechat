@@ -18,9 +18,10 @@ class LLMController extends Controller {
     const { ctx } = this
     const { provider } = ctx.params
     const config = ctx.request.body
+    const { model } = ctx.request.body
 
     try {
-      const result = await ctx.service.llm.testConnection(provider, config)
+      const result = await ctx.service.llm.testConnection(provider, config, model)
       ctx.body = ctx.helper.success(result)
     } catch (error) {
       ctx.body = ctx.helper.error(error.message)

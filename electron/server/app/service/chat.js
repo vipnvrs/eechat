@@ -358,7 +358,7 @@ class ChatService extends Service {
       if (provider_id == 'local') {
         res = await ctx.service.ollama.chatNoStream(prompt, model.id)
       } else {
-        res = await ctx.service.llm.chatNoStream(prompt, model.id, provider_id)
+        res = await ctx.service.llm.chatNoStream(prompt, model, provider_id)
       }
       const session = await ctx.model.ChatSession.findByPk(sessionId.id)
       if (!session) {

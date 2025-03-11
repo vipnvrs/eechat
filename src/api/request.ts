@@ -211,8 +211,8 @@ export const llmApi = {
   },
 
   // 测试连接
-  async testConnection(provider: string, config: any) {
-    return request.post(`/api/llm/test/${provider}`, config)
+  async testConnection(provider: string, config: any, model) {
+    return request.post(`/api/llm/test/${provider}`, {...config, model})
   },
 
   // 获取提供商列表

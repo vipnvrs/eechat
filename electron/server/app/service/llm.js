@@ -1,6 +1,7 @@
 const { stat } = require('fs')
 const BaseLLMService = require('./llm/base')
 const DeepseekService = require('./llm/deepseek')
+const CommonService = require('./llm/common')
 
 class LLMService extends BaseLLMService {
   constructor(ctx) {
@@ -8,16 +9,29 @@ class LLMService extends BaseLLMService {
     this.providers = {
       // openai: new OpenAIService(ctx),
       // anthropic: new AnthropicService(ctx),
-      deepseek: new DeepseekService(ctx),
+      // deepseek: new DeepseekService(ctx),
+      common: new CommonService(ctx),
     }
   }
 
-  async testConnection(provider, config) {
-    const service = this.providers[provider]
+  getProviderService(provider) {
+    let service
+    service = this.providers[provider] 
     if (!service) {
-      throw new Error('暂不支持该模型提供商，请尝试通用模型')
+      console.log(`使用openai通道`);
+      service = this.providers['common']
     }
-    return service.testConnection(config)
+    return service
+  }
+
+  async testConnection(provider, config, model) {
+    let service
+    service = this.providers[provider] 
+    if (!service) {
+      console.log(`使用openai通道`);
+      service = this.providers['common']
+    }
+    return service.testConnection(config, model)
   }
 
   async listModels(provider) {
@@ -334,9 +348,8 @@ class LLMService extends BaseLLMService {
     const { ctx } = this
     const chatService = ctx.service.chat
     try {
-      const service = this.providers[provider]
+      let service= this.getProviderService(provider)
       const stream = await service.chat(model, messages, config)
-
       // 使用 ChatService 的 handleStream 处理流数据
       await chatService.handleStream(stream, ctx, messages, sessionId, model)
     } catch (error) {
@@ -346,11 +359,11 @@ class LLMService extends BaseLLMService {
     }
   }
 
-  async chatNoStream(messages, modelName, provider_id) {
+  async chatNoStream(messages, model, provider_id) {
     const { ctx } = this
     try {
-      const providerService = this.providers[provider_id]
-      const res = await providerService.chatNoStream(messages, modelName)
+      let service= this.getProviderService(provider_id)
+      const res = await service.chatNoStream(messages, model, provider_id)
       return res.choices[0].message.content
     } catch (error) {
       ctx.logger.error('Chat error:', error)
