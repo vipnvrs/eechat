@@ -18,10 +18,10 @@
     // ],
     "target": [
       {
-        "target": "zip",
+        "target": "dmg",
         "arch": [
-          // "x64",
-          'arm64',
+          "x64",
+          "arm64"
         ]
       }
     ],
