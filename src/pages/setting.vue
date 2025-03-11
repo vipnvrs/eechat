@@ -7,11 +7,19 @@ import { useRoute } from "vue-router"
 import { useModelStore } from "@/stores/model"
 import { ModelProvider } from "@/types/llm"
 
+interface MenuItem {
+  label: string
+  icon: string
+  key: string
+  component: any
+  props: Record<string, any>
+}
+
 const route = useRoute()
 const modelStore = useModelStore()
 
 // 定义可用的菜单项
-const menuItems = {
+const menuItems: Record<string, MenuItem> = {
   LocalModel: {
     label: "本地模型",
     icon: "HardDrive",
@@ -29,7 +37,7 @@ const menuItems = {
   },
 }
 
-const activeMenu = ref(menuItems.LocalModel)
+const activeMenu = ref<MenuItem>(menuItems.LocalModel)
 
 const handleChange = (e) => {
   console.log("change", e)
