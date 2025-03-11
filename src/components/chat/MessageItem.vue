@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, defineProps, computed, nextTick, onBeforeUnmount} from "vue"
-import {LoaderCircle} from 'lucide-vue-next'
+import { ref, defineProps, computed, nextTick, onBeforeUnmount } from "vue"
+import { LoaderCircle } from "lucide-vue-next"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
@@ -30,11 +30,8 @@ const processor = unified()
   // .use(rehypeMermaid, mermaidOptions) // 简化配置
   .use(rehypeStringify) // 输出 HTML 字符串
 
-
 // 安全处理后的内容
-const sanitizedContent = computed(() => 
-  processor.processSync(props.message).toString()
-)
+const sanitizedContent = computed(() => processor.processSync(props.message).toString())
 </script>
 
 <template>
@@ -49,7 +46,7 @@ const sanitizedContent = computed(() =>
     <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
       <div class="flex flex-col max-w-[80%]">
         <div
-          class="rounded-lg px-4 py-2 list-disc text-[14px]"
+          class="rounded-lg px-4 py-2 list-disc text-[14px] whitespace-wrap"
           :class="
             role === 'user'
               ? 'bg-primary text-primary-foreground'

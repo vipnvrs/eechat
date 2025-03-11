@@ -59,7 +59,11 @@ class ChatService extends Service {
         if (ctx.res.writableEnded) {
           break
         }
-
+        // reasoning_content, 
+        // finish_reason
+        if(!chunk.choices[0].delta.content) {
+          continue
+        }
         // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
@@ -67,7 +71,9 @@ class ChatService extends Service {
             chunk.choices[0].delta &&
             chunk.choices[0].delta.content) ||
           ''
-        assistantMessage += content
+          if (content) {
+            assistantMessage += content
+          }
         // todo: 用量信息
         // todo: session 会话信息
       }

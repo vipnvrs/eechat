@@ -285,6 +285,7 @@ const handleStream = async (response, onProgress) => {
         buffer = lines.pop() || ''
 
         lines.forEach(line => {
+          if (!line.trim()) return
           try {
             const data = JSON.parse(line)
             onProgress?.(data.choices[0]?.delta?.content || '')
