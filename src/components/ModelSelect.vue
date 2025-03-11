@@ -4,9 +4,15 @@ import { useModelStore } from "@/stores/model"
 import { useChatStore } from "@/stores/chatStore"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import router from "@/router"
 import { Button } from "@/components/ui/button"
-import { ChevronsDownUp, SlidersHorizontal, ArrowUpDown, Pin } from "lucide-vue-next"
+import { ChevronsDownUp, SlidersHorizontal, ArrowUpDown, Pin, Cog } from "lucide-vue-next"
 import Icon from "@/components/Icon.vue"
 const modelStore = useModelStore()
 const chatStore = useChatStore()
@@ -35,6 +41,10 @@ const handleModelChange = (key, item) => {
   console.log(chatStore.model)
 }
 
+const handleConfigModel = (key) => {
+  router.push({ path: "/setting", query: { action: key } })
+}
+
 onMounted(() => {
   const chatingModel = localStorage.getItem("chating_model")
   if (chatingModel) {
@@ -59,8 +69,24 @@ onMounted(() => {
         <ScrollArea class="h-[500px] max-h-[500px] w-[350px]" :class="groupedModels.size">
           <!-- <ScrollArea class="max-h-[400px] w-full"> -->
           <div class="" v-for="(value, key) in groupedModels" :key="key">
-            <div class="text-sm px-4 py-2 text-gray-400">
-              {{ key == "Local" ? "本地模型" : key }}
+            <div class="text-sm px-4 py-2 text-gray-400 flex items-center">
+              <div>{{ key == "Local" ? "本地模型" : key }}</div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button
+                      @click="handleConfigModel(key)"
+                      size="icon"
+                      variant="ghost"
+                      class="size-6 ml-2"
+                    >
+                      <Cog></Cog> </Button
+                  ></TooltipTrigger>
+                  <TooltipContent>
+                    <p>点击去配置模型</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <!-- model -->
             <div v-for="item in value" class="flex items-center" :key="key + item.name">

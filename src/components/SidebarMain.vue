@@ -26,8 +26,11 @@ import {
   Sparkles,
   Compass,
 } from 'lucide-vue-next'
-import { h, ref, onMounted } from 'vue'
+import { h, ref, onMounted, computed } from 'vue'
 import router from '@/router'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const data = {
   user: {
@@ -40,7 +43,7 @@ const data = {
       title: '对话',
       url: '/',
       icon: Inbox,
-      isActive: true,
+      isActive: false,
     },
     {
       title: '智能体',
@@ -63,14 +66,28 @@ const data = {
   ],
 }
 
+// 计算当前活动项
+const activeItem = computed(() => {
+  const currentPath = route.path
+  // 找到匹配当前路径的导航项
+  const matchedItem = data.navMain.find(item => {
+    if (item.url === '/') {
+      return currentPath === '/'
+    }
+    return currentPath.includes(item.url)
+  }) || data.navMain[0]
+
+  return matchedItem
+})
+
 const goPage = item => {
   console.log(item)
   router.push(item.url)
 }
+
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
 })
-const activeItem = ref(data.navMain[0])
 </script>
 <template>
   <Sidebar collapsible="none" class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r">
@@ -115,7 +132,6 @@ const activeItem = ref(data.navMain[0])
                 class="px-2.5 px-2"
                 @click="
                   () => {
-                    activeItem = item
                     goPage(item)
                   }
                 "
