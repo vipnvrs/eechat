@@ -37,7 +37,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}-Windows-${arch}-${version}-Setup.${ext}"
+    "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}"
   },
   "nsis": {
     "oneClick": false,
@@ -49,7 +49,7 @@
     "target": [
       "AppImage"
     ],
-    "artifactName": "${productName}-Linux-${arch}-${version}.${ext}"
+    "artifactName": "${productName}-linux-${arch}-${version}.${ext}"
   },
   "releaseInfo": {
     "releaseNotes": "更新日志： \n1.使用新的地址",
