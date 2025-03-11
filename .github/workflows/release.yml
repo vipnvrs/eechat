@@ -82,14 +82,8 @@ jobs:
             files: release_files/*
             generate_release_notes: true
             body: |
-              ## EE Chat 发布版本 ${{ steps.get_version.outputs.VERSION }}
-              
-              ### 下载
-              - Windows: EE Chat-Windows-1.1.0-Setup.exe
-              - macOS: EE Chat-Mac-1.1.0-Installer.dmg
-              - Linux: EE Chat-Linux-1.1.0.AppImage
-              
-              ### 更新日志
-              自动从提交记录生成
+              ### Changes  
+              ${{ github.event.head_commit.message }}
+                
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
