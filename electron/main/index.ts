@@ -107,7 +107,8 @@ async function startEggServer(): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     // 使用 cross-spawn 来处理跨平台命令
     const app = await egg.start({
-      baseDir: path.join(__dirname, '../server'),
+      baseDir: path.join(__dirname, '../../electron/server'),
+      // baseDir: path.join(__dirname, '../server'),
     });
   
     app.listen(7002); // 端口
