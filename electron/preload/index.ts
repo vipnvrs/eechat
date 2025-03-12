@@ -20,6 +20,10 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   },
 })
 
+contextBridge.exposeInMainWorld('electron', {
+  platform: process.platform,
+})
+
 // --------- Preload scripts loading ---------
 function domReady(
   condition: DocumentReadyState[] = ['complete', 'interactive'],

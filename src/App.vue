@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import HelloWorld from "./components/HelloWorld.vue"
 import { onMounted } from "vue"
-import Layout from "@/components/Layout.vue"
 import { useModelStore } from "@/stores/model"
+import { useEnvStore } from "@/stores/env"
+import Layout from "@/components/Layout.vue"
 import { llmApi, ollamaApi } from "@/api/request"
 import { LLMProvider, ModelProvider } from "@/types/llm"
 const modelStore = useModelStore()
+const envStore = useEnvStore()
 
 // 初始化模型配置
 async function initModelConfig() {
@@ -84,6 +86,9 @@ async function initModelConfig() {
 onMounted(() => {
   initModelConfig()
 })
+envStore.initEnv()
+console.log(`platform:`, envStore.platform)
+console.log(`isweb:`, envStore.isWeb)
 </script>
 
 <template>

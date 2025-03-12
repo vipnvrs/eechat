@@ -11,13 +11,15 @@ import TitleBar from '@/components/TitleBar.vue'
 </script>
 
 <template>
-  <TitleBar></TitleBar>
-  <div class="flex w-full h-full">
-    <SidebarProvider class="w-auto" v-model:open="sidebarLeftOpenMain">
-      <SidebarMain></SidebarMain>
-    </SidebarProvider>
-    <div class="flex-1">
-      <router-view></router-view>
+  <div class="flex w-full flex-col">
+    <TitleBar class="h-[30px] w-full z-1000"></TitleBar>
+    <div class="w-full flex">
+      <SidebarProvider class="w-auto" v-model:open="sidebarLeftOpenMain">
+        <SidebarMain></SidebarMain>
+      </SidebarProvider>
+      <div class="flex-1 overflow-auto">
+        <router-view></router-view>
+      </div>
     </div>
   </div>
 </template>

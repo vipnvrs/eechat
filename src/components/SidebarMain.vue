@@ -145,7 +145,7 @@ const props = withDefaults(defineProps<SidebarProps>(), {
       </SidebarGroup>
     </SidebarContent>
     <SidebarFooter>
-      <!-- <NavUser :user="data.user" /> -->
+      <NavUser :user="data.user" />
     </SidebarFooter>
   </Sidebar>
 </template>
