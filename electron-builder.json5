@@ -8,8 +8,8 @@
     "output": "release/${version}"
   },
   "files": [
-    "dist",
-    "dist-electron"
+    "dist-electron",
+    "dist"
   ],
   "mac": {
     "icon": "icon/icons/mac/AppIcon.icns",
@@ -39,7 +39,7 @@
     ],
     "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}",
     "asarUnpack": [
-      "dist-electron/**/*"
+      "**/node_modules/**/*"
     ]
   },
   "nsis": {

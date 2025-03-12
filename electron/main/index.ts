@@ -115,14 +115,17 @@ async function startEggServer(): Promise<void> {
 
   return new Promise<void>(async (resolve, reject) => {
     // 使用 cross-spawn 来处理跨平台命令
-    const app = await egg.start({
-      baseDir: path.join(__dirname, '../../electron/server'),
-      // baseDir: path.join(__dirname, '../server'),
-    });
-  
-    app.listen(7002); // 端口
-    console.log(`Server started on ${7002}`);
-    resolve();
+    try {
+      const app = await egg.start({
+        // baseDir: path.join(__dirname, '../../electron/server'),
+        baseDir: path.join(__dirname, '../../dist-electron/server'),
+      });
+      app.listen(7002); // 端口
+      console.log(`Server started on ${7002}`);
+      resolve();
+    } catch (error) {
+      reject(error)
+    }
   });
 }
 
@@ -212,3 +215,28 @@ ipcMain.handle('open-external', (_, url) => {
 ipcMain.handle('open-url', (_, url) => {
   return shell.openExternal(url)
 })
+
+// 添加更详细的错误处理
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的 Promise 拒绝:');
+  console.error('- 原因:', reason);
+  
+  // 创建一个对话框显示错误
+  if (win) {
+    const { dialog } = require('electron')
+    dialog.showErrorBox(
+      '应用程序错误',
+      `发生未处理的错误:\n${reason instanceof Error ? reason.stack : String(reason)}`
+    );
+  }
+  
+  // 将错误写入文件
+  const fs = require('fs')
+  const logPath = path.join(app.getPath('userData'), 'error.log');
+  fs.appendFileSync(
+    logPath,
+    `[${new Date().toISOString()}] 未处理的 Promise 拒绝:\n${reason instanceof Error ? reason.stack : String(reason)}\n\n`
+  );
+  
+  console.error(`错误已记录到: ${logPath}`);
+});
