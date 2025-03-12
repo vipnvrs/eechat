@@ -6,7 +6,6 @@ import pkg from './package.json'
 import autoprefixer from 'autoprefixer'
 import tailwind from 'tailwindcss'
 import { fileURLToPath, URL } from 'node:url'
-import path from 'node:path'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
@@ -47,38 +46,9 @@ export default defineConfig(({ command }) => {
                 // we can use `external` to exclude them to ensure they work correctly.
                 // Others need to put them in `dependencies` to ensure they are collected into `app.asar` after the app is built.
                 // Of course, this is not absolute, just this way is relatively simple. :)
-                // external: Object.keys(
-                //   'dependencies' in pkg ? pkg.dependencies : {},
-                // ),
-                external: [
-                  // 只排除无法打包的C++模块
-                  'sqlite3',
-                  'better-sqlite3',
-                  'node-gyp',
-                  'electron'
-                ],
-                output: {
-                  // 确保 require 语法可用
-                  format: 'cjs',
-                },
-                plugins: [
-                  {
-                    name: 'copy-server',
-                    writeBundle() {
-                      const srcDir = path.join(__dirname, 'electron/server')
-                      const destDir = path.join(__dirname, 'dist-electron/server')
-                      fs.cpSync(srcDir, destDir, { 
-                        recursive: true,
-                        filter: (src) => {
-                          // 排除 node_modules 和日志文件
-                          return !src.includes('node_modules') 
-                            && !src.endsWith('.log')
-                            && !src.includes('run')
-                        }
-                      })
-                    }
-                  }
-                ]
+                external: Object.keys(
+                  'dependencies' in pkg ? pkg.dependencies : {},
+                ),
               },
             },
           },

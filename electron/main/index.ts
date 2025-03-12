@@ -100,45 +100,26 @@ async function createWindow() {
 }
 
 // 添加启动 EggJS 的函数
-async function startEggServer() {
+const egg = require('egg');
+async function startEggServer(): Promise<void> {
   const serverPath = path.join(process.env.APP_ROOT, 'electron/server')
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void>(async (resolve, reject) => {
     // 使用 cross-spawn 来处理跨平台命令
-    const eggProcess = spawn('npm', ['run', 'dev'], {
-      cwd: serverPath,
-      stdio: 'pipe',
-      shell: true,
-    })
-
-    eggProcess.stdout.on('data', data => {
-      console.log(`[EggJS]: ${data}`)
-      // 当看到特定输出时认为服务启动成功
-      if (data.toString().includes('egg started')) {
-        resolve(eggProcess)
-      }
-    })
-
-    eggProcess.stderr.on('data', data => {
-      console.error(`[EggJS Error]: ${data}`)
-    })
-
-    eggProcess.on('error', err => {
-      reject(err)
-    })
-
-    // 设置超时
-    setTimeout(() => {
-      reject(new Error('EggJS 启动超时'))
-    }, 30000)
-  })
+    const app = await egg.start({
+      baseDir: path.join(__dirname, '../server'),
+    });
+  
+    app.listen(7002); // 端口
+    console.log(`Server started on ${7002}`);
+    resolve();
+  });
 }
 
 // 在 app ready 时启动 EggJS
 app.whenReady().then(async () => {
   try {
-    // await startEggServer()
-    console.log('EggJS server started successfully')
+    await startEggServer()
     createWindow()
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
