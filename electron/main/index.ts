@@ -8,6 +8,15 @@ import { spawn } from 'child_process'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+const log = require('electron-log');
+log.transports.file.level = 'debug';
+log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs/main.log');
+
+// 捕获未处理的异常
+process.on('uncaughtException', (error) => {
+  log.error('未捕获的异常:', error);
+});
+
 // The built directory structure
 //
 // ├─┬ dist-electron

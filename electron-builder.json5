@@ -37,7 +37,10 @@
         ]
       }
     ],
-    "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}"
+    "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}",
+    "asarUnpack": [
+      "dist-electron/**/*"
+    ]
   },
   "nsis": {
     "oneClick": false,
@@ -51,6 +54,12 @@
     ],
     "artifactName": "${productName}-linux-${arch}-${version}.${ext}"
   },
+  "extraResources": [
+    {
+      "from": "logs",
+      "to": "logs"
+    }
+  ],
   "releaseInfo": {
     "releaseNotes": "更新日志： \n1.使用新的地址",
     "releaseDate": "2025-3-10"
