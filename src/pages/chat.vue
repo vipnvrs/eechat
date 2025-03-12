@@ -215,7 +215,9 @@ onMounted(() => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>{{ activeSession.title }}</BreadcrumbPage>
+                <BreadcrumbPage class="max-w-[200px] truncate">{{
+                  activeSession.title
+                }}</BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator class="hidden md:block" />
               <BreadcrumbItem class="hidden md:block">

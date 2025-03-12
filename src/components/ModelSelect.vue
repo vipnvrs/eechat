@@ -95,6 +95,16 @@ onMounted(() => {
               </TooltipProvider>
             </div>
             <!-- model -->
+            <div v-if="key === 'local' && value.models.length == 0">
+              <div class="ml-4 text-sm">
+                未找到本地模型，<Button
+                  variant="link"
+                  class="p-0 text-blue-500"
+                  @click="handleConfigModel('local')"
+                  >去配置</Button
+                >
+              </div>
+            </div>
             <div
               v-for="item in value.models"
               class="flex items-center"

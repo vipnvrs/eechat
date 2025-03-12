@@ -49,10 +49,15 @@ import {
   Plus,
   EllipsisVertical,
 } from 'lucide-vue-next'
-import { h, ref, onMounted, toRaw } from 'vue'
+import { h, ref, onMounted, toRaw,computed  } from 'vue'
 import { chatApi } from '@/api/request'
 import Icon from '@/components/Icon.vue'
 import router from '@/router'
+import dayjs from 'dayjs'
+import 'dayjs/locale/zh-cn'
+
+// 设置语言为中文
+dayjs.locale('zh-cn')
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
@@ -186,7 +191,43 @@ onMounted(() => {
   }
   fetchSessions(localActiveSessionId)
 })
+
+// 添加时间分组函数
+const getTimeGroup = (date: string) => {
+  const now = dayjs()
+  const targetDate = dayjs(date)
+  const diffDays = now.diff(targetDate, 'day')
+
+  if (diffDays === 0) return '今天'
+  if (diffDays === 1) return '昨天'
+  if (diffDays <= 7) return '7天内'
+  if (diffDays <= 30) return '30天内'
+
+  // 如果是不同年份，显示完整年月
+  if (targetDate.year() !== now.year()) {
+    return targetDate.format('YYYY年M月')
+  }
+  // 同年不同月
+  return targetDate.format('M月')
+}
+
+// 对会话列表进行分组
+const groupedSessions = computed(() => {
+  if (!sessions.value) return {}
+
+  const groups: Record<string, ChatSession[]> = {}
+  sessions.value.forEach(session => {
+    const group = getTimeGroup(session.created_at)
+    if (!groups[group]) {
+      groups[group] = []
+    }
+    groups[group].push(session)
+  })
+
+  return groups
+})
 </script>
+
 <template>
   <Toaster />
   <!-- 添加确认对话框 -->
@@ -208,7 +249,7 @@ onMounted(() => {
     </AlertDialogContent>
   </AlertDialog>
   <Sidebar class="hidden flex-1 md:flex absolute">
-    <SidebarHeader class="gap-3.5 border-b p-4">
+    <SidebarHeader class="gap-3.5 border-b p-4 h-[64px]">
       <div class="flex w-full items-center justify-between">
         <div class="text-base font-medium text-foreground">
           {{ activeItem.title }}
@@ -219,60 +260,59 @@ onMounted(() => {
           </Button>
         </Label>
       </div>
-      <SidebarInput placeholder="输入要搜索的内容..." />
+      <!-- <SidebarInput placeholder="输入要搜索的内容..." /> -->
     </SidebarHeader>
     <SidebarContent>
       <ScrollArea class="h-full w-full">
         <SidebarGroup class="px-0">
-          <template v-for="(item, index) in sessions">
-            <SidebarGroupLabel
-              v-if="index % 4 == 0"
-              class="pl-4 mt-2 text-xs text-gray-400"
-              >最近 {{ index + 7 }} 天</SidebarGroupLabel
-            >
+          <template v-for="(sessions, groupName) in groupedSessions" :key="groupName">
+            <SidebarGroupLabel class="pl-4 mt-2 text-xs text-gray-400">{{
+              groupName
+            }}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <a
-                @click="handleSessionChange(item)"
-                :key="item.id"
-                href="#"
-                class="group/item flex justify-between items-center px-4 py-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                :class="
-                  item.id === activeSessionId
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : ''
-                "
-              >
-                <div class="flex-1 max-w-[80%] space-y-2">
-                  <div
-                    class="truncate text-gray-950 dark:text-white"
-                    :class="item.id === activeSessionId ? 'font-bold' : 'font-normal'"
-                  >
-                    {{ item.title }}
+              <template v-for="item in sessions" :key="item.id">
+                <a
+                  @click="handleSessionChange(item)"
+                  href="#"
+                  class="group/item flex justify-between items-center px-4 py-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  :class="
+                    item.id === activeSessionId
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : ''
+                  "
+                >
+                  <div class="flex-1 max-w-[80%] space-y-2">
+                    <div
+                      class="truncate text-gray-950 dark:text-white"
+                      :class="item.id === activeSessionId ? 'font-bold' : 'font-normal'"
+                    >
+                      {{ item.title }}
+                    </div>
                   </div>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger as-child>
-                    <Button
-                      class="invisible group-hover/item:visible"
-                      size="icon"
-                      variant="ghost"
-                      v-on:click.stop=""
-                    >
-                      <EllipsisVertical class=""></EllipsisVertical>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <!-- <DropdownMenuContent algin="start" side="right" as-child> -->
-                  <DropdownMenuContent align="start" side="right">
-                    <!-- <DropdownMenuItem> <Copy></Copy> 复制 </DropdownMenuItem> -->
-                    <DropdownMenuItem
-                      @click.stop="handleRemoveSession(item)"
-                      class="text-red-600 hover:text-red-500"
-                    >
-                      <Trash2></Trash2> 删除
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </a>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                      <Button
+                        class="invisible group-hover/item:visible"
+                        size="icon"
+                        variant="ghost"
+                        v-on:click.stop=""
+                      >
+                        <EllipsisVertical class=""></EllipsisVertical>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <!-- <DropdownMenuContent algin="start" side="right" as-child> -->
+                    <DropdownMenuContent align="start" side="right">
+                      <!-- <DropdownMenuItem> <Copy></Copy> 复制 </DropdownMenuItem> -->
+                      <DropdownMenuItem
+                        @click.stop="handleRemoveSession(item)"
+                        class="text-red-600 hover:text-red-500"
+                      >
+                        <Trash2></Trash2> 删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </a>
+              </template>
             </SidebarGroupContent>
           </template>
         </SidebarGroup>

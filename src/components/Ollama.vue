@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { Button } from '@/components/ui/button'
-import { CircleDot, Download, Play, Square, AlertCircle } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted } from "vue"
+import { Button } from "@/components/ui/button"
+import { CircleDot, Download, Play, Square, AlertCircle } from "lucide-vue-next"
 
 // Ollama 状态枚举
 enum OllamaStatus {
-  CHECKING = 'checking',
-  NOT_INSTALLED = 'not_installed',
-  STOPPED = 'stopped',
-  RUNNING = 'running',
-  ERROR = 'error',
+  CHECKING = "checking",
+  NOT_INSTALLED = "not_installed",
+  STOPPED = "stopped",
+  RUNNING = "running",
+  ERROR = "error",
 }
 
 const status = ref<OllamaStatus>(OllamaStatus.CHECKING)
-const errorMessage = ref('')
+const errorMessage = ref("")
 
 // 添加工具函数
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // 添加状态检查控制变量
 const shouldCheck = ref(true) // 控制是否继续检查
@@ -32,7 +32,7 @@ const checkOllamaStatus = async () => {
 
   while (attempts < maxAttempts && shouldCheck.value) {
     try {
-      const response = await fetch('http://localhost:11434/api/version')
+      const response = await fetch("http://localhost:11434/api/version")
       if (response.ok) {
         status.value = OllamaStatus.RUNNING
         return
@@ -47,10 +47,10 @@ const checkOllamaStatus = async () => {
       if (attempts === maxAttempts) {
         // 最后一次尝试失败，检查是否安装
         try {
-          const platform = await window.ipcRenderer.invoke('get-platform')
-          const isWindows = platform === 'win32'
-          const checkCmd = isWindows ? 'where ollama' : 'which ollama'
-          await window.ipcRenderer.invoke('exec', checkCmd)
+          const platform = await window.ipcRenderer.invoke("get-platform")
+          const isWindows = platform === "win32"
+          const checkCmd = isWindows ? "where ollama" : "which ollama"
+          await window.ipcRenderer.invoke("exec", checkCmd)
           status.value = OllamaStatus.STOPPED
         } catch {
           status.value = OllamaStatus.NOT_INSTALLED
@@ -73,7 +73,7 @@ const startOllama = async (): Promise<void> => {
 
     // 先检查 Ollama 是否已经在运行
     try {
-      const response = await fetch('http://localhost:11434/api/version')
+      const response = await fetch("http://localhost:11434/api/version")
       if (response.ok) {
         status.value = OllamaStatus.RUNNING
         return
@@ -81,7 +81,7 @@ const startOllama = async (): Promise<void> => {
     } catch {}
 
     // 启动 Ollama
-    await window.ipcRenderer.invoke('exec', 'ollama serve')
+    await window.ipcRenderer.invoke("exec", "ollama serve")
 
     // 等待服务启动
     let attempts = 0
@@ -89,7 +89,7 @@ const startOllama = async (): Promise<void> => {
 
     while (attempts < maxAttempts) {
       try {
-        const response = await fetch('http://localhost:11434/api/version')
+        const response = await fetch("http://localhost:11434/api/version")
         if (response.ok) {
           status.value = OllamaStatus.RUNNING
           return
@@ -97,17 +97,17 @@ const startOllama = async (): Promise<void> => {
       } catch {}
 
       // 等待1秒后重试
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       attempts++
     }
 
     // 如果多次尝试后仍未成功,则认为启动失败
     shouldCheck.value = false
-    throw new Error('启动超时')
+    throw new Error("启动超时")
   } catch (error: any) {
-    console.error('Failed to start Ollama:', error)
+    console.error("Failed to start Ollama:", error)
     status.value = OllamaStatus.ERROR
-    errorMessage.value = '启动失败: ' + (error.message || '未知错误')
+    errorMessage.value = "启动失败: " + (error.message || "未知错误")
     shouldCheck.value = false // 错误时停止检查
   }
 }
@@ -119,11 +119,10 @@ const stopOllama = async () => {
     status.value = OllamaStatus.CHECKING
 
     // 从主进程获取平台信息
-    const platform = await window.ipcRenderer.invoke('get-platform')
-    const killCmd =
-      platform === 'win32' ? 'taskkill /F /IM ollama.exe' : 'pkill ollama'
+    const platform = await window.ipcRenderer.invoke("get-platform")
+    const killCmd = platform === "win32" ? "taskkill /F /IM ollama.exe" : "pkill ollama"
 
-    await window.ipcRenderer.invoke('exec', killCmd)
+    await window.ipcRenderer.invoke("exec", killCmd)
 
     // 等待进程真正结束
     let attempts = 0
@@ -131,7 +130,7 @@ const stopOllama = async () => {
 
     while (attempts < maxAttempts) {
       try {
-        const response = await fetch('http://localhost:11434/api/version')
+        const response = await fetch("http://localhost:11434/api/version")
         if (!response.ok) {
           status.value = OllamaStatus.STOPPED
           return
@@ -146,12 +145,12 @@ const stopOllama = async () => {
       attempts++
     }
 
-    throw new Error('停止超时')
+    throw new Error("停止超时")
   } catch (error) {
-    console.error('Failed to stop Ollama:', error)
+    console.error("Failed to stop Ollama:", error)
     status.value = OllamaStatus.ERROR
     // @ts-ignore
-    errorMessage.value = '停止失败: ' + (error.message || '未知错误')
+    errorMessage.value = "停止失败: " + (error.message || "未知错误")
   } finally {
     shouldCheck.value = true // 恢复检查
   }
@@ -160,16 +159,16 @@ const stopOllama = async () => {
 // 下载 Ollama
 const downloadOllama = () => {
   // 打开下载页面
-  window.ipcRenderer.invoke('open-external', 'https://ollama.ai/download')
+  window.ipcRenderer.invoke("open-external", "https://ollama.ai/download")
 }
 
 // 状态文本映射
 const statusText = {
-  [OllamaStatus.CHECKING]: 'Ollama 检查中...',
-  [OllamaStatus.NOT_INSTALLED]: 'Ollama 未安装',
-  [OllamaStatus.STOPPED]: 'Ollama 未运行',
-  [OllamaStatus.RUNNING]: 'Ollama 运行中',
-  [OllamaStatus.ERROR]: errorMessage.value || 'Ollama 错误',
+  [OllamaStatus.CHECKING]: "Ollama 检查中...",
+  [OllamaStatus.NOT_INSTALLED]: "Ollama 未安装",
+  [OllamaStatus.STOPPED]: "Ollama 未运行",
+  [OllamaStatus.RUNNING]: "Ollama 运行中",
+  [OllamaStatus.ERROR]: errorMessage.value || "Ollama 错误",
 }
 
 // 状态图标映射
