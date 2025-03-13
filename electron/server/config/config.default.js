@@ -29,6 +29,17 @@ module.exports = appInfo => {
     domainWhiteList: ['*'],
   }
 
+  // 日志
+  // config.logger = {
+  //   dir: path.join(appInfo.baseDir, 'logs'),
+  //   level: 'DEBUG',
+  //   consoleLevel: 'DEBUG',
+  //   encoding: 'utf8',
+  //   when: 'D',
+  //   keepFileExt: true,
+  //   maxFiles: 10,
+  // }
+
   // 添加数据库配置
   const path = require('path')
   config.sequelize = {

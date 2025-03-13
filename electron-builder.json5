@@ -39,8 +39,14 @@
     ],
     "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}",
     "asarUnpack": [
-      "**/node_modules/**/*"
-    ]
+    ],
+    "extraResources": [{
+      "from": "dist-electron/server",
+      "to": "server"
+    }, {
+      "from": "node_modules",
+      "to": "server/node_modules"
+    }]
   },
   "nsis": {
     "oneClick": false,

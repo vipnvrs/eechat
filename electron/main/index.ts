@@ -8,13 +8,19 @@ import { spawn } from 'child_process'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const log = require('electron-log');
-log.transports.file.level = 'debug';
-log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs/main.log');
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = app.isPackaged ? 'production' : 'development'
+}
+
+const log = require('electron-log')
+log.transports.file.level = 'debug'
+log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs/main.log')
+log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
+// Object.assign(console, log.functions)
 
 // 捕获未处理的异常
 process.on('uncaughtException', (error) => {
-  log.error('未捕获的异常:', error);
+  log.error('未捕获的异常:', error)
 });
 
 // The built directory structure
@@ -108,32 +114,49 @@ async function createWindow() {
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
-// 添加启动 EggJS 的函数
-const egg = require('egg');
-async function startEggServer(): Promise<void> {
-  const serverPath = path.join(process.env.APP_ROOT, 'electron/server')
-
+const egg = require('egg')
+let appServer: any = null
+async function startEggServer(pathArg): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
-    // 使用 cross-spawn 来处理跨平台命令
+    const isDev = process.env.NODE_ENV !== 'production'
+    log.info('isDev:', isDev);
+    const baseDir = isDev 
+      ? path.join(__dirname, '../../electron/server') 
+      : path.join(process.resourcesPath, 'app', '../server')
+    log.info('baseDir:', baseDir)
     try {
-      const app = await egg.start({
-        // baseDir: path.join(__dirname, '../../electron/server'),
-        baseDir: path.join(__dirname, '../../dist-electron/server'),
+      appServer = await egg.start({
+        baseDir: baseDir,
       });
-      app.listen(7002); // 端口
-      console.log(`Server started on ${7002}`);
-      resolve();
+      appServer.listen(7002)
+      log.info(`Server started on ${7002}`)
+      resolve()
     } catch (error) {
       reject(error)
     }
   });
 }
+async function stopEggServer(): Promise<void> {
+  return new Promise<void>(async (resolve, reject) => {
+    try {
+      console.log(appServer);
+      
+      await appServer.close()
+      console.log(`Server stoped`)
+    } catch (error) {
+      log.error(error)
+      reject(error)
+    }
+  });
+}
+
+
 
 // 在 app ready 时启动 EggJS
 app.whenReady().then(async () => {
   try {
-    await startEggServer()
     createWindow()
+    await startEggServer('')
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
     app.quit()
@@ -216,6 +239,27 @@ ipcMain.handle('open-url', (_, url) => {
   return shell.openExternal(url)
 })
 
+// startEggServer
+ipcMain.handle('startEggServer', async (_, pathArg) => {
+  try {
+    const res = await startEggServer(pathArg)
+    return res
+  } catch (error) {
+    console.error('Failed to start EggJS server:', error)
+    return error
+  }
+})
+// stopEggServer
+ipcMain.handle('stopEggServer', async (_, pathArg) => {
+  try {
+    const res = await stopEggServer()
+    return res
+  } catch (error) {
+    console.error('Failed to stop EggJS server:', error)
+    return error
+  }
+})
+
 // 添加更详细的错误处理
 process.on('unhandledRejection', (reason, promise) => {
   console.error('未处理的 Promise 拒绝:');
@@ -232,7 +276,7 @@ process.on('unhandledRejection', (reason, promise) => {
   
   // 将错误写入文件
   const fs = require('fs')
-  const logPath = path.join(app.getPath('userData'), 'error.log');
+  const logPath = path.join(app.getPath('userData'), 'logs/error.log');
   fs.appendFileSync(
     logPath,
     `[${new Date().toISOString()}] 未处理的 Promise 拒绝:\n${reason instanceof Error ? reason.stack : String(reason)}\n\n`

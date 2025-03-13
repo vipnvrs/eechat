@@ -20,6 +20,7 @@ import { Brain, HardDrive } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
 import About from '@/components/setting/About.vue'
+import Playground from '@/components/setting/Playground.vue'
 
 // const props = withDefaults(defineProps<SidebarProps>(), {
 //   collapsible: 'icon',
@@ -58,6 +59,12 @@ const menuData = [
         icon: Brain,
         key: 'about',
         component: markRaw(About),
+      },
+      {
+        label: 'Playground',
+        icon: Brain,
+        key: 'playground',
+        component: markRaw(Playground),
       },
     ],
   },
@@ -100,7 +107,12 @@ const handleMenuClick = e => {
           <SidebarGroupLabel>{{ group.label }}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem v-for="item in group.items" :key="item.label">
-              <SidebarMenuButton class="cursor-pointer w-full" @click="handleMenuClick(item)" as-child :is-active="item.key == activeKey">
+              <SidebarMenuButton
+                class="cursor-pointer w-full"
+                @click="handleMenuClick(item)"
+                as-child
+                :is-active="item.key == activeKey"
+              >
                 <div class="flex items-center">
                   <component :is="item.icon"></component>
                   <span class="ml-2">{{ item.label }}</span>
