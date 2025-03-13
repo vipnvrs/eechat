@@ -5,6 +5,7 @@ on:
     tags:
       - 'v*'
 
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -21,7 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
 
       - name: Install Dependencies
         run: npm install
@@ -34,69 +34,56 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release_on_${{ matrix.os }}
+          name: release_on_${{ matrix. os }}
           path: release/
           retention-days: 5
 
   release:
-    name: 发布 Release
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      actions: write  # ✅ 允许删除 artifact
+      name: 发布 Release
+      needs: build
+      runs-on: ubuntu-latest
+      permissions:
+        contents: write
+      steps:
+        - name: 检出代码
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
-    steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        - name: 获取版本号
+          id: get_version
+          run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          shell: bash
 
-      - name: 获取版本号
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        shell: bash
+        - name: 下载所有构建产物
+          uses: actions/download-artifact@v4
+          with:
+            path: artifacts
+            # merge-multiple: true
 
-      - name: 下载所有构建产物
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true  # ✅ 直接合并所有 artifacts
+        - name: 显示下载的文件
+          run: ls -R artifacts
+          shell: bash
 
-      - name: 显示下载的文件
-        run: ls -R artifacts
-        shell: bash
+        - name: 准备发布文件
+          run: |
+            mkdir -p release_files
+            # 复制所有安装包文件到发布目录
+            find artifacts -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "latest*.yml" | xargs -I {} cp {} release_files/
+            ls -la release_files/
+          shell: bash
 
-      - name: 准备发布文件
-        run: |
-          mkdir -p release_files
-          find artifacts -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.zip" -o -name "*.deb" -o -name "*.rpm" -o -name "latest*.yml" \) -exec mv {} release_files/ \;
-          ls -la release_files/
-        shell: bash
-
-      - name: 创建 Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ee.chat ${{ env.VERSION }}
-          draft: false
-          prerelease: false
-          files: release_files/*
-          generate_release_notes: true
-          body: |
-            ### Changes  
-            ${{ github.event.head_commit.message }}
-              
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 清理 Artifact
-        run: |
-          ARTIFACTS=$(gh api repos/${{ github.repository }}/actions/artifacts --jq '.artifacts[].id')
-          if [[ -n "$ARTIFACTS" ]]; then
-            echo "Deleting artifacts: $ARTIFACTS"
-            echo "$ARTIFACTS" | xargs -n 1 -I {} gh api --method DELETE repos/${{ github.repository }}/actions/artifacts/{}
-          else
-            echo "No artifacts to delete."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - name: 创建 Release
+          uses: softprops/action-gh-release@v1
+          with:
+            name: ee.chat ${{ steps.get_version.outputs.VERSION }}
+            draft: false
+            prerelease: false
+            files: release_files/*
+            generate_release_notes: true
+            body: |
+              ### Changes  
+              ${{ github.event.head_commit.message }}
+                
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
