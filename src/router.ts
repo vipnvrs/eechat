@@ -1,4 +1,4 @@
-import { createWebHistory, createRouter } from 'vue-router'
+import { createWebHistory, createWebHashHistory, createRouter } from 'vue-router'
 
 import Chat from '@/pages/chat.vue'
 import Discover from '@/pages/discover.vue'
@@ -29,18 +29,18 @@ const routes = [
   // { path: '/about', component: AboutView },
 ]
 
+// Use hash mode for Electron production builds to avoid path issues
+const isElectron = window.navigator.userAgent.includes('Electron');
 const router = createRouter({
-  history: createWebHistory(),
+  history: isElectron ? createWebHashHistory() : createWebHistory(),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  next()
 })
 
 router.afterEach((to, from) => {
   analytics.page()
-
-  // analytics.track('vue-page-go', {
-  //   price: 20,
-  //   item: 'pink socks'
-  // })
 })
-
 export default router

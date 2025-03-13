@@ -49,6 +49,7 @@ if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 
+// Ensure single instance
 if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
@@ -59,12 +60,9 @@ const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
-  // 获取主屏幕的尺寸
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
-
-  // 设置窗口的宽度和高度
-  const windowWidth = Math.min(1200, width * 0.8) // 窗口宽度为屏幕宽度的80%，最大宽度为1200px
-  const windowHeight = Math.min(800, height * 0.8) // 窗口高度为屏幕高度的80%，最大高度为800px
+  const windowWidth = Math.min(1200, width * 0.8)
+  const windowHeight = Math.min(800, height * 0.8)
 
   win = new BrowserWindow({
     title: 'Main window',
@@ -89,6 +87,7 @@ async function createWindow() {
     },
   })
 
+  win.webContents.openDevTools()
   // 隐藏菜单栏
   win.setMenuBarVisibility(false)
 
@@ -258,6 +257,10 @@ ipcMain.handle('stopEggServer', async (_, pathArg) => {
     console.error('Failed to stop EggJS server:', error)
     return error
   }
+})
+
+app.on('render-process-gone', (event, webContents, details) => {
+  console.error('渲染进程崩溃:', details.reason)
 })
 
 // 添加更详细的错误处理

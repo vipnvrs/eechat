@@ -1,46 +1,43 @@
 <script setup lang="ts">
 import HelloWorld from "./components/HelloWorld.vue"
-import { onMounted } from "vue"
+import { onMounted, onErrorCaptured } from "vue"
 import { useModelStore } from "@/stores/model"
 import { useEnvStore } from "@/stores/env"
 import Layout from "@/components/Layout.vue"
 import { llmApi, ollamaApi } from "@/api/request"
 import { LLMProvider, ModelProvider } from "@/types/llm"
+import { useRouter } from "vue-router"
+
 const modelStore = useModelStore()
 const envStore = useEnvStore()
+const router = useRouter()
+
+// 捕获全局错误
+onErrorCaptured((err, instance, info) => {
+  console.error("Vue 错误:", err)
+  console.error("错误信息:", info)
+  return false
+})
 
 // 初始化模型配置
 async function initModelConfig() {
   try {
     modelStore.isLoading = true
-
-    // 1. 初始化本地模型提供商
     modelStore.initLocalProvider()
-
-    // 2. 获取所有API提供商
     const providers = await llmApi.getProviders()
-
-    // 3. 遍历处理每个提供商
     for (const [providerId, providerInfo] of Object.entries(providers) as [
       string,
       LLMProvider
     ][]) {
-      // 获取提供商配置
       const config = await llmApi.getConfigProvider(providerId)
-
-      // 获取该提供商的所有模型
       const models = await llmApi.getModels(providerId)
-
-      // 构建提供商对象
       const provider: ModelProvider = {
         id: providerId,
         name: providerInfo.name || providerId,
         type: "api",
-        // 使用服务端返回的状态
         state: providerInfo.state,
         models: models.map((model) => ({
           ...model,
-          // 使用服务端返回的模型状态
           state: model.state,
         })),
         config: {
@@ -50,14 +47,10 @@ async function initModelConfig() {
         description: providerInfo.description,
         icon: providerId,
       }
-
-      // 更新到 store
       modelStore.setProvider(providerId, provider)
     }
-
     console.log(modelStore.providers)
-
-    // 4. 获取本地模型配置
+    // 获取本地模型配置
     const localModels = await ollamaApi.listModel()
     const modelsData = localModels.data.models
     if (modelsData?.length) {
@@ -76,16 +69,18 @@ async function initModelConfig() {
     }
   } catch (error) {
     console.log(error)
-
     modelStore.error = (error as Error).message
   } finally {
     modelStore.isLoading = false
   }
 }
-// 在应用启动时初始化
+
 onMounted(() => {
-  initModelConfig()
+  setTimeout(() => {
+    initModelConfig()
+  }, 100)
 })
+
 envStore.initEnv()
 console.log(`platform:`, envStore.platform)
 console.log(`isweb:`, envStore.isWeb)
