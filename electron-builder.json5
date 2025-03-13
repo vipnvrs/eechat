@@ -38,15 +38,14 @@
       }
     ],
     "artifactName": "${productName}-windows-${arch}-${version}-Setup.${ext}",
-    "asarUnpack": [
-    ],
-    "extraResources": [{
-      "from": "dist-electron/server",
-      "to": "server"
-    }, {
-      "from": "node_modules",
-      "to": "server/node_modules"
-    }]
+    "asarUnpack": [],
+    // "extraResources": [{
+    //   "from": "dist-electron/server",
+    //   "to": "server"
+    // }, {
+    //   "from": "node_modules",
+    //   "to": "server/node_modules"
+    // }]
   },
   "nsis": {
     "oneClick": false,
@@ -60,12 +59,14 @@
     ],
     "artifactName": "${productName}-linux-${arch}-${version}.${ext}"
   },
-  "extraResources": [
-    {
-      "from": "logs",
-      "to": "logs"
-    }
-  ],
+  "asarUnpack": [],
+  "extraResources": [{
+      "from": "dist-electron/server",
+      "to": "server"
+    }, {
+      "from": "node_modules",
+      "to": "server/node_modules"
+  }],
   "releaseInfo": {
     "releaseNotes": "更新日志： \n1.使用新的地址",
     "releaseDate": "2025-3-10"
