@@ -31,3 +31,4 @@ yarn.lock
 
 tauri/dist
 .vercel
+updateServer

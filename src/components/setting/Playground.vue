@@ -1,10 +1,50 @@
 <script setup lang="ts">
-import { ref, reactive } from "vue"
+import { ref, reactive, onMounted, onUnmounted } from "vue"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 const serverPath = ref("../server")
 const resStr = ref("")
+
+// 添加更新器事件监听
+const setupUpdateListeners = () => {
+  window.ipcRenderer.on("update-error", (_, message) => {
+    resStr.value = JSON.stringify({ type: "error", message })
+  })
+
+  window.ipcRenderer.on("update-available", (_, info) => {
+    resStr.value = JSON.stringify({ type: "update-available", info })
+  })
+
+  window.ipcRenderer.on("update-not-available", (_, info) => {
+    resStr.value = JSON.stringify({ type: "update-not-available", info })
+  })
+
+  window.ipcRenderer.on("download-progress", (_, progressObj) => {
+    resStr.value = JSON.stringify({ type: "progress", ...progressObj })
+  })
+
+  window.ipcRenderer.on("update-downloaded", (_, info) => {
+    resStr.value = JSON.stringify({ type: "downloaded", info })
+  })
+}
+
+// 移除事件监听
+const removeUpdateListeners = () => {
+  window.ipcRenderer.removeAllListeners("update-error")
+  window.ipcRenderer.removeAllListeners("update-available")
+  window.ipcRenderer.removeAllListeners("update-not-available")
+  window.ipcRenderer.removeAllListeners("download-progress")
+  window.ipcRenderer.removeAllListeners("update-downloaded")
+}
+
+onMounted(() => {
+  setupUpdateListeners()
+})
+
+onUnmounted(() => {
+  removeUpdateListeners()
+})
 const handleClickStart = async () => {
   console.log("handleClickStart")
   const res = await window.ipcRenderer.invoke("startEggServer", serverPath.value)
@@ -20,6 +60,33 @@ const handleClickStop = async () => {
     resStr.value = JSON.stringify(error)
   }
 }
+const checkUpdate = async () => {
+  console.log("checkUpdate")
+  try {
+    const res = await window.ipcRenderer.invoke("check-update")
+    resStr.value = res
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
+const downloadUpdate = async () => {
+  console.log("downloadUpdate")
+  try {
+    const res = await window.ipcRenderer.invoke("download-update")
+    resStr.value = res
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
+const installUpdate = async () => {
+  console.log("installUpdate")
+  try {
+    const res = await window.ipcRenderer.invoke("install-update")
+    resStr.value = res
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
 </script>
 
 <template>
@@ -30,6 +97,11 @@ const handleClickStop = async () => {
       <div class="flex space-x-2">
         <Button @click="handleClickStart">startEggServer</Button>
         <Button @click="handleClickStop">stopEggServer</Button>
+      </div>
+      <div class="flex space-x-2">
+        <Button @click="checkUpdate">checkUpdate</Button>
+        <Button @click="downloadUpdate">downloadUpdate</Button>
+        <Button @click="installUpdate">installUpdate</Button>
       </div>
       <div class="res">
         {{ resStr }}

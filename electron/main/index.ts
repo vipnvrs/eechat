@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'child_process'
+import { AppUpdater, registerUpdaterHandlers } from './updater'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -56,6 +57,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow | null = null
+let updater: AppUpdater | null = null
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
@@ -111,7 +113,24 @@ async function createWindow() {
     return { action: 'deny' }
   })
   // win.webContents.on('will-navigate', (event, url) => { }) #344
+
+  
+  // 初始化更新器
+  // if (app.isPackaged) {
+    updater = new AppUpdater(win)
+    registerUpdaterHandlers(updater)
+  // }
 }
+
+// ipcMain.handle('checkUpdate', async () => {
+//   try {
+//     console.log('checkUpdate');
+    
+//   } catch (error) {
+//     console.error('检查更新失败:', error)
+//     return { success: false, message: error.message || '检查更新失败' }
+//   }
+// })
 
 const egg = require('egg')
 let appServer: any = null
@@ -149,13 +168,21 @@ async function stopEggServer(): Promise<void> {
   });
 }
 
-
+const initUpdate = () => {
+  if (app.isPackaged && updater) {
+    // 延迟几秒检查更新，确保应用已完全启动
+    setTimeout(() => {
+      updater.checkUpdate()
+    }, 3000)
+  }
+}
 
 // 在 app ready 时启动 EggJS
 app.whenReady().then(async () => {
   try {
     createWindow()
     await startEggServer('')
+    initUpdate()
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
     app.quit()

@@ -26,9 +26,12 @@ import {
   Sparkles,
   Compass,
 } from 'lucide-vue-next'
+import Updater from '@/components/Updater.vue'
 import { h, ref, onMounted, computed } from 'vue'
 import router from '@/router'
 import { useRoute } from 'vue-router'
+import { useEnvStore } from "@/stores/env"
+const envStore = useEnvStore()
 
 const route = useRoute()
 
@@ -90,7 +93,13 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 })
 </script>
 <template>
-  <Sidebar collapsible="none" class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r">
+  <Sidebar
+    collapsible="none"
+    class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
+    :class="
+      !envStore.isWeb ? '!min-h-[calc(100dvh-30px)] h-[calc(100dvh-30px)]' : 'hello'
+    "
+  >
     <SidebarHeader>
       <SidebarMenu>
         <SidebarMenuItem>
@@ -145,7 +154,8 @@ const props = withDefaults(defineProps<SidebarProps>(), {
       </SidebarGroup>
     </SidebarContent>
     <SidebarFooter>
-      <NavUser :user="data.user" />
+      <Updater></Updater>
+      <!-- <NavUser :user="data.user" /> -->
     </SidebarFooter>
   </Sidebar>
 </template>

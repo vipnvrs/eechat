@@ -72,7 +72,13 @@
     "releaseDate": "2025-3-10"
   },
   "publish": [{
-    "provider": "generic",
-    "url": "https://g-electron-updater.oss-accelerate.aliyuncs.com/g-electron-updater"
+    // "provider": "generic",
+    // "url": "https://g-electron-updater.oss-accelerate.aliyuncs.com/g-electron-updater"
+    // "url": "http://127.0.0.1:8080/"
+      "provider": "github",
+      "owner": "Lucassssss",
+      "repo": "updater",
+      "private": false,
+      "releaseType": "release"
   }]
 }
