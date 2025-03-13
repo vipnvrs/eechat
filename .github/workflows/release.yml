@@ -21,10 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'  # ✅ 缓存 node_modules 以加速安装
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci  # ✅ 用 `ci` 代替 `install`，确保干净安装
+        run: npm install
 
       - name: Build Release Files
         run: npm run build
