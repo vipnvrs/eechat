@@ -249,6 +249,10 @@ onMounted(() => {
         <ArrowDownToLine> </ArrowDownToLine>
       </Button>
       <ScrollArea ref="scrollAreaRef" class="h-full w-full px-6 flex-1">
+        <div class="h-[300px] overflow-hidden ml--4">
+          <!-- <img src="https://www.notion.so/images/page-cover/woodcuts_1.jpg" alt=""> -->
+          <img src="/photo.jpeg" alt="">
+        </div>
         <!-- <ScrollArea
         class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
       > -->
