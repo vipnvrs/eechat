@@ -21,20 +21,20 @@ const platforms = [
   { name: 'linux', dir: join(releaseDir, 'linux') },
 ]
 
-platforms.forEach(({ name, dir }) => {
-  if (existsSync(dir)) {
-    console.log(`Publishing ${name} artifacts from ${dir} ...`)
+// platforms.forEach(({ name, dir }) => {
+//   if (existsSync(dir)) {
+//     console.log(`Publishing ${name} artifacts from ${dir} ...`)
     try {
       // 调用 electron-builder 进行发布，使用 --prepackaged 指定预构建目录
       // 注意这里使用 npx，如果你已全局安装 electron-builder，也可以直接调用 electron-builder
-      execSync(`npx electron-builder --publish=onTag --prepackaged "${dir}"`, {
+      execSync(`npx electron-builder --publish=always --prepackaged release/${version}`, {
         stdio: 'inherit',
       })
-      console.log(`${name} 发布完成！`)
+      console.log(`发布完成！`)
     } catch (error) {
-      console.error(`${name} 发布失败：`, error)
+      console.error(`发布失败：`, error)
     }
-  } else {
-    console.warn(`Warning: ${dir} 不存在，跳过 ${name} 的发布。`)
-  }
-})
+//   } else {
+//     console.warn(`Warning: ${dir} 不存在，跳过 ${name} 的发布。`)
+//   }
+// })

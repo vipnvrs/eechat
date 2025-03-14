@@ -80,7 +80,6 @@
       "owner": "Lucassssss",
       "repo": "updater",
       "private": false,
-      "releaseType": "release",
-      // "token": "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"
+      "releaseType": "release"
   }]
 }

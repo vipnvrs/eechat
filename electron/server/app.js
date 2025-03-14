@@ -55,6 +55,15 @@ class AppBootHook {
 
   async didReady() {
     // 应用已经启动完毕
+    try {
+      const updateDatabase = require('./scripts/updateDatabase')
+      await updateDatabase()
+      console.log('数据库初始化/更新成功')
+    } catch (error) {
+      console.error('数据库初始化/更新失败:', error)
+      // 如果数据库初始化失败，可以选择退出应用
+      // process.exit(1)
+    }
   }
 
   async serverDidReady() {
