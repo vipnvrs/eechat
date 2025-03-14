@@ -87,6 +87,27 @@ const installUpdate = async () => {
     resStr.value = JSON.stringify(error)
   }
 }
+
+const modelPath = ref("")
+const chatMessage = ref("")
+
+const initializeLlama = async () => {
+  try {
+    const res = await window.ipcRenderer.invoke("llama-initialize", modelPath.value)
+    resStr.value = JSON.stringify(res)
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
+
+const sendMessage = async () => {
+  try {
+    const res = await window.ipcRenderer.invoke("llama-chat", chatMessage.value)
+    resStr.value = res
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
 </script>
 
 <template>
@@ -102,6 +123,13 @@ const installUpdate = async () => {
         <Button @click="checkUpdate">checkUpdate</Button>
         <Button @click="downloadUpdate">downloadUpdate</Button>
         <Button @click="installUpdate">installUpdate</Button>
+      </div>
+      <div class="flex flex-col space-y-6">
+        <Input type="file" v-model="modelPath" placeholder="模型路径"></Input>
+        <Button @click="initializeLlama">初始化模型</Button>
+
+        <Input v-model="chatMessage" placeholder="输入消息"></Input>
+        <Button @click="sendMessage">发送消息</Button>
       </div>
       <div class="res">
         {{ resStr }}

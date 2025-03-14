@@ -55,7 +55,8 @@ export default defineConfig(({ command }) => {
                   'sqlite3',
                   'better-sqlite3',
                   'node-gyp',
-                  'electron'
+                  'electron',
+                  'node-llama-cpp'
                 ],
                 output: {
                   // 确保 require 语法可用

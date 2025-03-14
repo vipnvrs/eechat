@@ -5,6 +5,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'child_process'
 import { AppUpdater, registerUpdaterHandlers } from './updater'
+import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -58,6 +59,7 @@ if (!app.requestSingleInstanceLock()) {
 
 let win: BrowserWindow | null = null
 let updater: AppUpdater | null = null
+let nodeLlamaCpp:any
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
@@ -89,9 +91,9 @@ async function createWindow() {
     },
   })
 
-  win.webContents.openDevTools()
-  // 隐藏菜单栏
-  win.setMenuBarVisibility(false)
+    win.webContents.openDevTools()
+    // 隐藏菜单栏
+    win.setMenuBarVisibility(false)
 
   if (VITE_DEV_SERVER_URL) {
     // #298
@@ -116,10 +118,14 @@ async function createWindow() {
 
   
   // 初始化更新器
-  // if (app.isPackaged) {
+  if (app.isPackaged) {
     updater = new AppUpdater(win)
     registerUpdaterHandlers(updater)
-  // }
+  }
+  
+  // 保存返回的 llamaService 实例
+  nodeLlamaCpp = registerLlamaHandlers()
+  console.log('Llama handlers registered successfully');
 }
 
 // ipcMain.handle('checkUpdate', async () => {

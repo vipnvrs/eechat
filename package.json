@@ -69,6 +69,7 @@
     "markdown-it-highlightjs": "^4.2.0",
     "marked": "^15.0.7",
     "mermaid": "^11.4.1",
+    "node-llama-cpp": "^3.6.0",
     "openai": "^4.83.0",
     "pinia": "^3.0.1",
     "radix-vue": "^1.9.13",
