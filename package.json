@@ -24,7 +24,7 @@
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "build:pord": "vite build --mode production && electron-builder",
     "preview": "vite preview",
-    "release": "electron-builder --publish always",
+    "release": "node scripts/release.js",
     "update-models": "node electron/server/tools/getOpenrouterModelList.js"
   },
   "devDependencies": {
