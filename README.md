@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>EE Chat</h1>
+  <h1>eechat</h1>
   <p>🚀 Powerful locally deployed AI chat application</p>
 
   <p>
