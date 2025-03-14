@@ -60,7 +60,9 @@
     ],
     "artifactName": "${productName}-linux-${arch}-${version}.${ext}"
   },
-  "asarUnpack": [],
+  "asarUnpack": [
+    // "node_modules/sqlite3/**/*"
+  ],
   "extraResources": [{
       "from": "dist-electron/server",
       "to": "server"

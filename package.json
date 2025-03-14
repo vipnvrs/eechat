@@ -91,10 +91,5 @@
     "vue-router": "4",
     "ylru": "^1.4.0",
     "zod": "^3.24.2"
-  },
-  "build": {
-    "asarUnpack": [
-      "node_modules/sqlite3/**/*"
-    ]
   }
 }
