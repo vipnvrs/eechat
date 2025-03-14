@@ -1,14 +1,12 @@
 <template>
-  <div>
-    <div class="rounded-full bg-no-repeat object-contain bg-red-200flex items-center justify-center">
-      <div class="flex items-center justify-center bg-slate-200 rounded-full overflow-hidden" :style="{
-        width: props.size + 'px',
+  <div class="flex items-center">
+    <Avatar size="sm" class="overflow-hidden p-1 bg-slate-300 dark:bg-white dark:text-sidebar" :style="{
         height: props.size + 'px',
+        width: props.size + 'px',
       }">
-        <img class="block" v-if="props.name.length > 1" :src="src" alt="">
-        <div v-else>{{ props.name }}</div>
-      </div>
-    </div>
+      <AvatarImage :src="src"></AvatarImage>
+      <AvatarFallback>{{ props.name.charAt(0).toUpperCase() }}</AvatarFallback>
+    </Avatar>
   </div>
 </template>
 

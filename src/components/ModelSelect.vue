@@ -65,8 +65,8 @@ onMounted(() => {
       <PopoverTrigger>
         <Button asChild variant="outline" class="flex">
           <div>
-            <Icon :size="18" :name="chatStore.model.provider_id"></Icon>
-            {{ chatStore.model.name }} <ChevronsDownUp> </ChevronsDownUp>
+            <Icon :size="18" :name="chatStore.model.provider_id ? chatStore.model.provider_id : '⚙️'"></Icon>
+            {{ chatStore.model.name ? chatStore.model.name : '选择模型' }} <ChevronsDownUp> </ChevronsDownUp>
           </div>
         </Button>
       </PopoverTrigger>
@@ -115,7 +115,7 @@ onMounted(() => {
                 class="w-full items-center justify-start"
                 variant="ghost"
               >
-                <Icon :name="item.provider_id"></Icon> <span>{{ item.name }}</span>
+                <Icon :name="key !== 'local' ? item.provider_id : item.name"></Icon> <span>{{ item.name }}</span>
                 <!-- <Pin class="w-4 h-4 text-gray-300"></Pin> -->
               </Button>
             </div>
