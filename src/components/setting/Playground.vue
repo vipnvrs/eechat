@@ -88,12 +88,12 @@ const installUpdate = async () => {
   }
 }
 
-const modelPath = ref("")
-const chatMessage = ref("")
+const modelPath = ref("/Users/lucas/workspace/workspace/ai/deepseek/llmModel/DeepSeek-R1-Distill-Qwen-7B-Q3_K_L.gguf")
+const chatMessage = ref("你好")
 
 const initializeLlama = async () => {
   try {
-    const res = await window.ipcRenderer.invoke("llama-initialize", modelPath.value)
+    const res = await window.ipcRenderer.invoke("nodeLlamaCppInit", modelPath.value)
     resStr.value = JSON.stringify(res)
   } catch (error) {
     resStr.value = JSON.stringify(error)
@@ -102,8 +102,25 @@ const initializeLlama = async () => {
 
 const sendMessage = async () => {
   try {
-    const res = await window.ipcRenderer.invoke("llama-chat", chatMessage.value)
+    const res = await window.ipcRenderer.invoke("nodeLlamaCppChat", chatMessage.value)
     resStr.value = res
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
+
+const hancleQuit = async () => {
+  try {
+    const res = await window.ipcRenderer.invoke("quit")
+    resStr.value = JSON.stringify(res)
+  } catch (error) {
+    resStr.value = JSON.stringify(error)
+  }
+}
+const hancleReload = async () => {
+  try {
+    const res = await window.ipcRenderer.invoke("reload")
+    resStr.value = JSON.stringify(res)
   } catch (error) {
     resStr.value = JSON.stringify(error)
   }
@@ -114,6 +131,10 @@ const sendMessage = async () => {
   <div class="h-full space-y-6">
     <div>for dev playground</div>
     <div class="flex flex-col space-y-6">
+      <div class="space-x-2"> 
+        <Button @click="hancleQuit">quit</Button>
+        <Button @click="hancleReload">reload</Button>
+      </div>
       <Input v-model="serverPath"></Input>
       <div class="flex space-x-2">
         <Button @click="handleClickStart">startEggServer</Button>
@@ -125,7 +146,7 @@ const sendMessage = async () => {
         <Button @click="installUpdate">installUpdate</Button>
       </div>
       <div class="flex flex-col space-y-6">
-        <Input type="file" v-model="modelPath" placeholder="模型路径"></Input>
+        <Input v-model="modelPath" placeholder="模型路径"></Input>
         <Button @click="initializeLlama">初始化模型</Button>
 
         <Input v-model="chatMessage" placeholder="输入消息"></Input>

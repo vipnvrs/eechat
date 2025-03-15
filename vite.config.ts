@@ -56,7 +56,7 @@ export default defineConfig(({ command }) => {
                   'better-sqlite3',
                   'node-gyp',
                   'electron',
-                  'node-llama-cpp'
+                  'node-llama-cpp',
                 ],
                 output: {
                   // 确保 require 语法可用
@@ -67,36 +67,54 @@ export default defineConfig(({ command }) => {
                     name: 'copy-server',
                     writeBundle() {
                       const srcDir = path.join(__dirname, 'electron/server')
-                      const destDir = path.join(__dirname, 'dist-electron/server')
-                      fs.cpSync(srcDir, destDir, { 
+                      const destDir = path.join(
+                        __dirname,
+                        'dist-electron/server',
+                      )
+                      fs.cpSync(srcDir, destDir, {
                         recursive: true,
-                        filter: (src) => {
+                        filter: src => {
                           // 排除 node_modules 和日志文件
-                          return !src.includes('node_modules') 
-                            && !src.endsWith('.log')
-                            && !src.includes('run')
-                            && !src.includes('.vercel')
-                            && !src.includes('.vscode')
-                            && !src.includes('run')
-                            && !src.includes('.vercel')
-                            && !src.includes('.vscode')
-                            && !src.includes('logs')
-                            && !src.includes('npm-debug.log')
-                            && !src.includes('yarn-error.log')
-                            && !src.includes('coverage')
-                            && !src.includes('.idea')
-                            && !src.includes('.DS_Store')
-                            && !src.endsWith('.sw')
-                            && !src.endsWith('.un~')
-                            && !src.includes('typings')
-                            && !src.includes('.nyc_output')
-                            && !src.includes('database') 
-                            && !src.endsWith('.db')
-                        }
+                          return (
+                            !src.includes('node_modules') &&
+                            !src.endsWith('.log') &&
+                            !src.includes('run') &&
+                            !src.includes('.vercel') &&
+                            !src.includes('.vscode') &&
+                            !src.includes('run') &&
+                            !src.includes('.vercel') &&
+                            !src.includes('.vscode') &&
+                            !src.includes('logs') &&
+                            !src.includes('npm-debug.log') &&
+                            !src.includes('yarn-error.log') &&
+                            !src.includes('coverage') &&
+                            !src.includes('.idea') &&
+                            !src.includes('.DS_Store') &&
+                            !src.endsWith('.sw') &&
+                            !src.endsWith('.un~') &&
+                            !src.includes('typings') &&
+                            !src.includes('.nyc_output') &&
+                            !src.includes('database') &&
+                            !src.endsWith('.db')
+                          )
+                        },
                       })
-                    }
-                  }
-                ]
+                    },
+                  },
+                  {
+                    name: 'copy-llama-cpp',
+                    writeBundle() {
+                      const srcDir = path.join(__dirname, 'electron/main/bin')
+                      const destDir = path.join(
+                        __dirname,
+                        'dist-electron/main/bin',
+                      )
+                      fs.cpSync(srcDir, destDir, {
+                        recursive: true,
+                      })
+                    },
+                  },
+                ],
               },
             },
           },

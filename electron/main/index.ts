@@ -6,6 +6,7 @@ import os from 'node:os'
 import { spawn } from 'child_process'
 import { AppUpdater, registerUpdaterHandlers } from './updater'
 import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
+import { Playground } from './playground/playground'
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -16,14 +17,15 @@ if (!process.env.NODE_ENV) {
 
 const log = require('electron-log')
 log.transports.file.level = 'debug'
-log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs/main.log')
+log.transports.file.resolvePathFn = () =>
+  path.join(app.getPath('userData'), 'logs/main.log')
 log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
 // Object.assign(console, log.functions)
 
 // 捕获未处理的异常
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   log.error('未捕获的异常:', error)
-});
+})
 
 // The built directory structure
 //
@@ -59,7 +61,7 @@ if (!app.requestSingleInstanceLock()) {
 
 let win: BrowserWindow | null = null
 let updater: AppUpdater | null = null
-let nodeLlamaCpp:any
+// let nodeLlamaCpp: any
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
@@ -91,9 +93,9 @@ async function createWindow() {
     },
   })
 
-    win.webContents.openDevTools()
-    // 隐藏菜单栏
-    win.setMenuBarVisibility(false)
+  win.webContents.openDevTools()
+  // 隐藏菜单栏
+  win.setMenuBarVisibility(false)
 
   if (VITE_DEV_SERVER_URL) {
     // #298
@@ -116,62 +118,50 @@ async function createWindow() {
   })
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 
-  
   // 初始化更新器
   if (app.isPackaged) {
     updater = new AppUpdater(win)
     registerUpdaterHandlers(updater)
   }
-  
   // 保存返回的 llamaService 实例
-  nodeLlamaCpp = registerLlamaHandlers()
-  console.log('Llama handlers registered successfully');
+  const nodeLlamaCpp = registerLlamaHandlers()
+  console.log('Llama handlers registered successfully')
 }
 
-// ipcMain.handle('checkUpdate', async () => {
-//   try {
-//     console.log('checkUpdate');
-    
-//   } catch (error) {
-//     console.error('检查更新失败:', error)
-//     return { success: false, message: error.message || '检查更新失败' }
-//   }
-// })
-
-const egg = require('egg')
 let appServer: any = null
+const egg = require('egg')
 async function startEggServer(pathArg): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     const isDev = process.env.NODE_ENV !== 'production'
-    log.info('isDev:', isDev);
-    const baseDir = isDev 
-      ? path.join(__dirname, '../../electron/server') 
+    log.info('isDev:', isDev)
+    const baseDir = isDev
+      ? path.join(__dirname, '../../electron/server')
       : path.join(process.resourcesPath, 'app', '../server')
     log.info('baseDir:', baseDir)
     try {
       appServer = await egg.start({
         baseDir: baseDir,
-      });
+      })
       appServer.listen(7002)
       log.info(`Server started on ${7002}`)
       resolve()
     } catch (error) {
       reject(error)
     }
-  });
+  })
 }
 async function stopEggServer(): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      console.log(appServer);
-      
+      console.log(appServer)
+
       await appServer.close()
       console.log(`Server stoped`)
     } catch (error) {
       log.error(error)
       reject(error)
     }
-  });
+  })
 }
 
 const initUpdate = () => {
@@ -189,6 +179,7 @@ app.whenReady().then(async () => {
     createWindow()
     await startEggServer('')
     initUpdate()
+    const playground = new Playground(win)
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
     app.quit()
@@ -197,14 +188,10 @@ app.whenReady().then(async () => {
 
 // 在应用退出时关闭 EggJS 进程
 app.on('window-all-closed', () => {
-  win = null
-  if (process.platform !== 'darwin') {
-    // 关闭 EggJS 进程
-    if (global.eggProcess) {
-      global.eggProcess.kill()
-    }
-    app.quit()
-  }
+  // win = null
+  console.log('window-all-closed')
+  appServer.close()
+  app.quit()
 })
 
 app.on('second-instance', () => {
@@ -294,6 +281,7 @@ ipcMain.handle('stopEggServer', async (_, pathArg) => {
 
 app.on('render-process-gone', (event, webContents, details) => {
   console.error('渲染进程崩溃:', details.reason)
+  app.exit()
 })
 
 // 添加更详细的错误处理

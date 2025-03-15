@@ -18,9 +18,10 @@
     // ],
     "target": [
       {
-        "target": "zip",
+        // "target": "zip",
+        "target": "dmg",
         "arch": [
-          "x64",
+          // "x64",
           "arm64"
         ]
       }
@@ -69,7 +70,12 @@
     }, {
       "from": "node_modules",
       "to": "server/node_modules"
-  }],
+    }, {
+      "from": "dist-electron/main/bin",
+      // "to": "main/bin"
+      "to": "bin"
+    }
+  ],
   "releaseInfo": {
     "releaseNotes": "更新日志： \n1.使用新的地址",
     "releaseDate": "2025-3-10"

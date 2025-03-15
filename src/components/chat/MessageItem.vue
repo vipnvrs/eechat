@@ -35,7 +35,7 @@ const sanitizedContent = computed(() => processor.processSync(props.message).toS
 </script>
 
 <template>
-  <div class="last:min-h-[calc(100dvh-258px)]">
+  <div class="last:min-h-[calc(100dvh-268px)]">
     <div
       v-if="message == ''"
       class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
