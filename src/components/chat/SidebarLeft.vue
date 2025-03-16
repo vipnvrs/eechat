@@ -164,16 +164,16 @@ const confirmDeleteSession = async () => {
         handleSessionChange(sessions.value[0])
       }
       toast({
-        title: '删除成功',
-        description: `会话 "${sessionToDelete.value.title}" 已被删除`
+        title: t('chat.sidebar.deleteSuccess'),
+        description: t('chat.sidebar.deleteSuccessDesc', { title: sessionToDelete.value.title })
       })
     }
   } catch (error) {
     console.error('Failed to delete session:', error)
     toast({
-      title: '删除失败',
+      title: t('chat.sidebar.deleteFailed'),
       variant: 'destructive',
-      description: (error as Error).message || '未知错误'
+      description: (error as Error).message || t('chat.sidebar.unknownError')
     })
   } finally {
     deleteLoading.value = false

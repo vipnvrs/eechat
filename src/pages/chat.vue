@@ -252,10 +252,10 @@ onMounted(() => {
         <span class="sr-only">{{ t('chat.scrollToBottom') }}</span>
       </Button>
       <ScrollArea ref="scrollAreaRef" class="h-full w-full px-6 flex-1">
-        <div class="h-[300px] overflow-hidden ml--4">
+        <!-- <div class="h-[300px] overflow-hidden ml--4"> -->
           <!-- <img src="https://www.notion.so/images/page-cover/woodcuts_1.jpg" alt=""> -->
-          <img src="/photo.jpeg" alt="">
-        </div>
+          <!-- <img src="/photo.jpeg" alt=""> -->
+        <!-- </div> -->
         <!-- <ScrollArea
         class="h-full w-full px-4 flex-1 bg-slate-200 dark:bg-[#282C34]"
       > -->
@@ -265,7 +265,7 @@ onMounted(() => {
       <div
         class="sticky bottom-0 h-[120px] content-center shrink-0 items-center gap-2 border-b bg-background"
       >
-        <ChatInput :loading="loading" @send="sendMsg" :placeholder="t('chat.inputPlaceholder')" />
+        <ChatInput :loading="loading" @sendMsg="sendMsg" :placeholder="t('chat.inputPlaceholder')" />
       </div>
     </div>
     <SidebarProvider

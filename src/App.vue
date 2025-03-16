@@ -7,6 +7,8 @@ import Layout from "@/components/Layout.vue"
 import { llmApi, ollamaApi } from "@/api/request"
 import { LLMProvider, ModelProvider } from "@/types/llm"
 import { useRouter } from "vue-router"
+import { useColorMode } from '@vueuse/core'
+const mode = useColorMode()
 
 const modelStore = useModelStore()
 const envStore = useEnvStore()

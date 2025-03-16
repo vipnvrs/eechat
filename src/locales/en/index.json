@@ -9,8 +9,8 @@
     "timeGroup": {
       "today": "Today",
       "yesterday": "Yesterday",
-      "within7days": "Within 7 days",
-      "within30days": "Within 30 days",
+      "within7days": "Last 7 days",
+      "within30days": "Last 30 days",
       "monthFormat": "MMMM",
       "yearMonthFormat": "MMMM YYYY"
     }
@@ -65,7 +65,11 @@
       "confirmDeleteDesc": "This action will delete the chat \"{title}\", this cannot be undone.",
       "deleting": "Deleting...",
       "confirmDeleteBtn": "Confirm Delete",
-      "newChat": "New Chat"
+      "newChat": "New Chat",
+      "deleteSuccess": "Delete Success",
+      "deleteSuccessDesc": "Chat \"{title}\" has been deleted",
+      "deleteFailed": "Delete Failed",
+      "unknownError": "Unknown Error"
     }
   },
 

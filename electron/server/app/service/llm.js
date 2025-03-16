@@ -348,10 +348,11 @@ class LLMService extends BaseLLMService {
     const { ctx } = this
     const chatService = ctx.service.chat
     try {
-      let service= this.getProviderService(provider)
+      let service = this.getProviderService(provider)
       const stream = await service.chat(model, messages, config)
       // 使用 ChatService 的 handleStream 处理流数据
       await chatService.handleStream(stream, ctx, messages, sessionId, model)
+      // todo: 这里的错误没有handle到
     } catch (error) {
       console.error('模型请求失败:', error)
       await chatService.handleStreamError(error, ctx, sessionId)

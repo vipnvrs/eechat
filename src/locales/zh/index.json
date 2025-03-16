@@ -65,7 +65,11 @@
       "confirmDeleteDesc": "此操作将删除会话 \"{title}\"，删除后无法恢复。",
       "deleting": "删除中...",
       "confirmDeleteBtn": "确认删除",
-      "newChat": "新对话"
+      "newChat": "新对话",
+      "deleteSuccess": "删除成功",
+      "deleteSuccessDesc": "会话 \"{title}\" 已被删除",
+      "deleteFailed": "删除失败",
+      "unknownError": "未知错误"
     }
   },
   "discover": {
