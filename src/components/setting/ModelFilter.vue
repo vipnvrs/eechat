@@ -1,11 +1,14 @@
 // src/components/setting/ModelFilter.vue
 <script setup lang="ts">
 import { ref, computed, watchEffect } from "vue"
+import { useI18n } from "vue-i18n"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-vue-next"
 import { modelsData } from "@/lib/models"
 import { useOllamaStore } from "@/stores/ollama"
+
+const { t } = useI18n()
 
 const ollamaStore = useOllamaStore()
 
@@ -117,8 +120,8 @@ const handleSearchChange = (value: string) => {
       :model-value="modelValue"
       @update:model-value="(values) => handleFilterChange(values as FilterOption[])"
     >
-      <ToggleGroupItem value="all">热门</ToggleGroupItem>
-      <ToggleGroupItem value="installed">已安装</ToggleGroupItem>
+      <ToggleGroupItem value="all">{{ t('settings.modelFilter.popular') }}</ToggleGroupItem>
+      <ToggleGroupItem value="installed">{{ t('settings.modelFilter.installed') }}</ToggleGroupItem>
       <ToggleGroupItem value="llm">LLM</ToggleGroupItem>
       <ToggleGroupItem value="vision">Vision</ToggleGroupItem>
       <ToggleGroupItem value="embedding">Embedding</ToggleGroupItem>
@@ -131,7 +134,7 @@ const handleSearchChange = (value: string) => {
         type="text"
         :model-value="searchQuery"
         @update:model-value="(payload: string | number) => handleSearchChange(payload.toString())"
-        placeholder="deepseek..."
+        :placeholder="t('settings.modelFilter.searchPlaceholder')"
         class="pl-10 w-[220px]"
       />
       <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">

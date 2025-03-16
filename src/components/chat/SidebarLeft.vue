@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Label } from '@/components/ui/label'
+import { useI18n } from 'vue-i18n'
 import {
   Sidebar,
   SidebarContent,
@@ -141,6 +142,7 @@ const handleSessionChange = session => {
 }
 
 // 删除会话
+const { t } = useI18n()
 const { toast } = useToast()
 const deleteLoading = ref(false)
 const sessionToDelete = ref<ChatSession | null>(null)
@@ -198,17 +200,17 @@ const getTimeGroup = (date: string) => {
   const targetDate = dayjs(date)
   const diffDays = now.diff(targetDate, 'day')
 
-  if (diffDays === 0) return '今天'
-  if (diffDays === 1) return '昨天'
-  if (diffDays <= 7) return '7天内'
-  if (diffDays <= 30) return '30天内'
+  if (diffDays === 0) return t('common.timeGroup.today')
+  if (diffDays === 1) return t('common.timeGroup.yesterday')
+  if (diffDays <= 7) return t('common.timeGroup.within7days')
+  if (diffDays <= 30) return t('common.timeGroup.within30days')
 
   // 如果是不同年份，显示完整年月
   if (targetDate.year() !== now.year()) {
-    return targetDate.format('YYYY年M月')
+    return targetDate.format(t('common.timeGroup.yearMonthFormat'))
   }
   // 同年不同月
-  return targetDate.format('M月')
+  return targetDate.format(t('common.timeGroup.monthFormat'))
 }
 
 // 对会话列表进行分组
@@ -234,16 +236,16 @@ const groupedSessions = computed(() => {
   <AlertDialog :open="!!sessionToDelete" @update:open="">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>确认删除会话?</AlertDialogTitle>
+        <AlertDialogTitle>{{ t('chat.sidebar.confirmDelete') }}</AlertDialogTitle>
         <AlertDialogDescription>
-          此操作将删除会话 "{{ sessionToDelete?.title }}"，删除后无法恢复。
+          {{ t('chat.sidebar.confirmDeleteDesc', { title: sessionToDelete?.title }) }}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>取消</AlertDialogCancel>
+        <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
         <AlertDialogAction :disabled="deleteLoading" @click="confirmDeleteSession">
           <Loader2 v-if="deleteLoading" class="mr-2 h-4 w-4 animate-spin" />
-          {{ deleteLoading ? "删除中..." : "确认删除" }}
+          {{ deleteLoading ? t('chat.sidebar.deleting') : t('chat.sidebar.confirmDeleteBtn') }}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
@@ -252,11 +254,12 @@ const groupedSessions = computed(() => {
     <SidebarHeader class="gap-3.5 border-b p-4 h-[64px]">
       <div class="flex w-full items-center justify-between">
         <div class="text-base font-medium text-foreground">
-          {{ activeItem.title }}
+          <!-- {{ activeItem.title }} -->
+            {{ t('chat.sidebar.chat') }}
         </div>
         <Label class="flex items-center gap-2 text-sm">
           <Button size="sm" class="font-bold" @click="createNewChat">
-            <Plus class="w-4 h-4" />新对话
+            <Plus class="w-4 h-4" />{{ t('chat.sidebar.newChat') }}
           </Button>
         </Label>
       </div>
@@ -307,7 +310,7 @@ const groupedSessions = computed(() => {
                         @click.stop="handleRemoveSession(item)"
                         class="text-red-600 hover:text-red-500"
                       >
-                        <Trash2></Trash2> 删除
+                        <Trash2></Trash2> {{ t('common.delete') }}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

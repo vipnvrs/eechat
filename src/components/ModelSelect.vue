@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, reactive, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { useModelStore } from "@/stores/model"
 import { useChatStore } from "@/stores/chatStore"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -16,6 +17,7 @@ import { ChevronsDownUp, SlidersHorizontal, ArrowUpDown, Pin, Cog } from "lucide
 import Icon from "@/components/Icon.vue"
 const modelStore = useModelStore()
 const chatStore = useChatStore()
+const { t } = useI18n()
 
 const groupedModels = computed(() => {
   // 通过展开 Map 的值来强制追踪内部变化
@@ -66,7 +68,7 @@ onMounted(() => {
         <Button asChild variant="outline" class="flex">
           <div>
             <Icon :size="18" :name="chatStore.model.provider_id ? chatStore.model.provider_id : '⚙️'"></Icon>
-            {{ chatStore.model.name ? chatStore.model.name : '选择模型' }} <ChevronsDownUp> </ChevronsDownUp>
+            {{ chatStore.model.name ? chatStore.model.name : t('settings.modelSelect.selectModel') }} <ChevronsDownUp> </ChevronsDownUp>
           </div>
         </Button>
       </PopoverTrigger>
@@ -76,7 +78,7 @@ onMounted(() => {
           <!-- <ScrollArea class="max-h-[400px] w-full"> -->
           <div class="" v-for="(value, key) in groupedModels" :key="key">
             <div class="text-sm px-4 py-2 text-gray-400 flex items-center">
-              <div>{{ key === "local" ? "本地模型" : value.name }}</div>
+              <div>{{ key === "local" ? t('settings.modelSelect.localModel') : value.name }}</div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -89,7 +91,7 @@ onMounted(() => {
                       <Cog></Cog> </Button
                   ></TooltipTrigger>
                   <TooltipContent>
-                    <p>点击去配置模型</p>
+                    <p>{{ t('settings.modelSelect.clickToConfig') }}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -97,11 +99,11 @@ onMounted(() => {
             <!-- model -->
             <div v-if="key === 'local' && value.models.length == 0">
               <div class="ml-4 text-sm">
-                未找到本地模型，<Button
+                {{ t('settings.modelSelect.noLocalModel') }}<Button
                   variant="link"
                   class="p-0 text-blue-500"
                   @click="handleConfigModel('local')"
-                  >去配置</Button
+                  >{{ t('settings.modelSelect.configureModel') }}</Button
                 >
               </div>
             </div>

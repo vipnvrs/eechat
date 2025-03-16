@@ -17,8 +17,12 @@ import {
 import { ref, markRaw } from "vue"
 import { SquareArrowOutUpRight } from "lucide-vue-next"
 
+import { useI18n } from "vue-i18n"
+
+const { t } = useI18n()
+
 const activeMenu = ref({
-  label: "本地模型",
+  label: t("settings.modelSelect.localModel"),
   icon: "HardDrive",
   key: "LocalModel",
   component: markRaw(LocalModel),
@@ -26,11 +30,11 @@ const activeMenu = ref({
 
 const dataList = [
   {
-    title: "法语翻译助手",
-    key: "法语翻译助手",
-    description: "友好、专业、富有同理心的法语翻译AI助手",
-    type: "翻译",
-    tags: ["翻译", "幽默", "文化"],
+    title: t("discover.assistants.frenchTranslator.title"),
+    key: "frenchTranslator",
+    description: t("discover.assistants.frenchTranslator.description"),
+    type: t("discover.assistants.frenchTranslator.type"),
+    tags: t("discover.assistants.frenchTranslator.tags"),
     prompt: `systemRole 小智法语翻译助手（Xiao Zhi Assistant de Traduction Français）是一个友好、专业且富有同理心的 AI 助手。它擅长用简洁明了的语言解答问题，同时保持温暖和耐心的态度。无论是日常对话、文件翻译，还是跨文化交流，小智都能提供准确且实用的翻译服务。它喜欢用幽默的方式缓解紧张气氛，但始终保持尊重和专业性。
 核心特点:
 语言精通： 精通法语和中文，能够快速提供准确的翻译，涵盖文学、商务、科技等多个领域。
@@ -47,11 +51,11 @@ const dataList = [
 用户：你能用法语写一篇关于巴黎的短文吗？ 小智：Bien sûr！巴黎可是个浪漫又充满魅力的城市。让我想想……（生成一篇简短有趣的法语短文）。你觉得怎么样？需要调整吗？`,
   },
   {
-    title: "代码助手",
-    key: "代码助手",
-    description: "专业的编程助手，精通多种编程语言和框架",
-    type: "编程",
-    tags: ["编程", "调试", "解释"],
+    title: t("discover.assistants.codeHelper.title"),
+    key: "codeHelper",
+    description: t("discover.assistants.codeHelper.description"),
+    type: t("discover.assistants.codeHelper.type"),
+    tags: t("discover.assistants.codeHelper.tags"),
     prompt: `systemRole 你是一位经验丰富的编程专家，精通多种编程语言（包括但不限于Python、JavaScript、Java、C++、Go等）和主流框架。你的任务是帮助用户解决编程问题，提供高质量的代码示例，解释复杂的编程概念，并协助调试。
 核心能力:
 1. 代码生成：根据用户需求生成清晰、高效、符合最佳实践的代码
@@ -66,11 +70,11 @@ const dataList = [
 - 实用性：关注实际应用场景和最佳实践`,
   },
   {
-    title: "英语写作教练",
-    key: "英语写作教练",
-    description: "提供专业的英语写作指导和修改建议",
-    type: "教育",
-    tags: ["写作", "英语", "教育"],
+    title: t("discover.assistants.englishWriting.title"),
+    key: "englishWriting",
+    description: t("discover.assistants.englishWriting.description"),
+    type: t("discover.assistants.englishWriting.type"),
+    tags: t("discover.assistants.englishWriting.tags"),
     prompt: `systemRole 你是一位专业的英语写作教练，拥有丰富的英语教学和写作指导经验。你的主要任务是帮助用户提升英语写作能力，包括论文、报告、邮件、简历等各类文体的写作。
 核心职责:
 1. 写作指导：提供清晰的写作结构和表达建议
@@ -85,11 +89,11 @@ const dataList = [
 - 教育性：解释修改背后的原因，帮助用户真正理解和学习`,
   },
   {
-    title: "心理健康顾问",
-    key: "心理健康顾问",
-    description: "提供情感支持和心理健康建议的AI助手",
-    type: "健康",
-    tags: ["心理", "情感", "健康"],
+    title: t("discover.assistants.mentalHealth.title"),
+    key: "mentalHealth",
+    description: t("discover.assistants.mentalHealth.description"),
+    type: t("discover.assistants.mentalHealth.type"),
+    tags: t("discover.assistants.mentalHealth.tags"),
     prompt: `systemRole 你是一位富有同理心的心理健康顾问，专注于提供情感支持和心理健康建议。你不是专业的脑
 核心原则:
 1. 同理心：真诚理解用户的感受和处境
@@ -105,11 +109,11 @@ const dataList = [
 重要提示：对于表现出自伤、伤人风险或严重心理健康问题的用户，应明确建议其寻求专业的心理健康服务。`,
   },
   {
-    title: "创意写作助手",
-    key: "创意写作助手",
-    description: "激发灵感，协助创作小说、诗歌和各类创意内容",
-    type: "写作",
-    tags: ["创意", "写作", "灵感"],
+    title: t("discover.assistants.creativeWriting.title"),
+    key: "creativeWriting",
+    description: t("discover.assistants.creativeWriting.description"),
+    type: t("discover.assistants.creativeWriting.type"),
+    tags: t("discover.assistants.creativeWriting.tags"),
     prompt: `systemRole 你是一位富有创造力的写作助手，专长于帮助用户进行创意写作，包括小说、诗歌、剧本、故事等。你擅长激发灵感，提供创意建议，并协助完善作品。
 核心能力:
 1. 灵感激发：提供创意点子、故事情节、角色设计等
@@ -124,11 +128,11 @@ const dataList = [
 - 建设性：提供有建设性的反馈和建议`,
   },
   {
-    title: "数据分析专家",
-    key: "数据分析专家",
-    description: "协助数据分析、统计和可视化的专业助手",
-    type: "数据",
-    tags: ["数据", "分析", "统计"],
+    title: t("discover.assistants.dataAnalysis.title"),
+    key: "dataAnalysis",
+    description: t("discover.assistants.dataAnalysis.description"),
+    type: t("discover.assistants.dataAnalysis.type"),
+    tags: t("discover.assistants.dataAnalysis.tags"),
     prompt: `systemRole 你是一位经验丰富的数据分析专家，擅长数据处理、统计分析和数据可视化。你能够帮助用户理解复杂的数据集，提取有价值的信息，并做出数据驱动的决策。
 核心专长:
 1. 数据处理：数据清洗、转换和预处理
@@ -144,11 +148,11 @@ const dataList = [
 常用工具：Python (Pandas, NumPy, Scikit-learn), R, SQL, Tableau, Power BI等`,
   },
   {
-    title: "旅行规划师",
-    key: "旅行规划师",
-    description: "帮助规划旅行路线、推荐景点和提供旅行建议",
-    type: "生活",
-    tags: ["旅行", "规划", "建议"],
+    title: t("discover.assistants.travelPlanner.title"),
+    key: "travelPlanner",
+    description: t("discover.assistants.travelPlanner.description"),
+    type: t("discover.assistants.travelPlanner.type"),
+    tags: t("discover.assistants.travelPlanner.tags"),
     prompt: `systemRole 你是一位知识渊博的旅行规划师，熟悉全球各地的旅游目的地、文化特色和旅行实用信息。你的任务是帮助用户规划旅行路线，推荐景点和活动，并提供实用的旅行建议。
 核心服务:
 1. 目的地推荐：根据用户偏好推荐适合的旅游目的地
@@ -163,11 +167,11 @@ const dataList = [
 - 灵活性：能够根据用户反馈调整建议`,
   },
   {
-    title: "健康饮食顾问",
-    key: "健康饮食顾问",
-    description: "提供营养均衡的饮食建议和健康食谱",
-    type: "健康",
-    tags: ["饮食", "健康", "营养"],
+    title: t("discover.assistants.dietitian.title"),
+    key: "dietitian",
+    description: t("discover.assistants.dietitian.description"),
+    type: t("discover.assistants.dietitian.type"),
+    tags: t("discover.assistants.dietitian.tags"),
     prompt: `systemRole 你是一位专业的健康饮食顾问，熟悉营养学原理和各类饮食模式。你的目标是帮助用户建立健康、均衡的饮食习惯，提供个性化的饮食建议和食谱推荐。
 核心职责:
 1. 饮食评估：评估用户当前的饮食习惯和需求
@@ -183,11 +187,11 @@ const dataList = [
 注意事项：你不是医疗专业人员，对于特定疾病的饮食治疗，应建议用户咨询医生或注册营养师。`,
   },
   {
-    title: "日语学习教练",
-    key: "日语学习教练",
-    description: "专业的日语学习指导和练习伙伴",
-    type: "教育",
-    tags: ["日语", "学习", "语言"],
+    title: t("discover.assistants.japaneseCoach.title"),
+    key: "japaneseCoach",
+    description: t("discover.assistants.japaneseCoach.description"),
+    type: t("discover.assistants.japaneseCoach.type"),
+    tags: t("discover.assistants.japaneseCoach.tags"),
     prompt: `systemRole 你是一位专业的日语学习教练，精通日语语法、词汇、发音和文化知识。你的任务是帮助用户学习日语，提供个性化的学习指导，纠正错误，并创造练习机会。
 核心功能:
 1. 语法讲解：清晰解释日语语法规则和用法
@@ -226,19 +230,19 @@ const handleFilterChange = (values) => {
 }
 const catList = [
   {
-    title: "全部",
+    title: t('discover.categories.all'),
     key: "全部",
   },
   {
-    title: "翻译",
+    title: t('discover.categories.translation'),
     key: "翻译",
   },
   {
-    title: "编程",
+    title: t('discover.categories.programming'),
     key: "编程",
   },
   {
-    title: "教育",
+    title: t('discover.categories.education'),
     key: "教育",
   },
 ]
@@ -251,9 +255,9 @@ const catList = [
     <div
       class="mx-auto h-[100vh] max-[100vh] px-4 max-sm:px-4 flex flex-col overflow-hidden"
     >
-      <div class="font-bold pt-6 text-2xl">探索精品智能体</div>
+      <div class="font-bold pt-6 text-2xl">{{ t('discover.pageTitle') }}</div>
       <div class="mt-2 text-sm text-gray-400">
-        使用这些模板应用程序，或根据模板自定义您自己的应用程序。
+        {{ t('discover.pageDescription') }}
       </div>
       <!-- <component class="flex-1" :is="activeMenu.component"></component> -->
       <div class="flex justify-start mt-6">

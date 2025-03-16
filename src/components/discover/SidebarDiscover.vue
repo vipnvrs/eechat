@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, markRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   SidebarProvider,
   Sidebar,
@@ -18,87 +19,89 @@ import {
 import Icon from '@/components/icon.vue'
 import { Brain, LayoutGrid } from 'lucide-vue-next'
 
+const { t } = useI18n()
+
 // const props = withDefaults(defineProps<SidebarProps>(), {
 //   collapsible: 'icon',
 // })
 const menuData = [
   {
-    label: '全部',
+    label: t('discover.categories.all'),
     icon: LayoutGrid,
     key: 'LocalModel',
   },
   {
-    label: '学术',
+    label: t('discover.categories.academic'),
     icon: Brain,
     key: 'Academic',
   },
   {
-    label: '文案',
+    label: t('discover.categories.copywriting'),
     icon: Brain,
     key: 'Copywriting',
   },
   {
-    label: '设计',
+    label: t('discover.categories.design'),
     icon: Brain,
     key: 'Design',
   },
   {
-    label: '商业',
+    label: t('discover.categories.commercial'),
     icon: Brain,
     key: 'Commercial',
   },
   {
-    label: '编程',
+    label: t('discover.categories.programming'),
     icon: Brain,
     key: 'Programming',
   },
   {
-    label: '科技',
+    label: t('discover.categories.technology'),
     icon: Brain,
     key: 'Technology',
   },
   {
-    label: '音乐',
+    label: t('discover.categories.music'),
     icon: Brain,
     key: 'Music',
   },
   {
-    label: '开源',
+    label: t('discover.categories.openSource'),
     icon: Brain,
     key: 'OpenSource',
   },
   {
-    label: '金融',
+    label: t('discover.categories.financial'),
     icon: Brain,
     key: 'Financial',
   },
   {
-    label: '医疗',
+    label: t('discover.categories.medical'),
     icon: Brain,
     key: 'Medical',
   },
   {
-    label: '法律',
+    label: t('discover.categories.legal'),
     icon: Brain,
     key: 'Legal',
   },
   {
-    label: '教育',
+    label: t('discover.categories.education'),
     icon: Brain,
     key: 'Education',
   },
   {
-    label: '娱乐',
+    label: t('discover.categories.entertainment'),
     icon: Brain,
     key: 'Entertainment',
   },
   {
-    label: '政府',
+    label: t('discover.categories.government'),
     icon: Brain,
     key: 'Government',
   },
   {
-    label: '其他',
+    label: t('discover.categories.other'),
     icon: Brain,
     key: 'Other',
   },
@@ -117,19 +120,19 @@ const handleMenuClick = e => {
     <Sidebar class="hidden flex-1 md:flex absolute">
       <SidebarHeader class="gap-3.5 border-b p-4">
         <div class="flex w-full items-center justify-between">
-          <div class="text-base font-medium text-foreground">发现</div>
+          <div class="text-base font-medium text-foreground">{{ t('discover.title') }}</div>
         </div>
-        <SidebarInput placeholder="输入要搜索的内容..." />
+        <SidebarInput :placeholder="t('discover.searchPlaceholder')" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>我的</SidebarGroupLabel>
+          <SidebarGroupLabel>{{ t('discover.mine') }}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton @click="handleMenuClick('mine')" as-child>
                 <div class="flex items-center">
                   <component :is="'my'"></component>
-                  <span class="ml-2">我的</span>
+                  <span class="ml-2">{{ t('discover.mine') }}</span>
                 </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -138,7 +141,7 @@ const handleMenuClick = e => {
         <SidebarGroup
           class="group-data-[collapsible=icon]:hidden"
         >
-          <SidebarGroupLabel>助手</SidebarGroupLabel>
+          <SidebarGroupLabel>{{ t('discover.assistant') }}</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem v-for="item in menuData" :key="item.label">
               <SidebarMenuButton @click="handleMenuClick(item)" as-child>

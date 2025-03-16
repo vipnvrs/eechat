@@ -31,8 +31,9 @@ import { h, ref, onMounted, computed } from 'vue'
 import router from '@/router'
 import { useRoute } from 'vue-router'
 import { useEnvStore } from "@/stores/env"
+import { useI18n } from 'vue-i18n'
 const envStore = useEnvStore()
-
+const { t } = useI18n()
 const route = useRoute()
 
 const data = {
@@ -43,19 +44,19 @@ const data = {
   },
   navMain: [
     {
-      title: '对话',
+      title: t('chat.newChat'),
       url: '/',
       icon: Inbox,
       isActive: false,
     },
     {
-      title: '智能体',
+      title: t('chat.discover.title'),
       url: 'discover',
       icon: Compass,
       isActive: false,
     },
     {
-      title: '设置',
+      title: t('chat.settings.title'),
       url: 'setting',
       icon: SlidersHorizontal,
       isActive: false,

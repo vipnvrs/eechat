@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, reactive, computed } from "vue"
+import { useI18n } from "vue-i18n"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -51,9 +52,10 @@ const loading = ref(false)
 const ollamaStore = useOllamaStore()
 const modelStore = useModelStore()
 const { toast } = useToast()
+const { t } = useI18n()
 
 const ollamaState = reactive({
-  error: "服务未响应",
+  error: "",
   installed: false,
   running: false,
   checked: false,
@@ -122,8 +124,8 @@ const handlePullModel = async (model: string) => {
             ollamaStore.clearDownloadStatus(model)
             await listModel() // 刷新模型列表
             toast({
-              title: `${model} 安装成功`,
-              description: "模型已安装成功，快去使用吧。",
+              title: t('settings.localModel.installSuccess', { model }),
+              description: t('settings.localModel.installSuccessDesc'),
             })
             break
           }
@@ -178,8 +180,8 @@ const deleteModel = async (model: string) => {
     loading.value = true
     const res = await ollamaApi.removeModel(model)
     toast({
-      title: "删除成功",
-      description: `模型 ${model} 已被删除`,
+      title: t('settings.localModel.confirmDelete'),
+      description: t('settings.localModel.confirmDeleteDesc', { model }),
     })
     // 删除成功后，刷新本地模型列表
     await listModel()
@@ -187,9 +189,9 @@ const deleteModel = async (model: string) => {
     console.log(error)
 
     toast({
-      title: "删除失败",
+      title: t('common.delete') + t('common.loading'),
       variant: "destructive",
-      description: (error as Error).message || "未知错误",
+      description: (error as Error).message || t('settings.localModel.serviceNotResponding'),
     })
     // console.error('删除模型失败:', error)
   } finally {
@@ -206,8 +208,8 @@ const handleInstall = async () => {
   await window.ipcRenderer.invoke("open-url", downloadUrl.value)
   showInstallDialog.value = false
   toast({
-    title: "开始下载",
-    description: "请完成安装后重启本软件以检查安装状态",
+    title: t('settings.localModel.downloadOllama'),
+    description: t('settings.localModel.downloadOllamaDesc'),
   })
 }
 </script>
@@ -229,7 +231,7 @@ const handleInstall = async () => {
       <div class="font-bold flex items-center space-x-2">
         <template v-if="ollamaState.running">
           <div class="rounded-full w-2 h-2 mr-3 bg-green-500"></div>
-          本地服务运行正常
+          {{ t('settings.localModel.serviceRunningNormal') }}
         </template>
         <template v-if="!ollamaState.running && ollamaState.installed">
           <div class="rounded-full w-2 h-2 mr-3 bg-yellow-500"></div>
@@ -246,26 +248,26 @@ const handleInstall = async () => {
         </div>
       </div>
       <div>
-        <Button v-if="!ollamaState.checked" @click="getOllamaState">刷新状态</Button>
+        <Button v-if="!ollamaState.checked" @click="getOllamaState">{{ t('settings.localModel.refreshStatus') }}</Button>
         <Button v-if="ollamaState.running" @click="stopOllama"
-          >停止模型管理器
+          >{{ t('settings.localModel.stopModelManager') }}
           <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
         </Button>
         <Button
           v-if="!ollamaState.installed && ollamaState.checked"
           @click="installOllama"
-          >安装模型管理器
+          >{{ t('settings.localModel.installModelManager') }}
           <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
         </Button>
         <Button v-if="!ollamaState.running && ollamaState.installed" @click="startOllama"
-          >启动模型管理器
+          >{{ t('settings.localModel.startModelManager') }}
           <LoaderCircle v-if="loading" class="animate-spin w-4 h-4 ml-2"></LoaderCircle>
         </Button>
       </div>
     </div>
     <div class="flex justify-between items-center pt-2">
-      <div class="font-bold">模型管理</div>
-      <Button variant="link" class="text-gray-400">更多模型?</Button>
+      <div class="font-bold">{{ t('settings.localModel.modelManagement') }}</div>
+      <Button variant="link" class="text-gray-400">{{ t('settings.localModel.moreModels') }}</Button>
     </div>
 
     <ModelFilter
@@ -292,7 +294,7 @@ const handleInstall = async () => {
                 variant="outline"
                 class="border-green-500 text-green-500"
               >
-                已安装
+                {{ t('settings.localModel.installed') }}
               </Badge>
               <!-- 显示模型详细信息 -->
               <div
@@ -344,10 +346,9 @@ const handleInstall = async () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>确认删除模型?</AlertDialogTitle>
+                    <AlertDialogTitle>{{ t('settings.localModel.confirmDelete') }}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      此操作将删除模型
-                      {{ `${item.name}:${model}` }}，删除后需要重新下载才能使用。
+                      {{ t('settings.localModel.confirmDeleteDesc', { model: `${item.name}:${model}` }) }}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -357,7 +358,7 @@ const handleInstall = async () => {
                       @click="deleteModel(`${item.name}:${model}`)"
                     >
                       <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
-                      {{ loading ? "删除中..." : "确认删除" }}
+                      {{ loading ? t('settings.localModel.deleting') : t('settings.localModel.confirmDelete') }}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -418,14 +419,14 @@ const handleInstall = async () => {
   <AlertDialog :open="showInstallDialog" @update:open="showInstallDialog = $event">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>下载并安装 Ollama</AlertDialogTitle>
+        <AlertDialogTitle>{{ t('settings.localModel.downloadOllama') }}</AlertDialogTitle>
         <AlertDialogDescription>
-          点击确认将打开浏览器下载 Ollama。完成安装后请重启本软件以检查安装状态。
+          {{ t('settings.localModel.downloadOllamaDesc') }}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>取消</AlertDialogCancel>
-        <AlertDialogAction @click="handleInstall"> 马上下载 </AlertDialogAction>
+        <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
+        <AlertDialogAction @click="handleInstall"> {{ t('settings.localModel.downloadNow') }} </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

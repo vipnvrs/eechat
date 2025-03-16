@@ -5,21 +5,221 @@
     "save": "保存",
     "delete": "删除",
     "edit": "编辑",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "timeGroup": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "within7days": "7天内",
+      "within30days": "30天内",
+      "monthFormat": "M月",
+      "yearMonthFormat": "YYYY年M月"
+    }
   },
   "chat": {
+    "scrollToBottom": "滚动到底部",
     "newChat": "新对话",
     "send": "发送",
     "typing": "正在输入...",
+    "thinking": "思考中...",
     "clearConversation": "清空对话",
-    "exportConversation": "导出对话"
+    "exportConversation": "导出对话",
+    "inputPlaceholder": "输入消息，使用 Enter 发送, Shift + Enter 换行",
+    "discover": {
+      "title": "发现",
+      "searchPlaceholder": "输入要搜索的内容...",
+      "mine": "我的",
+      "assistant": "助手",
+      "categories": {
+        "all": "全部",
+        "academic": "学术",
+        "copywriting": "文案",
+        "design": "设计",
+        "commercial": "商业",
+        "programming": "编程",
+        "technology": "科技",
+        "music": "音乐",
+        "openSource": "开源",
+        "financial": "金融",
+        "medical": "医疗",
+        "legal": "法律",
+        "education": "教育",
+        "entertainment": "娱乐",
+        "government": "政府",
+        "other": "其他"
+      }
+    },
+    "settings": {
+      "title": "设置",
+      "chatName": "对话名称",
+      "systemPrompt": "系统提示",
+      "rolePrompt": "角色设定",
+      "creativity": "创意活跃度",
+      "openness": "思维开放度",
+      "expressiveness": "表述发散度",
+      "vocabulary": "词汇丰富度",
+      "saveSettings": "保存设置"
+    },
+    "sidebar": {
+      "chat": "对话",
+      "confirmDelete": "确认删除会话?",
+      "confirmDeleteDesc": "此操作将删除会话 \"{title}\"，删除后无法恢复。",
+      "deleting": "删除中...",
+      "confirmDeleteBtn": "确认删除",
+      "newChat": "新对话"
+    }
+  },
+  "discover": {
+    "title": "发现",
+    "searchPlaceholder": "输入要搜索的内容...",
+    "mine": "我的",
+    "assistant": "助手",
+    "pageTitle": "探索精品智能体",
+    "pageDescription": "使用这些模板应用程序，或根据模板自定义您自己的应用程序。",
+    "categories": {
+      "all": "全部",
+      "academic": "学术",
+      "copywriting": "文案",
+      "design": "设计",
+      "commercial": "商业",
+      "programming": "编程",
+      "technology": "科技",
+      "music": "音乐",
+      "openSource": "开源",
+      "financial": "金融",
+      "medical": "医疗",
+      "legal": "法律",
+      "education": "教育",
+      "entertainment": "娱乐",
+      "government": "政府",
+      "other": "其他"
+    },
+    "assistants": {
+      "frenchTranslator": {
+        "title": "法语翻译助手",
+        "description": "友好、专业、富有同理心的法语翻译AI助手",
+        "type": "翻译",
+        "tags": ["翻译", "幽默", "文化"]
+      },
+      "codeHelper": {
+        "title": "代码助手",
+        "description": "专业的编程助手，精通多种编程语言和框架",
+        "type": "编程",
+        "tags": ["编程", "调试", "解释"]
+      },
+      "englishWriting": {
+        "title": "英语写作教练",
+        "description": "提供专业的英语写作指导和修改建议",
+        "type": "教育",
+        "tags": ["写作", "英语", "教育"]
+      },
+      "mentalHealth": {
+        "title": "心理健康顾问",
+        "description": "提供情感支持和心理健康建议的AI助手",
+        "type": "健康",
+        "tags": ["心理", "情感", "健康"]
+      },
+      "creativeWriting": {
+        "title": "创意写作助手",
+        "description": "激发灵感，协助创作小说、诗歌和各类创意内容",
+        "type": "写作",
+        "tags": ["创意", "写作", "灵感"]
+      },
+      "dataAnalysis": {
+        "title": "数据分析专家",
+        "description": "协助数据分析、统计和可视化的专业助手",
+        "type": "数据",
+        "tags": ["数据", "分析", "统计"]
+      },
+      "travelPlanner": {
+        "title": "旅行规划师",
+        "description": "帮助规划旅行路线、推荐景点和提供旅行建议",
+        "type": "生活",
+        "tags": ["旅行", "规划", "建议"]
+      },
+      "dietitian": {
+        "title": "健康饮食顾问",
+        "description": "提供营养均衡的饮食建议和健康食谱",
+        "type": "健康",
+        "tags": ["饮食", "健康", "营养"]
+      },
+      "japaneseCoach": {
+        "title": "日语学习教练",
+        "description": "专业的日语学习指导和练习伙伴",
+        "type": "教育",
+        "tags": ["日语", "学习", "语言"]
+      }
+    }
   },
   "settings": {
+    "modelFilter": {
+      "popular": "热门",
+      "installed": "已安装",
+      "searchPlaceholder": "deepseek..."
+    },
     "title": "设置",
     "language": "语言",
     "theme": "主题",
     "apiSettings": "API 设置",
     "modelSettings": "模型设置",
-    "configureInterface": "配置您的软件界面"
+    "configureInterface": "配置您的软件界面",
+    "system": "系统",
+    "light": "浅色",
+    "dark": "深色",
+    "modelSelect": {
+      "selectModel": "选择模型",
+      "noLocalModel": "未找到本地模型",
+      "configureModel": "去配置",
+      "clickToConfig": "点击去配置模型",
+      "localModel": "本地模型"
+    },
+    "apiModel": {
+      "modelProvider": "模型提供商",
+      "connectionSuccess": "连接成功",
+      "connectionSuccessDesc": "已成功连接到 API",
+      "connectionFailed": "连接失败",
+      "testConnection": "测试连接",
+      "testing": "测试中...",
+      "enableProvider": "开启后可在聊天中使用该服务商",
+      "modelConfig": "模型配置",
+      "apiKey": "API Key",
+      "apiUrl": "API URL",
+      "connectivityCheck": "连通性检查",
+      "selectModelToTest": "选择要测试连通性的模型",
+      "availableModels": "可用模型",
+      "enableModel": "开启后可在聊天中使用该模型"
+    },
+    "localModel": {
+      "serviceNotResponding": "服务未响应",
+      "serviceRunningNormal": "本地服务运行正常",
+      "installModelManager": "安装模型管理器",
+      "startModelManager": "启动模型管理器",
+      "stopModelManager": "停止模型管理器",
+      "refreshStatus": "刷新状态",
+      "modelManagement": "模型管理",
+      "moreModels": "更多模型?",
+      "installed": "已安装",
+      "confirmDelete": "确认删除模型?",
+      "confirmDeleteDesc": "此操作将删除模型 {model}，删除后需要重新下载才能使用。",
+      "deleting": "删除中...",
+      "confirmDelete": "确认删除",
+      "downloadOllama": "下载并安装 Ollama",
+      "downloadOllamaDesc": "点击确认将打开浏览器下载 Ollama。完成安装后请重启本软件以检查安装状态。",
+      "downloadNow": "马上下载",
+      "installSuccess": "{model} 安装成功",
+      "installSuccessDesc": "模型已安装成功，快去使用吧。"
+    },
+    "models": {
+      "localModel": "本地模型",
+      "apiModel": "API模型配置"
+    },
+    "sidebar": {
+      "models": "模型",
+      "localModel": "本地模型",
+      "apiModel": "API 模型",
+      "general": "通用",
+      "interface": "界面",
+      "about": "关于",
+      "playground": "Playground"
+    }
   }
 }

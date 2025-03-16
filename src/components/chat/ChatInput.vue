@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue"
+import { useI18n } from "vue-i18n"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUpToLine } from "lucide-vue-next"
 import { CornerDownLeft } from "lucide-vue-next"
+
+const { t } = useI18n()
 
 const count = ref(0)
 const msg = ref("")
@@ -47,7 +50,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
       <Textarea
         v-model="msg"
         class="h-[120px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0 border-l-0"
-        placeholder="输入消息，使用 Enter 发送, Shift + Enter 换行"
+        :placeholder="t('chat.inputPlaceholder')"
         @keydown="handleKeyDown"
       ></Textarea>
       <Button

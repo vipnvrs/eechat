@@ -5,21 +5,222 @@
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "timeGroup": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "within7days": "Within 7 days",
+      "within30days": "Within 30 days",
+      "monthFormat": "MMMM",
+      "yearMonthFormat": "MMMM YYYY"
+    }
   },
   "chat": {
-    "newChat": "New Chat",
+    "scrollToBottom": "Scroll to Bottom",
+    "newChat": "Chat",
     "send": "Send",
     "typing": "Typing...",
+    "thinking": "Thinking...",
     "clearConversation": "Clear Conversation",
-    "exportConversation": "Export Conversation"
+    "exportConversation": "Export Conversation",
+    "inputPlaceholder": "Type a message, press Enter to send, Shift + Enter for new line",
+    "discover": {
+      "title": "Discover",
+      "searchPlaceholder": "Enter content to search...",
+      "mine": "Mine",
+      "assistant": "Assistant",
+      "categories": {
+        "all": "All",
+        "academic": "Academic",
+        "copywriting": "Copywriting",
+        "design": "Design",
+        "commercial": "Commercial",
+        "programming": "Programming",
+        "technology": "Technology",
+        "music": "Music",
+        "openSource": "Open Source",
+        "financial": "Financial",
+        "medical": "Medical",
+        "legal": "Legal",
+        "education": "Education",
+        "entertainment": "Entertainment",
+        "government": "Government",
+        "other": "Other"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "chatName": "Chat Name",
+      "systemPrompt": "System Prompt",
+      "rolePrompt": "Role Setting",
+      "creativity": "Creativity",
+      "openness": "Openness",
+      "expressiveness": "Expressiveness",
+      "vocabulary": "Vocabulary",
+      "saveSettings": "Save Settings"
+    },
+    "sidebar": {
+      "chat": "Chat",
+      "confirmDelete": "Confirm Delete Chat?",
+      "confirmDeleteDesc": "This action will delete the chat \"{title}\", this cannot be undone.",
+      "deleting": "Deleting...",
+      "confirmDeleteBtn": "Confirm Delete",
+      "newChat": "New Chat"
+    }
+  },
+
+  "discover": {
+    "title": "Discover",
+    "searchPlaceholder": "Enter content to search...",
+    "mine": "Mine",
+    "assistant": "Assistant",
+    "pageTitle": "Explore Premium AI Agents",
+    "pageDescription": "Use these template applications, or customize your own based on the templates.",
+    "categories": {
+      "all": "All",
+      "academic": "Academic",
+      "copywriting": "Copywriting",
+      "design": "Design",
+      "commercial": "Commercial",
+      "programming": "Programming",
+      "technology": "Technology",
+      "music": "Music",
+      "openSource": "Open Source",
+      "financial": "Financial",
+      "medical": "Medical",
+      "legal": "Legal",
+      "education": "Education",
+      "entertainment": "Entertainment",
+      "government": "Government",
+      "other": "Other"
+    },
+    "assistants": {
+      "frenchTranslator": {
+        "title": "French Translation Assistant",
+        "description": "Friendly, professional and empathetic French translation AI assistant",
+        "type": "Translation",
+        "tags": ["Translation", "Humor", "Culture"]
+      },
+      "codeHelper": {
+        "title": "Code Assistant",
+        "description": "Professional programming assistant proficient in multiple programming languages and frameworks",
+        "type": "Programming",
+        "tags": ["Programming", "Debugging", "Explanation"]
+      },
+      "englishWriting": {
+        "title": "English Writing Coach",
+        "description": "Provides professional English writing guidance and revision suggestions",
+        "type": "Education",
+        "tags": ["Writing", "English", "Education"]
+      },
+      "mentalHealth": {
+        "title": "Mental Health Counselor",
+        "description": "AI assistant providing emotional support and mental health advice",
+        "type": "Health",
+        "tags": ["Mental", "Emotional", "Health"]
+      },
+      "creativeWriting": {
+        "title": "Creative Writing Assistant",
+        "description": "Sparks inspiration, assists in creating novels, poetry and various creative content",
+        "type": "Writing",
+        "tags": ["Creative", "Writing", "Inspiration"]
+      },
+      "dataAnalysis": {
+        "title": "Data Analysis Expert",
+        "description": "Professional assistant for data analysis, statistics and visualization",
+        "type": "Data",
+        "tags": ["Data", "Analysis", "Statistics"]
+      },
+      "travelPlanner": {
+        "title": "Travel Planner",
+        "description": "Helps plan travel routes, recommend attractions and provide travel advice",
+        "type": "Lifestyle",
+        "tags": ["Travel", "Planning", "Advice"]
+      },
+      "dietitian": {
+        "title": "Health Diet Advisor",
+        "description": "Provides balanced dietary advice and healthy recipes",
+        "type": "Health",
+        "tags": ["Diet", "Health", "Nutrition"]
+      },
+      "japaneseCoach": {
+        "title": "Japanese Learning Coach",
+        "description": "Professional Japanese learning guidance and practice partner",
+        "type": "Education",
+        "tags": ["Japanese", "Learning", "Language"]
+      }
+    }
   },
   "settings": {
+    "modelFilter": {
+      "popular": "Popular",
+      "installed": "Installed",
+      "searchPlaceholder": "deepseek..."
+    },
     "title": "Settings",
     "language": "Language",
     "theme": "Theme",
     "apiSettings": "API Settings",
     "modelSettings": "Model Settings",
-    "configureInterface": "Configure your interface"
+    "configureInterface": "Configure your interface",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "modelSelect": {
+      "selectModel": "Select Model",
+      "noLocalModel": "No local model found",
+      "configureModel": "Configure",
+      "clickToConfig": "Click to configure model",
+      "localModel": "Local Model"
+    },
+    "apiModel": {
+      "modelProvider": "Model Provider",
+      "connectionSuccess": "Connection Successful",
+      "connectionSuccessDesc": "Successfully connected to API",
+      "connectionFailed": "Connection Failed",
+      "testConnection": "Test Connection",
+      "testing": "Testing...",
+      "enableProvider": "Enable this provider in chat",
+      "modelConfig": "Model Configuration",
+      "apiKey": "API Key",
+      "apiUrl": "API URL",
+      "connectivityCheck": "Connectivity Check",
+      "selectModelToTest": "Select a model to test connectivity",
+      "availableModels": "Available Models",
+      "enableModel": "Enable this model in chat"
+    },
+    "localModel": {
+      "serviceNotResponding": "Service Not Responding",
+      "serviceRunningNormal": "Local Service Running Normal",
+      "installModelManager": "Install Model Manager",
+      "startModelManager": "Start Model Manager",
+      "stopModelManager": "Stop Model Manager",
+      "refreshStatus": "Refresh Status",
+      "modelManagement": "Model Management",
+      "moreModels": "More Models?",
+      "installed": "Installed",
+      "confirmDelete": "Confirm Delete Model?",
+      "confirmDeleteDesc": "This action will delete the model {model}, you'll need to download it again to use it.",
+      "deleting": "Deleting...",
+      "confirmDelete": "Confirm Delete",
+      "downloadOllama": "Download and Install Ollama",
+      "downloadOllamaDesc": "Click confirm to open browser and download Ollama. Please restart the software after installation to check the installation status.",
+      "downloadNow": "Download Now",
+      "installSuccess": "{model} Installation Successful",
+      "installSuccessDesc": "Model has been installed successfully. You can start using it now."
+    },
+    "sidebar": {
+      "models": "Models",
+      "localModel": "Local Model",
+      "apiModel": "API Model",
+      "general": "General",
+      "interface": "Interface",
+      "about": "About",
+      "playground": "Playground"
+    },
+    "models": {
+      "localModel": "Local Model",
+      "apiModel": "API Model Configuration"
+    }
   }
 }

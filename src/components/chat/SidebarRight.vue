@@ -14,6 +14,9 @@ import { Label } from '@/components/ui/label'
 import { SquarePen } from 'lucide-vue-next'
 import { reactive } from 'vue'
 import { watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const formData = reactive({
   title: '',
@@ -45,20 +48,20 @@ const handleSubmit = () => {
 
 <template>
   <Sidebar side="right">
-    <SidebarHeader class="p-4">对话设置</SidebarHeader>
+    <SidebarHeader class="p-4">{{ t('chat.settings.title') }}</SidebarHeader>
     <SidebarContent>
       <form class="p-4 space-y-8">
         <!-- <FormField name="title"> -->
         <div class="grid gap-2">
-          <Label>对话名称</Label>
+          <Label>{{ t('chat.settings.chatName') }}</Label>
           <Input type="text" placeholder="shadcn" v-model="formData.title" />
         </div>
         <!-- </FormField> -->
         <div class="grid gap-2">
           <Label class="flex justify-between items-center">
             <span> 
-              <span>系统提示</span>
-              <Badge variant="outline">角色设定</Badge>
+              <span>{{ t('chat.settings.systemPrompt') }}</span>
+              <Badge variant="outline">{{ t('chat.settings.rolePrompt') }}</Badge>
             </span>
             <Button variant="ghost" size="icon">
               <SquarePen></SquarePen>
@@ -71,7 +74,7 @@ const handleSubmit = () => {
           />
         </div>
         <div class="grid gap-2">
-          <Label>创意活跃度 <Badge variant="outline">temperature</Badge></Label>
+          <Label>{{ t('chat.settings.creativity') }} <Badge variant="outline">temperature</Badge></Label>
           <div class="flex">
             <Slider
               v-model="formData.temperature"
@@ -84,7 +87,7 @@ const handleSubmit = () => {
           </div>
         </div>
         <div class="grid gap-2">
-          <Label>思维开放度 <Badge variant="outline">top_p</Badge></Label>
+          <Label>{{ t('chat.settings.openness') }} <Badge variant="outline">top_p</Badge></Label>
           <div class="flex">
             <Slider
               v-model="formData.top_p"
@@ -98,7 +101,7 @@ const handleSubmit = () => {
         </div>
         <div class="grid gap-2">
           <Label
-            >表述发散度 <Badge variant="outline">presence_penalty</Badge></Label
+            >{{ t('chat.settings.expressiveness') }} <Badge variant="outline">presence_penalty</Badge></Label
           >
           <div class="flex">
             <Slider
@@ -116,7 +119,7 @@ const handleSubmit = () => {
         </div>
         <div class="grid gap-2">
           <Label
-            >词汇丰富度
+            >{{ t('chat.settings.vocabulary') }}
             <Badge variant="outline">frequency_penalty</Badge></Label
           >
           <div class="flex">
@@ -138,7 +141,7 @@ const handleSubmit = () => {
     </SidebarContent>
     <SidebarFooter
       ><Button type="submit" @click="handleSubmit">
-        保存设置
+        {{ t('chat.settings.saveSettings') }}
       </Button></SidebarFooter
     >
   </Sidebar>

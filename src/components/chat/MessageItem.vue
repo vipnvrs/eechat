@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, defineProps, computed, nextTick, onBeforeUnmount } from "vue"
+import { useI18n } from "vue-i18n"
 import { LoaderCircle } from "lucide-vue-next"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
@@ -17,6 +18,7 @@ const props = defineProps<{
   message: string
   role: string
 }>()
+const { t } = useI18n()
 const renderedHTML = ref("")
 // 使用 remark 处理 Markdown
 const processor = unified()
@@ -41,7 +43,7 @@ const sanitizedContent = computed(() => processor.processSync(props.message).toS
       class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
     >
       <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
-      <span class="ml-2 text-[14px]">思考中...</span>
+      <span class="ml-2 text-[14px]">{{ t('chat.thinking') }}</span>
     </div>
     <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
       <div class="flex flex-col max-w-[80%]">

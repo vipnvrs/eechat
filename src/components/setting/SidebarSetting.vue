@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, markRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   SidebarProvider,
   Sidebar,
@@ -23,22 +24,24 @@ import About from '@/components/setting/About.vue'
 import Appearance from '@/components/setting/Appearance.vue'
 import Playground from '@/components/setting/Playground.vue'
 
+const { t } = useI18n()
+
 // const props = withDefaults(defineProps<SidebarProps>(), {
 //   collapsible: 'icon',
 // })
 const menuData = [
   {
-    label: '模型',
+    label: t('settings.sidebar.models'),
     icon: Brain,
     items: [
       {
-        label: '本地模型',
+        label: t('settings.sidebar.localModel'),
         icon: HardDrive,
         key: 'LocalModel',
         component: markRaw(LocalModel),
       },
       {
-        label: 'API 模型',
+        label: t('settings.sidebar.apiModel'),
         icon: Brain,
         key: 'ApiModel',
         component: markRaw(ApiModel),
@@ -46,23 +49,23 @@ const menuData = [
     ],
   },
   {
-    label: '通用',
+    label: t('settings.sidebar.general'),
     icon: Brain,
     items: [
       {
-        label: '界面',
+        label: t('settings.sidebar.interface'),
         icon: HardDrive,
         key: 'appearance',
         component: markRaw(Appearance),
       },
       {
-        label: '关于',
+        label: t('settings.sidebar.about'),
         icon: Brain,
         key: 'about',
         component: markRaw(About),
       },
       {
-        label: 'Playground',
+        label: t('settings.sidebar.playground'),
         icon: Brain,
         key: 'playground',
         component: markRaw(Playground),
@@ -96,7 +99,7 @@ const handleMenuClick = e => {
     <Sidebar class="hidden flex-1 md:flex absolute">
       <SidebarHeader class="gap-3.5 border-b p-4">
         <div class="flex w-full items-center justify-between">
-          <div class="text-base font-medium text-foreground">设置</div>
+          <div class="text-base font-medium text-foreground">{{ t('settings.title') }}</div>
         </div>
       </SidebarHeader>
       <SidebarContent>

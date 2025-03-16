@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch } from "vue"
 import { useChatStore } from "@/stores/chatStore"
+import { useI18n } from "vue-i18n"
 import { LLMModel } from "@/types/llm"
 import SidebarLeft from "@/components/chat/SidebarLeft.vue"
 import SidebarRight from "@/components/chat/SidebarRight.vue"
@@ -27,6 +28,7 @@ interface Message {
   role: "system" | "user" | "assistant"
   content: string
 }
+const { t } = useI18n()
 const chatStore = useChatStore()
 const activeSession = ref({ title: "", id: "" })
 const chatHistory = ref<Message[]>([])
@@ -71,7 +73,7 @@ const sendMsgLocalOllama = async (model: LLMModel, msg: string) => {
     await chatApi.sendMessage(
       model,
       [
-        { role: "system", content: "你是一个AI助手" },
+        { role: "system", content: t("chat.systemPrompt") },
         ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
       ],
       activeSession.value.id,
@@ -107,7 +109,7 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
     await llmApi.sendMessageLlm(
       model,
       [
-        { role: "system", content: "你是一个AI助手" },
+        { role: "system", content: t("chat.systemPrompt") },
         ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
       ],
       activeSession.value.id,
@@ -246,7 +248,8 @@ onMounted(() => {
         size="icon"
         class="fixed bottom-[120px] right-6 z-10 drop-shadow-xl"
       >
-        <ArrowDownToLine> </ArrowDownToLine>
+        <ArrowDownToLine class="h-4 w-4" />
+        <span class="sr-only">{{ t('chat.scrollToBottom') }}</span>
       </Button>
       <ScrollArea ref="scrollAreaRef" class="h-full w-full px-6 flex-1">
         <div class="h-[300px] overflow-hidden ml--4">
@@ -262,7 +265,7 @@ onMounted(() => {
       <div
         class="sticky bottom-0 h-[120px] content-center shrink-0 items-center gap-2 border-b bg-background"
       >
-        <ChatInput @sendMsg="sendMsg" :disabled="loading" />
+        <ChatInput :loading="loading" @send="sendMsg" :placeholder="t('chat.inputPlaceholder')" />
       </div>
     </div>
     <SidebarProvider

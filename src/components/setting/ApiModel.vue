@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, defineProps, watch } from "vue"
+import { useI18n } from "vue-i18n"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,7 @@ const props = defineProps({
 })
 
 const { toast } = useToast()
+const { t } = useI18n()
 const testLoading = ref(false)
 const saveLoading = ref(false)
 const testPassed = reactive<Record<string, boolean>>({
@@ -85,14 +87,14 @@ async function testConnection(provider: string) {
       testPassed[provider] = true
       await llmApi.saveConfigProvider(provider, config)
       toast({
-        title: "连接成功",
-        description: "已成功连接到 API",
+        title: t('settings.apiModel.connectionSuccess'),
+        description: t('settings.apiModel.connectionSuccessDesc'),
       })
     }
   } catch (error: any) {
     testPassed[provider] = false
     toast({
-      title: "连接失败",
+      title: t('settings.apiModel.connectionFailed'),
       description: error.message,
       variant: "destructive",
     })
@@ -237,7 +239,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
   <div class="flex h-full">
     <!-- 左侧 Sidebar -->
     <div class="w-40 border-r pr-2">
-      <div class="font-bold mb-4 ml-6">模型提供商</div>
+      <div class="font-bold mb-4 ml-6">{{ t('settings.apiModel.modelProvider') }}</div>
       <ScrollArea class="h-[calc(100vh-8rem)]">
         <div class="space-y-2">
           <div
@@ -281,7 +283,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>开启后可在聊天中使用该服务商</p>
+                  <p>{{ t('settings.apiModel.enableProvider') }}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -299,7 +301,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
 
         <!-- 配置表单 -->
         <div class="space-y-4">
-          <Label>模型配置</Label>
+          <Label>{{ t('settings.apiModel.modelConfig') }}</Label>
           <div class="grid gap-2">
             <Label class="font-bold">API Key</Label>
             <Input
@@ -319,7 +321,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
             />
           </div>
           <div class="grid gap-2">
-            <Label>连通性检查</Label>
+            <Label>{{ t('settings.apiModel.connectivityCheck') }}</Label>
             <div class="flex items-center space-x-2">
               <Select
                 class="w-full flex-1"
@@ -327,7 +329,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
                 @update:modelValue="handleCurrentCheckModelUpdate"
               >
                 <SelectTrigger class="w-full flex-1">
-                  <SelectValue placeholder="选择要测试连通性的模型" />
+                  <SelectValue :placeholder="t('settings.apiModel.selectModelToTest')" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem v-for="item in modelsArray" :value="item.id" :key="item.id">
@@ -344,7 +346,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
                   v-else-if="testPassed[currentProvider]"
                   class="mr-1 h-4 w-4 text-green-500"
                 />
-                {{ testLoading ? "测试中..." : "测试连接" }}
+                {{ testLoading ? t('settings.apiModel.testing') : t('settings.apiModel.testConnection') }}
               </Button>
             </div>
           </div>
@@ -352,7 +354,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
 
         <!-- 模型列表 -->
         <div class="flex-1 pt-6 min-h-0 overflow-hidden">
-          <Label>可用模型</Label>
+          <Label>{{ t('settings.apiModel.availableModels') }}</Label>
           <ScrollArea class="h-full w-full rounded-md pb-8">
             <!-- {{ models['DeepSeek Chat'] }} -->
             <div v-for="(group, key) in models" :key="key" class="space-y-4">
@@ -404,7 +406,7 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
                           </Switch>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>开启后可在聊天中使用该模型</p>
+                          <p>{{ t('settings.apiModel.enableModel') }}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

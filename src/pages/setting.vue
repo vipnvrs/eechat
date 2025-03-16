@@ -4,8 +4,11 @@ import LocalModel from "@/components/setting/LocalModel.vue"
 import ApiModel from "@/components/setting/ApiModel.vue"
 import { ref, markRaw, onMounted } from "vue"
 import { useRoute } from "vue-router"
+import { useI18n } from "vue-i18n"
 import { useModelStore } from "@/stores/model"
 import { ModelProvider } from "@/types/llm"
+
+const { t } = useI18n()
 
 interface MenuItem {
   label: string
@@ -21,14 +24,14 @@ const modelStore = useModelStore()
 // 定义可用的菜单项
 const menuItems: Record<string, MenuItem> = {
   LocalModel: {
-    label: "本地模型",
+    label: t('settings.models.localModel'),
     icon: "HardDrive",
     key: "LocalModel",
     component: markRaw(LocalModel),
     props: { providerId: "" },
   },
   ApiModel: {
-    label: "API模型配置",
+    label: t('settings.models.apiModel'),
     icon: "Cloud",
     key: "ApiModel",
     component: markRaw(ApiModel),
