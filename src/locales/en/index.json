@@ -1,0 +1,25 @@
+{
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading..."
+  },
+  "chat": {
+    "newChat": "New Chat",
+    "send": "Send",
+    "typing": "Typing...",
+    "clearConversation": "Clear Conversation",
+    "exportConversation": "Export Conversation"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "apiSettings": "API Settings",
+    "modelSettings": "Model Settings",
+    "configureInterface": "Configure your interface"
+  }
+}

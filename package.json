@@ -25,7 +25,8 @@
     "build:pord": "vite build --mode production && electron-builder",
     "preview": "vite preview",
     "release": "node scripts/release.js",
-    "update-models": "node electron/server/tools/getOpenrouterModelList.js"
+    "update-models": "node electron/server/tools/getOpenrouterModelList.js",
+    "i18n:extract": "vue-i18n-extract report --vueFiles 'src/**/*.?(js|vue)' --languageFiles 'src/locales/zh/index.json'"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
@@ -44,6 +45,8 @@
     "vite-plugin-electron-renderer": "^0.14.5",
     "vite-plugin-static-copy": "^2.3.0",
     "vue": "^3.4.21",
+    "vue-i18n": "^11.0.0-rc.1",
+    "vue-i18n-extract": "^2.0.7",
     "vue-tsc": "^2.0.6"
   },
   "packageManager": "pnpm@9.14.2+sha512.6e2baf77d06b9362294152c851c4f278ede37ab1eba3a55fda317a4a17b209f4dbb973fb250a77abc463a341fcb1f17f17cfa24091c4eb319cda0d9b84278387",

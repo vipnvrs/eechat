@@ -1,0 +1,25 @@
+{
+  "common": {
+    "ok": "确定",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "loading": "加载中..."
+  },
+  "chat": {
+    "newChat": "新对话",
+    "send": "发送",
+    "typing": "正在输入...",
+    "clearConversation": "清空对话",
+    "exportConversation": "导出对话"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "theme": "主题",
+    "apiSettings": "API 设置",
+    "modelSettings": "模型设置",
+    "configureInterface": "配置您的软件界面"
+  }
+}

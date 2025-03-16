@@ -1,82 +1,104 @@
 <div align="center">
   <h1>eechat</h1>
-  <p>🚀 Powerful locally deployed AI chat application</p>
+  <p>🚀 强大的本地部署 AI 聊天应用 - 安全、高效、个性化</p>
 
   <p>
-    <a href="#features">Features</a> •
-    <a href="#local-deployment">Local Deployment</a> •
-    <a href="#quick-start">Quick Start</a> •
-    <a href="#tech-stack">Tech Stack</a> •
-    <a href="#contribution">Contribution</a> •
-    <a href="#license">License</a>
+    <a href="#核心优势">核心优势</a> •
+    <a href="#功能特色">功能特色</a> •
+    <a href="#本地部署">本地部署</a> •
+    <a href="#快速开始">快速开始</a> •
+    <a href="#技术栈">技术栈</a> •
+    <a href="#贡献">贡献</a> •
+    <a href="#许可证">许可证</a>
   </p>
   
   <img src="./resources/chat.png" alt="EE Chat Application Screenshot" width="800" />
 </div>
 
-## Features
+## 核心优势
 
-EE Chat is an AI chat application focused on local deployment, providing users with secure, private, and efficient AI conversation experiences.
+eechat 是一款专注于本地部署的 AI 聊天应用，为用户提供安全、私密且高效的 AI 对话体验。
 
-### 🔒 Fully Local Deployment
+### 🔒 数据安全与隐私保护
 
-- **Data Privacy Protection**: All conversation data is stored locally, eliminating privacy concerns
-- **Offline Usage**: Once configured, continuous internet connection is not required
-- **Custom API**: Connect to your own AI model API or third-party services
+- **完全本地化存储**：所有对话数据存储在本地，杜绝隐私泄露风险
+- **离线使用能力**：配置完成后无需持续联网，保障数据安全
+- **API 自由定制**：连接自有 AI 模型 API 或第三方服务，掌控数据流向
 
-### 💬 Powerful Conversation Features
+### 💬 卓越的对话体验
 
-- **Multi-Session Management**: Easily create and manage multiple independent conversations
-- **History Records**: Automatically save all conversation history, view and continue previous conversations anytime
-- **Markdown Support**: Perfect rendering of Markdown format, including code blocks, tables, and mathematical formulas
-- **Code Highlighting**: Automatically identify and highlight code blocks, supporting multiple programming languages
+- **多会话管理**：轻松创建和管理多个独立对话，分类整理不同主题
+- **历史记录追溯**：自动保存全部对话历史，随时查看和继续之前的对话
+- **Markdown 完美支持**：精准渲染 Markdown 格式，包括代码块、表格和数学公式
+- **智能代码高亮**：自动识别并高亮代码块，支持多种编程语言语法
 
-### 🎨 Personalized Experience
+### 🎨 个性化定制能力
 
-- **Theme Switching**: Built-in light and dark themes to meet different usage scenarios
-- **Custom Prompts**: Save and manage frequently used prompts to improve conversation efficiency
-- **Model Parameter Adjustment**: Flexibly adjust temperature, maximum output, and other parameters for optimal responses
+- **主题切换**：内置明暗两种主题，适应不同使用场景和个人偏好
+- **提示词管理**：保存和管理常用提示词，提升对话效率和质量
+- **模型参数调优**：灵活调整温度、最大输出等参数，获取最佳回应效果
 
-### 🔌 Extensibility
+### 🔌 强大的扩展性
 
-- **Plugin System**: Support for extended functionality to meet specific scenario requirements
-- **API Integration**: Easily integrate various AI model APIs, such as OpenAI, Anthropic, etc.
-- **Custom Models**: Configure and use custom local or remote AI models
+- **插件生态系统**：支持功能扩展，满足特定场景需求
+- **多模型集成**：轻松集成各类 AI 模型 API，如 OpenAI、Anthropic 等
+- **自定义模型支持**：配置并使用自定义的本地或远程 AI 模型
 
-## Local Deployment
+## 功能特色
 
-EE Chat is designed for local deployment, ensuring your data security and user experience.
+### 智能对话增强
 
-### System Requirements
+- **上下文理解**：AI 能够理解并保持长对话中的上下文连贯性
+- **多轮对话优化**：针对复杂问题的多轮交互体验优化
+- **知识库集成**：可连接自定义知识库，提供更精准的领域回答
 
-- Windows 10/11 64-bit
+### 开发者友好
+
+- **代码生成与解释**：优化的代码生成能力，支持多种编程语言
+- **API 文档生成**：辅助开发者快速生成 API 文档
+- **调试辅助**：帮助识别代码问题并提供修复建议
+
+### 生产力工具
+
+- **文档摘要**：快速总结长文档内容
+- **思维导图生成**：将复杂概念转化为结构化思维导图
+- **多语言翻译**：支持多种语言之间的高质量翻译
+
+## 本地部署
+
+eechat 专为本地部署设计，确保您的数据安全和最佳用户体验。
+
+### 系统要求
+
+- Windows 10/11 64位
 - macOS 10.15+
 - Linux (Ubuntu 18.04+, Debian 10+)
-- At least 4GB RAM
-- 500MB available disk space
+- 至少 4GB RAM
+- 500MB 可用磁盘空间
 
-### Installation Methods
+### 安装方法
 
-#### Download Pre-built Packages
+#### 下载预构建包
 
-Download the installation package suitable for your system from the [release page](https://github.com/yourusername/chater/releases):
+从[发布页面](https://github.com/yourusername/chater/releases)下载适合您系统的安装包：
 
-- Windows: `EEChat-Setup-x.x.x.exe`
-- macOS: `EEChat-x.x.x.dmg`
-- Linux: `EEChat-x.x.x.AppImage` or `.deb`
+- Windows: `eechat-Setup-x.x.x.exe`
+- macOS: `eechat-x.x.x.dmg`
+- Linux: `eechat-x.x.x.AppImage` 或 `.deb`
 
-#### Build from Source
+#### 从源码构建
 
 ```bash
-# Clone repository
+# 克隆仓库
 git clone https://github.com/yourusername/chater.git
 cd chater
 
-# Install dependencies
+# 安装依赖
 npm install
 
-# Run in development mode
+# 开发模式运行
 npm run dev
 
-# Build application
+# 构建应用
 npm run build
+```

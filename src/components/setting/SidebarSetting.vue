@@ -20,6 +20,7 @@ import { Brain, HardDrive } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
 import About from '@/components/setting/About.vue'
+import Appearance from '@/components/setting/Appearance.vue'
 import Playground from '@/components/setting/Playground.vue'
 
 // const props = withDefaults(defineProps<SidebarProps>(), {
@@ -51,8 +52,8 @@ const menuData = [
       {
         label: '界面',
         icon: HardDrive,
-        key: 'interface',
-        component: markRaw(LocalModel),
+        key: 'appearance',
+        component: markRaw(Appearance),
       },
       {
         label: '关于',
