@@ -11,12 +11,12 @@
     <a href="#许可证">许可证</a>
   </p>
   
-  <img src="./resources/screenshot.png" alt="Chater应用截图" width="800" />
+  <img src="./resources/chat.png" alt="eechat应用截图" width="800" />
 </div>
 
 ## 特性
 
-Chater是一款专注于本地部署的AI聊天应用，为用户提供安全、私密且高效的AI对话体验。
+eechat是一款专注于本地部署的AI聊天应用，为用户提供安全、私密且高效的AI对话体验。
 
 ### 🔒 完全本地化部署
 
@@ -45,7 +45,7 @@ Chater是一款专注于本地部署的AI聊天应用，为用户提供安全、
 
 ## 本地部署
 
-Chater专为本地部署设计，确保您的数据安全和使用体验。
+eechat专为本地部署设计，确保您的数据安全和使用体验。
 
 ### 系统要求
 
@@ -59,17 +59,17 @@ Chater专为本地部署设计，确保您的数据安全和使用体验。
 
 #### 下载预构建包
 
-从[发布页面](https://github.com/yourusername/chater/releases)下载适合您系统的安装包：
+从[发布页面](https://github.com/Lucassssss/eechat/releases)下载适合您系统的安装包：
 
-- Windows: `Chater-Setup-x.x.x.exe`
-- macOS: `Chater-x.x.x.dmg`
-- Linux: `Chater-x.x.x.AppImage` 或 `.deb`
+- Windows: `eechat-Setup-x.x.x.exe`
+- macOS: `eechat-x.x.x.dmg`
+- Linux: `eechat-x.x.x.AppImage` 或 `.deb`
 
 #### 从源码构建
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/eechat.git
+git clone https://github.com/Lucassssss/eechat.git
 cd eechat
 
 # 安装依赖

@@ -80,7 +80,7 @@ eechat 专为本地部署设计，确保您的数据安全和最佳用户体验�
 
 #### 下载预构建包
 
-从[发布页面](https://github.com/yourusername/chater/releases)下载适合您系统的安装包：
+从[发布页面](https://github.com/Lucassssss/eechat/releases)下载适合您系统的安装包：
 
 - Windows: `eechat-Setup-x.x.x.exe`
 - macOS: `eechat-x.x.x.dmg`
@@ -90,8 +90,8 @@ eechat 专为本地部署设计，确保您的数据安全和最佳用户体验�
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/chater.git
-cd chater
+git clone https://github.com/Lucassssss/eechat.git
+cd eechat
 
 # 安装依赖
 npm install
