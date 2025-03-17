@@ -59,9 +59,9 @@ class ChatService extends Service {
         if (ctx.res.writableEnded) {
           break
         }
-        // reasoning_content, 
+        // reasoning_content,
         // finish_reason
-        if(!chunk.choices[0].delta.content) {
+        if (!chunk.choices[0].delta.content) {
           continue
         }
         // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
@@ -71,9 +71,9 @@ class ChatService extends Service {
             chunk.choices[0].delta &&
             chunk.choices[0].delta.content) ||
           ''
-          if (content) {
-            assistantMessage += content
-          }
+        if (content) {
+          assistantMessage += content
+        }
         // todo: 用量信息
         // todo: session 会话信息
       }
@@ -389,6 +389,54 @@ class ChatService extends Service {
     } catch (error) {
       ctx.logger.error('修改会话标题失败:', error)
       throw new Error('修改会话标题失败:' + error.message)
+    }
+  }
+
+  async updateSettings(sessionId, settings) {
+    const { ctx } = this
+    try {
+      const session = await ctx.model.ChatSession.findByPk(sessionId)
+      if (!session) {
+        throw new Error('会话不存在')
+      }
+
+      // 更新会话设置
+      const updateData = {
+        title: settings.title,
+        system_prompt: settings.systemPrompt,
+        temperature: settings.temperature?.[0],
+        top_p: settings.top_p?.[0],
+        presence_penalty: settings.presence_penalty?.[0],
+        frequency_penalty: settings.frequency_penalty?.[0],
+      }
+
+      await session.update(updateData)
+      return session
+    } catch (error) {
+      ctx.logger.error('更新会话设置失败:', error)
+      throw new Error('更新会话设置失败: ' + error.message)
+    }
+  }
+
+  async getSettings(sessionId) {
+    const { ctx } = this
+    try {
+      const session = await ctx.model.ChatSession.findByPk(sessionId)
+      if (!session) {
+        throw new Error('会话不存在')
+      }
+
+      return {
+        title: session.title,
+        systemPrompt: session.system_prompt,
+        temperature: session.temperature,
+        top_p: session.top_p,
+        presence_penalty: session.presence_penalty,
+        frequency_penalty: session.frequency_penalty,
+      }
+    } catch (error) {
+      ctx.logger.error('获取会话设置失败:', error)
+      throw new Error('获取会话设置失败: ' + error.message)
     }
   }
 }

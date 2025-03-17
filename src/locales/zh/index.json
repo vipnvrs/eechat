@@ -70,6 +70,10 @@
       "deleteSuccessDesc": "会话 \"{title}\" 已被删除",
       "deleteFailed": "删除失败",
       "unknownError": "未知错误"
+    },
+    "promptEditor": {
+      "title": "编辑提示词",
+      "placeholder": "请在此输入提示词..."
     }
   },
   "discover": {

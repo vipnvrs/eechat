@@ -18,8 +18,8 @@
     // ],
     "target": [
       {
-        // "target": "zip",
-        "target": "dmg",
+        "target": "zip",
+        // "target": "dmg",
         "arch": [
           // "x64",
           "arm64"
@@ -77,8 +77,8 @@
     }
   ],
   "releaseInfo": {
-    "releaseNotes": "更新日志： \n1.使用新的地址",
-    "releaseDate": "2025-3-10"
+    // "releaseNotes": "更新日志： \n1.使用新的地址",
+    // "releaseDate": "2025-3-10"
   },
   "publish": [{
     // "provider": "generic",

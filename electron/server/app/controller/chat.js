@@ -86,6 +86,31 @@ class ChatController extends Controller {
       ctx.body = ctx.helper.error(error.message)
     }
   }
+
+  async updateSettings() {
+    const { ctx } = this
+    const { id } = ctx.params
+    const settings = ctx.request.body
+
+    try {
+      const result = await ctx.service.chat.updateSettings(id, settings)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  async getSettings() {
+    const { ctx } = this
+    const { id } = ctx.params
+
+    try {
+      const settings = await ctx.service.chat.getSettings(id)
+      ctx.body = ctx.helper.success(settings)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
 }
 
 module.exports = ChatController

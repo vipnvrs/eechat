@@ -19,7 +19,9 @@ class DeepseekService extends BaseLLMService {
     try {
       console.log(config)
       const client = await this.createClient(config)
-      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
+      const model_id = model.id.includes(':')
+        ? model.id.split(model.provider_id + ':').pop()
+        : model.id
       const response = await client.chat.completions.create({
         model: model_id,
         messages: [{ role: 'user', content: 'test' }],
@@ -27,7 +29,7 @@ class DeepseekService extends BaseLLMService {
       })
       return response.choices.length > 0
     } catch (error) {
-      if(error.status == 401) {
+      if (error.status == 401) {
         throw new Error('连接失败，请检查您的 ApiKey')
       } else {
         throw new Error(`连接测试失败: ${error.message}`)
@@ -40,19 +42,43 @@ class DeepseekService extends BaseLLMService {
     return super.listModels()
   }
 
-  async chat(model, messages, config) {
+  /**
+   *
+   * sessionSettings = {
+   *   title: '',
+   *   systemPrompt: '',
+   *   temperature: 0.7,
+   *   top_p: 1,
+   *   presence_penalty: 0,
+   *   frequency_penalty: 0,
+   * }
+   */
+  async chat(model, messages, config, sessionSettings) {
     try {
       const configSaved = await this.getConfig(model.provider_id)
       console.log(configSaved)
       const client = await this.createClient(configSaved)
-      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
+      const model_id = model.id.includes(':')
+        ? model.id.split(model.provider_id + ':').pop()
+        : model.id
+
+      const messagesWithSystemPrompt = sessionSettings.systemPrompt
+        ? [
+            { role: 'system', content: sessionSettings.systemPrompt },
+            ...messages,
+          ]
+        : messages
+      console.log(sessionSettings)
+
       const response = await client.chat.completions.create({
         model: model_id,
-        // model: 'deepseek-chat',
-        messages,
+        messages: messagesWithSystemPrompt,
         stream: true,
         // max_tokens: 2048,
-        // temperature: 0.7,
+        // temperature: sessionSettings.temperature,
+        // top_p: sessionSettings.top_p,
+        // presence_penalty: sessionSettings.presence_penalty,
+        // frequency_penalty: sessionSettings.frequency_penalty,
       })
       // return response.choices[0].message.content
       return response
@@ -66,7 +92,9 @@ class DeepseekService extends BaseLLMService {
     try {
       const configSaved = await this.getConfig(model.provider_id)
       const client = await this.createClient(configSaved)
-      const model_id = model.id.includes(':') ? model.id.split(model.provider_id + ':').pop()  : model.id
+      const model_id = model.id.includes(':')
+        ? model.id.split(model.provider_id + ':').pop()
+        : model.id
       const response = await client.chat.completions.create({
         model: model_id,
         messages,

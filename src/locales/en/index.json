@@ -59,6 +59,71 @@
       "vocabulary": "Vocabulary",
       "saveSettings": "Save Settings"
     },
+    "promptEditor": {
+      "title": "Edit Prompt",
+      "placeholder": "Enter your prompt here..."
+    }
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "timeGroup": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "within7days": "Last 7 days",
+      "within30days": "Last 30 days",
+      "monthFormat": "MMMM",
+      "yearMonthFormat": "MMMM YYYY"
+    }
+  },
+  "chat": {
+    "scrollToBottom": "Scroll to Bottom",
+    "newChat": "Chat",
+    "send": "Send",
+    "typing": "Typing...",
+    "thinking": "Thinking...",
+    "clearConversation": "Clear Conversation",
+    "exportConversation": "Export Conversation",
+    "inputPlaceholder": "Type a message, press Enter to send, Shift + Enter for new line",
+    "discover": {
+      "title": "Discover",
+      "searchPlaceholder": "Enter content to search...",
+      "mine": "Mine",
+      "assistant": "Assistant",
+      "categories": {
+        "all": "All",
+        "academic": "Academic",
+        "copywriting": "Copywriting",
+        "design": "Design",
+        "commercial": "Commercial",
+        "programming": "Programming",
+        "technology": "Technology",
+        "music": "Music",
+        "openSource": "Open Source",
+        "financial": "Financial",
+        "medical": "Medical",
+        "legal": "Legal",
+        "education": "Education",
+        "entertainment": "Entertainment",
+        "government": "Government",
+        "other": "Other"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "chatName": "Chat Name",
+      "systemPrompt": "System Prompt",
+      "rolePrompt": "Role Setting",
+      "creativity": "Creativity",
+      "openness": "Openness",
+      "expressiveness": "Expressiveness",
+      "vocabulary": "Vocabulary",
+      "saveSettings": "Save Settings"
+    },
     "sidebar": {
       "chat": "Chat",
       "confirmDelete": "Confirm Delete Chat?",

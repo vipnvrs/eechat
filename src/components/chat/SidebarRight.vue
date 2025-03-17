@@ -12,11 +12,15 @@ import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { SquarePen } from 'lucide-vue-next'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import PromptEditor from '@/components/chat/PromptEditor.vue'
+import { chatApi } from '@/api/request'
+import { useToast } from '@/components/ui/toast/use-toast'
 
 const { t } = useI18n()
+const { toast } = useToast()
 
 const formData = reactive({
   title: '',
@@ -28,8 +32,65 @@ const formData = reactive({
 })
 
 const props = defineProps({
-  activeSession: Object,
+  activeSession: {
+    type: Object,
+    required: true
+  }
 })
+
+watch(
+  () => props.activeSession,
+  async (session) => {
+    if (session?.id) {
+      try {
+        const settings = await chatApi.getSettings(session.id)
+        formData.title = settings.title
+        formData.systemPrompt = settings.systemPrompt || 'You are a helpful assistant'
+        formData.temperature = [settings.temperature ?? 0.6]
+        formData.top_p = [settings.top_p ?? 1]
+        formData.presence_penalty = [settings.presence_penalty ?? 0]
+        formData.frequency_penalty = [settings.frequency_penalty ?? 0]
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: t('common.error'),
+          description: (error as Error).message,
+        })
+      }
+    }
+  },
+  { immediate: true, deep: true },
+)
+
+const handleSubmit = async () => {
+  try {
+    if (!props.activeSession?.id) {
+      throw new Error('会话不存在')
+    }
+    
+    await chatApi.updateSettings(props.activeSession.id, {
+      title: formData.title,
+      systemPrompt: formData.systemPrompt,
+      temperature: formData.temperature,
+      top_p: formData.top_p,
+      presence_penalty: formData.presence_penalty,
+      frequency_penalty: formData.frequency_penalty,
+    })
+    
+    toast({
+      title: t('common.success'),
+      description: t('chat.settings.saveSuccess'),
+    })
+  } catch (error) {
+    toast({
+      variant: 'destructive',
+      title: t('common.error'),
+      description: (error as Error).message,
+    })
+  }
+}
+
+const isPromptEditorOpen = ref(false)
 
 watch(
   () => props.activeSession,
@@ -41,8 +102,12 @@ watch(
   { deep: true },
 )
 
-const handleSubmit = () => {
-  console.log('Form submitted!', formData)
+const openPromptEditor = () => {
+  isPromptEditorOpen.value = true
+}
+
+const savePrompt = (newPrompt: string) => {
+  formData.systemPrompt = newPrompt
 }
 </script>
 
@@ -63,13 +128,13 @@ const handleSubmit = () => {
               <span>{{ t('chat.settings.systemPrompt') }}</span>
               <Badge variant="outline">{{ t('chat.settings.rolePrompt') }}</Badge>
             </span>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" @click="openPromptEditor">
               <SquarePen></SquarePen>
             </Button>
           </Label>
           <Textarea
             type="text"
-            placeholder="shadcn"
+            placeholder=""
             v-model="formData.systemPrompt"
           />
         </div>
@@ -145,4 +210,10 @@ const handleSubmit = () => {
       </Button></SidebarFooter
     >
   </Sidebar>
+  
+  <PromptEditor 
+    v-model:isOpen="isPromptEditorOpen"
+    :initialPrompt="formData.systemPrompt"
+    @save="savePrompt"
+  />
 </template>

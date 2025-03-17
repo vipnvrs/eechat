@@ -165,6 +165,33 @@ export const chatApi = {
   async getMessages(sessionId) {
     return request.get(`/api/chat/${sessionId}`)
   },
+
+  // 获取会话设置
+  async getSettings(sessionId: number) {
+    return request.get<{
+      title: string
+      systemPrompt: string
+      temperature: number
+      top_p: number
+      presence_penalty: number
+      frequency_penalty: number
+    }>(`/api/session/${sessionId}/settings`)
+  },
+
+  // 更新会话设置
+  async updateSettings(
+    sessionId: number,
+    settings: {
+      title?: string
+      systemPrompt?: string
+      temperature?: number[]
+      top_p?: number[]
+      presence_penalty?: number[]
+      frequency_penalty?: number[]
+    },
+  ) {
+    return request.post(`/api/session/${sessionId}/settings`, settings)
+  },
 }
 
 export const ollamaApi = {
@@ -212,7 +239,7 @@ export const llmApi = {
 
   // 测试连接
   async testConnection(provider: string, config: any, model) {
-    return request.post(`/api/llm/test/${provider}`, {...config, model})
+    return request.post(`/api/llm/test/${provider}`, { ...config, model })
   },
 
   // 获取提供商列表
@@ -273,6 +300,9 @@ const handleStream = async (response, onProgress) => {
   const reader = response.body?.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
+  let isThinking = false
+  let thinkContent = ''
+  let formalContent = ''
 
   try {
     while (true) {
@@ -288,28 +318,31 @@ const handleStream = async (response, onProgress) => {
           if (!line.trim()) return
           try {
             const data = JSON.parse(line)
-            onProgress?.(data.choices[0]?.delta?.content || '')
+            const content = data.choices[0]?.delta?.content || ''
+
+            // 处理思考标记
+            if (content === '<think>') {
+              isThinking = true
+              // 只发送标记，不累加
+              onProgress?.('<think>')
+              return
+            }
+
+            if (isThinking && content === '</think>') {
+              isThinking = false
+              // 发送结束标记
+              onProgress?.('</think>')
+              return
+            }
+
+            // 直接发送增量内容，不在这里累加
+            onProgress?.(content)
           } catch (e) {
             console.error('解析错误:', e)
           }
         })
       }
       processChunk(decoder.decode(value, { stream: true }))
-
-      // const chunk = decoder.decode(value)
-      // const lines = chunk.split('\n')
-
-      // for (const line of lines) {
-      //   if (!line) continue
-      //   try {
-      //     const data = JSON.parse(line)
-      //     if (data.choices[0]?.delta?.content) {
-      //       onProgress?.(data.choices[0]?.delta?.content)
-      //     }
-      //   } catch (e) {
-      //     console.error('Parse response error:', e)
-      //   }
-      // }
     }
   } finally {
     reader?.releaseLock()

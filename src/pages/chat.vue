@@ -73,7 +73,6 @@ const sendMsgLocalOllama = async (model: LLMModel, msg: string) => {
     await chatApi.sendMessage(
       model,
       [
-        { role: "system", content: t("chat.systemPrompt") },
         ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
       ],
       activeSession.value.id,
@@ -109,7 +108,6 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
     await llmApi.sendMessageLlm(
       model,
       [
-        { role: "system", content: t("chat.systemPrompt") },
         ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
       ],
       activeSession.value.id,
@@ -136,7 +134,6 @@ const sendMsg = async (msg: string) => {
     sendMsgLlmApi(chatStore.model, msg)
   }
   scrollToBottom(true)
-  // todo 对话总结
   if (chatHistory.value.length == 2) {
     const config = {
       model: chatStore.model,

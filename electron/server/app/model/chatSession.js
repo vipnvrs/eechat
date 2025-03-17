@@ -1,5 +1,5 @@
 module.exports = app => {
-  const { INTEGER, STRING, DATE } = app.Sequelize
+  const { INTEGER, STRING, DATE, FLOAT, TEXT } = app.Sequelize
 
   const ChatSession = app.model.define(
     'chat_session',
@@ -27,6 +27,36 @@ module.exports = app => {
         defaultValue: 'deepseek-r1',
         comment: '使用的模型',
       },
+      system_prompt: {
+        type: TEXT,
+        allowNull: true,
+        defaultValue: 'You are a helpful assistant.',
+        comment: '会话提示词',
+      },
+      temperature: {
+        type: FLOAT,
+        allowNull: true,
+        defaultValue: 0.6,
+        comment: '温度参数',
+      },
+      top_p: {
+        type: FLOAT,
+        allowNull: true,
+        defaultValue: 1.0,
+        comment: '采样阈值',
+      },
+      presence_penalty: {
+        type: FLOAT,
+        allowNull: true,
+        defaultValue: 0.0,
+        comment: '存在惩罚',
+      },
+      frequency_penalty: {
+        type: FLOAT,
+        allowNull: true,
+        defaultValue: 0.0,
+        comment: '频率惩罚',
+      },
       created_at: {
         type: DATE,
         allowNull: false,
@@ -42,20 +72,11 @@ module.exports = app => {
     },
     {
       tableName: 'chat_session',
-      paranoid: true, // 启用软删除
-      timestamps: true, // 启用时间戳
-      underscored: true, // 使用下划线命名
+      paranoid: true,
+      timestamps: true,
+      underscored: true,
     },
   )
-
-  // 定义关联关系
-  // ChatSession.associate = function () {
-  //   app.model.ChatSession.hasMany(app.model.Message, {
-  //     foreignKey: 'session_id',
-  //     as: 'messages',
-  //     onDelete: 'CASCADE', // 删除会话时级联删除消息
-  //   })
-  // }
 
   return ChatSession
 }

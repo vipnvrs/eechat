@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, computed, nextTick, onBeforeUnmount } from "vue"
+import { ref, defineProps, computed, nextTick, onBeforeUnmount, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { LoaderCircle } from "lucide-vue-next"
 import remarkParse from "remark-parse"
@@ -20,6 +20,31 @@ const props = defineProps<{
 }>()
 const { t } = useI18n()
 const renderedHTML = ref("")
+const isThinking = ref(false)
+const thinkContent = ref("")
+const formalContent = ref("")
+
+// 监听消息变化，处理思考过程和正式内容
+watch(() => props.message, (newMessage) => {
+  if (newMessage.includes("<think>") && !newMessage.includes("</think>")) {
+    // 开始思考状态
+    isThinking.value = true
+    thinkContent.value = newMessage.replace("<think>", "")
+    formalContent.value = ""
+  } else if (newMessage.includes("<think>") && newMessage.includes("</think>")) {
+    // 思考已结束，提取思考内容和正式内容
+    isThinking.value = false
+    const thinkMatch = newMessage.match(/<think>([\s\S]*?)<\/think>/);
+    thinkContent.value = thinkMatch ? thinkMatch[1] : "";
+    formalContent.value = newMessage.replace(/<think>[\s\S]*?<\/think>/, "");
+  } else {
+    // 没有思考内容，只有正式内容
+    isThinking.value = false
+    thinkContent.value = ""
+    formalContent.value = newMessage
+  }
+}, { immediate: true })
+
 // 使用 remark 处理 Markdown
 const processor = unified()
   .use(remarkParse) // 解析 Markdown
@@ -32,8 +57,20 @@ const processor = unified()
   // .use(rehypeMermaid, mermaidOptions) // 简化配置
   .use(rehypeStringify) // 输出 HTML 字符串
 
-// 安全处理后的内容
+// 安全处理后的内容 - 添加这个计算属性以修复未定义的变量
 const sanitizedContent = computed(() => processor.processSync(props.message).toString())
+
+// 处理思考内容的 Markdown
+const processedThinkContent = computed(() => {
+  if (!thinkContent.value) return "";
+  return processor.processSync(thinkContent.value).toString();
+})
+
+// 处理正式内容的 Markdown
+const processedFormalContent = computed(() => {
+  if (!formalContent.value) return "";
+  return processor.processSync(formalContent.value).toString();
+})
 </script>
 
 <template>
@@ -48,14 +85,28 @@ const sanitizedContent = computed(() => processor.processSync(props.message).toS
     <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
       <div class="flex flex-col max-w-[80%]">
         <div
-          class="rounded-lg px-4 py-2 list-disc text-[14px] whitespace-wrap"
+          class="rounded-lg px-4 py-2 list-disc text-[14px] whitespace-wrap msg-item"
           :class="
             role === 'user'
               ? 'bg-primary text-primary-foreground'
               : 'bg-gray-100 dark:bg-primary-foreground dark:text-white'
           "
-          v-html="sanitizedContent"
-        ></div>
+        >
+          <!-- 思考中状态 -->
+          <div v-if="isThinking" class="thinking-container">
+            <div class="think" v-html="processedThinkContent"></div>
+            <div class="thinking-indicator">
+              <LoaderCircle class="animate-spin w-4 h-4 inline-block mr-1"></LoaderCircle>
+              <span>{{ t('chat.thinking') }}</span>
+            </div>
+          </div>
+          
+          <!-- 思考已完成，显示思考内容和正式内容 -->
+          <template v-else>
+            <div v-if="thinkContent" class="think mb-3" v-html="processedThinkContent"></div>
+            <div v-html="processedFormalContent || sanitizedContent"></div>
+          </template>
+        </div>
       </div>
     </div>
   </div>
@@ -228,12 +279,34 @@ li pre {
   max-width: 100%;
   height: auto;
 }
+
+/* 思考状态样式 */
+.thinking-container {
+  position: relative;
+}
+
+.thinking-indicator {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  font-style: italic;
+  color: #666;
+  font-size: 14px;
+}
+
+:root[class~="dark"] .thinking-indicator {
+  color: #aaa;
+}
 </style>
 
 <style>
 .think {
   font-style: italic;
   color: #555;
-  font-size: 14px;
+}
+
+:root[class~="dark"] .think {
+  color: #aaa;
+  border-left-color: #555;
 }
 </style>
