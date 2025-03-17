@@ -4,16 +4,19 @@ import { useI18n } from 'vue-i18n'
 import { setLanguage } from '@/i18n'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
+type AvailableLanguages = 'en' | 'zh'
+
 const { locale } = useI18n()
-const currentLanguage = ref(locale.value)
+const currentLanguage = ref<AvailableLanguages>(locale.value as AvailableLanguages)
 
 const changeLanguage = (value: string) => {
-  currentLanguage.value = value
-  setLanguage(value)
+  const lang = value as AvailableLanguages
+  currentLanguage.value = lang
+  setLanguage(lang)
 }
 
 onMounted(() => {
-  currentLanguage.value = locale.value
+  currentLanguage.value = locale.value as AvailableLanguages
 })
 
 const languages = {
