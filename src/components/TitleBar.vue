@@ -10,6 +10,6 @@ const envStore = useEnvStore()
     class="bg-sidebar h-[30px] flex items-center justify-center text-center border-b text-xs font-bold"
     :class="envStore.isWeb && 'hidden'"
   >
-    ee.chat
+    eechat
   </div>
 </template>

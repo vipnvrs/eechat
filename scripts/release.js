@@ -27,7 +27,7 @@ const platforms = [
     try {
       // 调用 electron-builder 进行发布，使用 --prepackaged 指定预构建目录
       // 注意这里使用 npx，如果你已全局安装 electron-builder，也可以直接调用 electron-builder
-      execSync(`npx electron-builder --publish=always --prepackaged release/${version}`, {
+      execSync(`npx electron-builder --publish=onTag --prepackaged release/${version}`, {
         stdio: 'inherit',
       })
       console.log(`发布完成！`)

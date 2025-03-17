@@ -1,7 +1,7 @@
 {
-  "name": "ee.chat-server",
+  "name": "eechat-server",
   "version": "1.0.0",
-  "description": "ee.chat server",
+  "description": "eechat server",
   "author": "lucas(lucas@9tharts.com)",
   "private": true,
   "egg": {

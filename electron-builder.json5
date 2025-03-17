@@ -1,9 +1,9 @@
 // @see https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "ee.ee.chat",
+  "appId": "ee.chat",
   "asar": true,
-  "productName": "ee.chat",
+  "productName": "eechat",
   "directories": {
     "output": "release/${version}"
   },
@@ -86,7 +86,7 @@
     // "url": "http://127.0.0.1:8080/"
       "provider": "github",
       "owner": "Lucassssss",
-      "repo": "updater",
+      "repo": "eechat",
       "private": false,
       "releaseType": "release"
   }]
