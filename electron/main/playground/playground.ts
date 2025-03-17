@@ -16,8 +16,8 @@ export class Playground {
     const isDev = process.env.NODE_ENV !== 'production'
 
     this.llamaPath = isDev
-      ? path.join(__dirname, './bin/llama-server')
-      : path.join(process.resourcesPath, 'bin/llama-server')
+      ? path.join(__dirname, './bin/win/llama-server')
+      : path.join(process.resourcesPath, 'bin/win/llama-server')
 
     // const modelPath = path.join(__dirname, "models", "your_model.gguf")
     // this.modelPath = `/Users/lucas/workspace/workspace/ai/deepseek/model/DeepSeek-R1-Distill-Qwen-7B-Q3_K_L.gguf`
