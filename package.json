@@ -21,7 +21,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build && electron-builder && electron-builder --publish always",
+    "build:win": "vue-tsc --noEmit && vite build && electron-builder --publish always --win",
     "build:pord": "vite build --mode production && electron-builder",
     "preview": "vite preview",
     "release": "node scripts/release.js",
