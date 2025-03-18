@@ -3,13 +3,13 @@ import { createClient } from '@supabase/supabase-js'
 import os from 'node:os'
 import { app, BrowserWindow, shell, ipcMain, screen } from 'electron'
 
-export const T = class T {
+export class Analytics {
   constructor() {
     this.supabase = this.init()
     this.initEvents()
   }
 
-  supabase: any
+  supabase
 
   init() {
     return createClient(

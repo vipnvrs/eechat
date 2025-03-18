@@ -226,9 +226,9 @@ onMounted(() => {
           </Breadcrumb>
         </div>
         <div class="flex items-center gap-2">
-          <!-- <Theme></Theme> -->
+          <Theme></Theme>
           
-          <Separator orientation="vertical" class="mx-1 h-4" />
+          <!-- <Separator orientation="vertical" class="mx-1 h-4" />
           <Button size="icon"
             variant="ghost"
             class="h-7 w-7">
@@ -239,7 +239,7 @@ onMounted(() => {
             variant="ghost"
             class="h-7 w-7">
             <SquareChevronLeft></SquareChevronLeft>
-          </Button>
+          </Button> -->
           <Separator orientation="vertical" class="mx-1 h-4" />
           <Button
             size="icon"

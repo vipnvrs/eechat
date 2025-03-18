@@ -17,7 +17,7 @@ import {
   type SidebarProps,
 } from '@/components/ui/sidebar'
 import Icon from '@/components/icon.vue'
-import { Brain, HardDrive } from 'lucide-vue-next'
+import { Brain, HardDrive, Heart,PocketKnife } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
 import About from '@/components/setting/About.vue'
@@ -50,7 +50,7 @@ const menuData = [
   },
   {
     label: t('settings.sidebar.general'),
-    icon: Brain,
+    icon: Heart,
     items: [
       {
         label: t('settings.sidebar.interface'),
@@ -60,16 +60,18 @@ const menuData = [
       },
       {
         label: t('settings.sidebar.about'),
-        icon: Brain,
+        icon: Heart,
         key: 'about',
         component: markRaw(About),
       },
-      {
-        label: t('settings.sidebar.playground'),
-        icon: Brain,
-        key: 'playground',
-        component: markRaw(Playground),
-      },
+      ...(import.meta.env.MODE === 'development' ? [
+        {
+          label: t('settings.sidebar.playground'),
+          icon: PocketKnife,
+          key: 'playground',
+          component: markRaw(Playground),
+        },
+      ] : [])
     ],
   },
   // {

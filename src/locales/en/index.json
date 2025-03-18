@@ -26,31 +26,6 @@
     "clearConversation": "Clear Conversation",
     "exportConversation": "Export Conversation",
     "inputPlaceholder": "Type a message, press Enter to send, Shift + Enter for new line",
-    "discover": {
-      "title": "Discover",
-      "searchPlaceholder": "Enter content to search...",
-      "mine": "Mine",
-      "assistant": "Assistant",
-      "categories": {
-        "translation": "Translation",
-        "all": "All",
-        "academic": "Academic",
-        "copywriting": "Copywriting",
-        "design": "Design",
-        "commercial": "Commercial",
-        "programming": "Programming",
-        "technology": "Technology",
-        "music": "Music",
-        "openSource": "Open Source",
-        "financial": "Financial",
-        "medical": "Medical",
-        "legal": "Legal",
-        "education": "Education",
-        "entertainment": "Entertainment",
-        "government": "Government",
-        "other": "Other"
-      }
-    },
     "settings": {
       "title": "Settings",
       "chatName": "Chat Name",
@@ -88,6 +63,7 @@
     "pageTitle": "Explore Premium AI Agents",
     "pageDescription": "Use these template applications, or customize your own based on the templates.",
     "categories": {
+      "translation": "Translation",
       "all": "All",
       "academic": "Academic",
       "copywriting": "Copywriting",
@@ -233,6 +209,11 @@
     "models": {
       "localModel": "Local Model",
       "apiModel": "API Model Configuration"
+    },
+    "about": {
+      "description": "A simple and easy-to-use, locally deployed LLM tool.",
+      "star": "Star",
+      "accelerate": "Accelerate development"
     }
   }
 }

@@ -7,7 +7,7 @@ import { spawn } from 'child_process'
 import { AppUpdater, registerUpdaterHandlers } from './updater'
 import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
 import { Playground } from './playground/playground'
-import { T } from './t'
+import { Analytics } from './analytics'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -27,16 +27,6 @@ process.on('uncaughtException', error => {
   log.error('未捕获的异常:', error)
 })
 
-// The built directory structure
-//
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
-// │ └─┬ preload
-// │   └── index.mjs   > Preload-Scripts
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
-//
 process.env.APP_ROOT = path.join(__dirname, '../..')
 
 export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron')
@@ -69,7 +59,7 @@ async function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   const windowWidth = Math.min(1200, width * 0.8)
   const windowHeight = Math.min(800, height * 0.8)
-  const t = new T()
+  new Analytics()
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),
@@ -94,14 +84,12 @@ async function createWindow() {
   })
 
   win.webContents.openDevTools()
-  // 隐藏菜单栏
   win.setMenuBarVisibility(false)
 
   if (VITE_DEV_SERVER_URL) {
-    // #298
     win.loadURL(VITE_DEV_SERVER_URL)
-    // Open devTool if the app is not packaged
-    win.webContents.openDevTools()
+    // Open devTool if the app is not packaged 
+    if(!app.isPackaged) win.webContents.openDevTools()
   } else {
     win.loadFile(indexHtml)
   }
@@ -166,7 +154,6 @@ async function stopEggServer(): Promise<void> {
 
 const initUpdate = () => {
   if (app.isPackaged && updater) {
-    // 延迟几秒检查更新，确保应用已完全启动
     setTimeout(() => {
       updater.checkUpdate()
     }, 3000)
@@ -229,24 +216,22 @@ ipcMain.handle('open-win', (_, arg) => {
   }
 })
 
-// 添加 ipcMain handler 来处理系统平台查询
 ipcMain.handle('get-platform', () => {
   return process.platform
 })
 
-// 添加执行命令的 handler
-ipcMain.handle('exec', async (_, command) => {
-  const { exec } = require('child_process')
-  return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(error)
-        return
-      }
-      resolve(stdout)
-    })
-  })
-})
+// ipcMain.handle('exec', async (_, command) => {
+//   const { exec } = require('child_process')
+//   return new Promise((resolve, reject) => {
+//     exec(command, (error, stdout, stderr) => {
+//       if (error) {
+//         reject(error)
+//         return
+//       }
+//       resolve(stdout)
+//     })
+//   })
+// })
 
 // 添加打开外部链接的 handler
 ipcMain.handle('open-external', (_, url) => {

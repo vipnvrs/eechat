@@ -26,31 +26,6 @@
     "clearConversation": "清空对话",
     "exportConversation": "导出对话",
     "inputPlaceholder": "输入消息，使用 Enter 发送, Shift + Enter 换行",
-    "discover": {
-      "title": "发现",
-      "searchPlaceholder": "输入要搜索的内容...",
-      "mine": "我的",
-      "assistant": "助手",
-      "categories": {
-      "translation": "翻译",
-        "all": "全部",
-        "academic": "学术",
-        "copywriting": "文案",
-        "design": "设计",
-        "commercial": "商业",
-        "programming": "编程",
-        "technology": "科技",
-        "music": "音乐",
-        "openSource": "开源",
-        "financial": "金融",
-        "medical": "医疗",
-        "legal": "法律",
-        "education": "教育",
-        "entertainment": "娱乐",
-        "government": "政府",
-        "other": "其他"
-      }
-    },
     "settings": {
       "title": "设置",
       "chatName": "对话名称",
@@ -234,6 +209,11 @@
       "interface": "界面",
       "about": "关于",
       "playground": "Playground"
+    },
+    "about": {
+      "description": "一款简单易用，本地化部署的大模型工具。",
+      "star": "Star",
+      "accelerate": "加速开发"
     }
   }
 }

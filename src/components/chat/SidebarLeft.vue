@@ -151,6 +151,12 @@ const handleRemoveSession = item => {
   sessionToDelete.value = JSON.parse(JSON.stringify(item))
   console.log(sessionToDelete.value)
 }
+
+const handleCancelDelete = () => {
+  sessionToDelete.value = null
+  deleteLoading.value = false
+}
+
 const confirmDeleteSession = async () => {
   if (!sessionToDelete.value) return
   deleteLoading.value = true
@@ -242,7 +248,7 @@ const groupedSessions = computed(() => {
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel>{{ t('common.cancel') }}</AlertDialogCancel>
+        <AlertDialogCancel @click="handleCancelDelete">{{ t('common.cancel') }}</AlertDialogCancel>
         <AlertDialogAction :disabled="deleteLoading" @click="confirmDeleteSession">
           <Loader2 v-if="deleteLoading" class="mr-2 h-4 w-4 animate-spin" />
           {{ deleteLoading ? t('chat.sidebar.deleting') : t('chat.sidebar.confirmDeleteBtn') }}
