@@ -2,7 +2,7 @@
   <img src="./icon/icon.png" alt="EE Chat Application Screenshot" width="60" />
   <h1><a href="https://ee.chat">eechat</a> </h1>
   <p>🚀 Powerful Local AI Chat Application - Secure, Efficient, Personalized</p>
-  <div>  English |  <a href="./README.zh-CN.md">简体中文</a>  </div>
+  <p>  English |  <a href="./README.zh-CN.md">简体中文</a>  </p>
 
   <p style="margin-top:20px">
     <a href="#core-advantages">Core Advantages</a> •
