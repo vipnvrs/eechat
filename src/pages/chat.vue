@@ -22,7 +22,7 @@ import ModelSelect from "@/components/ModelSelect.vue"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import Theme from "@/components/Theme.vue"
 import { chatApi, llmApi } from "@/api/request"
-import { PanelLeft, PanelRight, ArrowDownToLine } from "lucide-vue-next"
+import { PanelLeft, PanelRight, ArrowDownToLine,SquareChevronRight, SquareChevronLeft } from "lucide-vue-next"
 
 interface Message {
   role: "system" | "user" | "assistant"
@@ -226,8 +226,21 @@ onMounted(() => {
           </Breadcrumb>
         </div>
         <div class="flex items-center gap-2">
-          <Theme></Theme>
-          <Separator orientation="vertical" class="mx-2 h-4" />
+          <!-- <Theme></Theme> -->
+          
+          <Separator orientation="vertical" class="mx-1 h-4" />
+          <Button size="icon"
+            variant="ghost"
+            class="h-7 w-7">
+            <SquareChevronRight></SquareChevronRight>
+          </Button>
+          <Separator orientation="vertical" class="mx-1 h-4" />
+          <Button size="icon"
+            variant="ghost"
+            class="h-7 w-7">
+            <SquareChevronLeft></SquareChevronLeft>
+          </Button>
+          <Separator orientation="vertical" class="mx-1 h-4" />
           <Button
             size="icon"
             variant="ghost"

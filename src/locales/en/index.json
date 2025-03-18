@@ -6,6 +6,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
     "timeGroup": {
       "today": "Today",
       "yesterday": "Yesterday",
@@ -30,6 +32,7 @@
       "mine": "Mine",
       "assistant": "Assistant",
       "categories": {
+        "translation": "Translation",
         "all": "All",
         "academic": "Academic",
         "copywriting": "Copywriting",
@@ -57,72 +60,8 @@
       "openness": "Openness",
       "expressiveness": "Expressiveness",
       "vocabulary": "Vocabulary",
-      "saveSettings": "Save Settings"
-    },
-    "promptEditor": {
-      "title": "Edit Prompt",
-      "placeholder": "Enter your prompt here..."
-    }
-  },
-  "common": {
-    "ok": "OK",
-    "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "loading": "Loading...",
-    "timeGroup": {
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "within7days": "Last 7 days",
-      "within30days": "Last 30 days",
-      "monthFormat": "MMMM",
-      "yearMonthFormat": "MMMM YYYY"
-    }
-  },
-  "chat": {
-    "scrollToBottom": "Scroll to Bottom",
-    "newChat": "Chat",
-    "send": "Send",
-    "typing": "Typing...",
-    "thinking": "Thinking...",
-    "clearConversation": "Clear Conversation",
-    "exportConversation": "Export Conversation",
-    "inputPlaceholder": "Type a message, press Enter to send, Shift + Enter for new line",
-    "discover": {
-      "title": "Discover",
-      "searchPlaceholder": "Enter content to search...",
-      "mine": "Mine",
-      "assistant": "Assistant",
-      "categories": {
-        "all": "All",
-        "academic": "Academic",
-        "copywriting": "Copywriting",
-        "design": "Design",
-        "commercial": "Commercial",
-        "programming": "Programming",
-        "technology": "Technology",
-        "music": "Music",
-        "openSource": "Open Source",
-        "financial": "Financial",
-        "medical": "Medical",
-        "legal": "Legal",
-        "education": "Education",
-        "entertainment": "Entertainment",
-        "government": "Government",
-        "other": "Other"
-      }
-    },
-    "settings": {
-      "title": "Settings",
-      "chatName": "Chat Name",
-      "systemPrompt": "System Prompt",
-      "rolePrompt": "Role Setting",
-      "creativity": "Creativity",
-      "openness": "Openness",
-      "expressiveness": "Expressiveness",
-      "vocabulary": "Vocabulary",
-      "saveSettings": "Save Settings"
+      "saveSettings": "Save Settings",
+      "saveSuccess": "Save Success"
     },
     "sidebar": {
       "chat": "Chat",
@@ -135,9 +74,12 @@
       "deleteSuccessDesc": "Chat \"{title}\" has been deleted",
       "deleteFailed": "Delete Failed",
       "unknownError": "Unknown Error"
+    },
+    "promptEditor": {
+      "title": "Edit Prompt",
+      "placeholder": "Enter your prompt here..."
     }
   },
-
   "discover": {
     "title": "Discover",
     "searchPlaceholder": "Enter content to search...",
@@ -268,7 +210,6 @@
       "modelManagement": "Model Management",
       "moreModels": "More Models?",
       "installed": "Installed",
-      "confirmDelete": "Confirm Delete Model?",
       "confirmDeleteDesc": "This action will delete the model {model}, you'll need to download it again to use it.",
       "deleting": "Deleting...",
       "confirmDelete": "Confirm Delete",
@@ -276,7 +217,9 @@
       "downloadOllamaDesc": "Click confirm to open browser and download Ollama. Please restart the software after installation to check the installation status.",
       "downloadNow": "Download Now",
       "installSuccess": "{model} Installation Successful",
-      "installSuccessDesc": "Model has been installed successfully. You can start using it now."
+      "installSuccessDesc": "Model has been installed successfully. You can start using it now.",
+      "serviceNotRunning": "Model Manager Not Running",
+      "serviceNotInstalled": "Model Manager Not Installed"
     },
     "sidebar": {
       "models": "Models",

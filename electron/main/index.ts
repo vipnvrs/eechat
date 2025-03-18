@@ -7,7 +7,7 @@ import { spawn } from 'child_process'
 import { AppUpdater, registerUpdaterHandlers } from './updater'
 import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
 import { Playground } from './playground/playground'
-
+import { T } from './t'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -69,7 +69,7 @@ async function createWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   const windowWidth = Math.min(1200, width * 0.8)
   const windowHeight = Math.min(800, height * 0.8)
-
+  const t = new T()
   win = new BrowserWindow({
     title: 'Main window',
     icon: path.join(process.env.VITE_PUBLIC, 'favicon.ico'),

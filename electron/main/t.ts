@@ -1,0 +1,86 @@
+import { machineIdSync } from 'node-machine-id'
+import { createClient } from '@supabase/supabase-js'
+import os from 'node:os'
+import { app, BrowserWindow, shell, ipcMain, screen } from 'electron'
+
+export const T = class T {
+  constructor() {
+    this.supabase = this.init()
+    this.initEvents()
+  }
+
+  supabase: any
+
+  init() {
+    return createClient(
+      'https://wcyaxelmpxohdbzngldd.supabase.co',
+       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndjeWF4ZWxtcHhvaGRiem5nbGRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIyNzY3MTcsImV4cCI6MjA1Nzg1MjcxN30.H-eWWldSBMuJorUhu8Y6t6LEbkAnqoSneE4MsaRFom4'
+    )
+  }
+
+  initEvents() {
+    this.recordInstallation()
+    this.recordUserActivity()
+  }
+
+  async recordInstallation() {
+    const today = new Date().toISOString().split('T')[0]
+    const deviceId = machineIdSync()
+    try {
+      // 检查设备是否已安装
+      const { data: existingDevice } = await this.supabase
+        .from('device_installations')
+        .select('id')
+        .eq('device_id', deviceId)
+        .single()
+  
+      if (!existingDevice) {
+        await this.supabase
+          .from('device_installations')
+          .insert([{
+            device_id: deviceId,
+            install_date: today,
+            os_type: process.platform,
+            os_version: os.release(),
+            os_arch: process.arch,
+            app_version: app.getVersion(),
+            node_version: process.version
+          }])
+        console.log('[T] New installation recorded successfully')
+      } else {
+        console.log('[T] Device already installed, skipping installation record')
+      }
+    } catch (error) {
+      console.error('[T] Error recording installation:', error)
+    }
+  }
+
+  async recordUserActivity() {
+    const today = new Date().toISOString().split('T')[0]
+    const deviceId = machineIdSync()
+    try {
+      // 检查今天是否已记录过该设备的活跃状态
+      const { data: existingActivity } = await this.supabase
+        .from('activities')
+        .select('id')
+        .eq('device_id', deviceId)
+        .eq('date', today)
+      console.log(existingActivity);
+      
+      if (!existingActivity.length) {
+        const { error } = await this.supabase
+          .from('activities')
+          .insert([{
+            device_id: deviceId,
+            date: today
+          }])
+        if (error) throw error
+        console.log('[T] User activity recorded successfully')
+      } else {
+        console.log('[T] User activity already recorded today')
+      }
+    } catch (error) {
+      console.error('[T] Error recording user activity:', error)
+    }
+  }
+}

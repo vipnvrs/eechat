@@ -167,25 +167,26 @@ class OllamaService extends Service {
    * @returns {Promise<void>}
    */
   async install() {
-    const { platform } = process
-    try {
-      if (platform === 'win32') {
-        // 通过 HTTP 请求通知渲染进程打开下载页面
-        return { data: 'https://ollama.com/download/OllamaSetup.exe' }
-      } else {
-        // macOS 和 Linux 继续使用包管理器安装
-        const installCmd = 'brew install ollama'
-        await execAsync(installCmd)
-      }
-    } catch (error) {
-      if (platform === 'win32') {
-        throw new Error(
-          '请从官网下载并手动安装 Ollama: https://ollama.ai/download/windows',
-        )
-      } else {
-        throw new Error('安装模型管理器失败，请手动安装')
-      }
-    }
+    return { data: 'https://ollama.com/download' }
+    // const { platform } = process
+    // try {
+    //   if (platform === 'win32') {
+    //     // 通过 HTTP 请求通知渲染进程打开下载页面
+    //     return { data: 'https://ollama.com/download' }
+    //   } else {
+    //     // macOS 和 Linux 继续使用包管理器安装
+    //     const installCmd = 'brew install ollama'
+    //     await execAsync(installCmd)
+    //   }
+    // } catch (error) {
+    //   if (platform === 'win32') {
+    //     throw new Error(
+    //       '请从官网下载并手动安装 Ollama: https://ollama.ai/download/windows',
+    //     )
+    //   } else {
+    //     throw new Error('安装模型管理器失败，请手动安装')
+    //   }
+    // }
   }
 
   /**

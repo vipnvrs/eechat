@@ -92,17 +92,17 @@ watchEffect(() => {
 // 处理筛选变化
 const handleFilterChange = (values: FilterOption[]) => {
   // single select
-  emits("update:modelValue", values)
+  // emits("update:modelValue", values)
   // multiple select
-  // let val: FilterOption[] = []
-  // if (values[values.length - 1] === "all") {
-  //   val = ["all"]
-  // } else if (values.length > 0 && values.includes("all")) {
-  //   val = values.filter((v) => v !== "all")
-  // } else {
-  //   val = values
-  // }
-  // emits("update:modelValue", val)
+  let val: FilterOption[] = []
+  if (values[values.length - 1] === "all") {
+    val = ["all"]
+  } else if (values.length > 0 && values.includes("all")) {
+    val = values.filter((v) => v !== "all")
+  } else {
+    val = values
+  }
+  emits("update:modelValue", val)
 }
 
 // 处理搜索变化
@@ -114,7 +114,7 @@ const handleSearchChange = (value: string) => {
 <template>
   <div class="flex space-x-2 justify-between">
     <ToggleGroup
-      type="single"
+      type="multiple"
       variant="outline"
       size="sm"
       :model-value="modelValue"

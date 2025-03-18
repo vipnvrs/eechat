@@ -6,6 +6,8 @@
     "delete": "删除",
     "edit": "编辑",
     "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
     "timeGroup": {
       "today": "今天",
       "yesterday": "昨天",
@@ -30,6 +32,7 @@
       "mine": "我的",
       "assistant": "助手",
       "categories": {
+      "translation": "翻译",
         "all": "全部",
         "academic": "学术",
         "copywriting": "文案",
@@ -57,7 +60,8 @@
       "openness": "思维开放度",
       "expressiveness": "表述发散度",
       "vocabulary": "词汇丰富度",
-      "saveSettings": "保存设置"
+      "saveSettings": "保存设置",
+      "saveSuccess": "保存成功"
     },
     "sidebar": {
       "chat": "对话",
@@ -84,6 +88,7 @@
     "pageTitle": "探索精品智能体",
     "pageDescription": "使用这些模板应用程序，或根据模板自定义您自己的应用程序。",
     "categories": {
+      "translation": "翻译",
       "all": "全部",
       "academic": "学术",
       "copywriting": "文案",
@@ -206,7 +211,6 @@
       "modelManagement": "模型管理",
       "moreModels": "更多模型?",
       "installed": "已安装",
-      "confirmDelete": "确认删除模型?",
       "confirmDeleteDesc": "此操作将删除模型 {model}，删除后需要重新下载才能使用。",
       "deleting": "删除中...",
       "confirmDelete": "确认删除",
@@ -214,7 +218,9 @@
       "downloadOllamaDesc": "点击确认将打开浏览器下载 Ollama。完成安装后请重启本软件以检查安装状态。",
       "downloadNow": "马上下载",
       "installSuccess": "{model} 安装成功",
-      "installSuccessDesc": "模型已安装成功，快去使用吧。"
+      "installSuccessDesc": "模型已安装成功，快去使用吧。",
+      "serviceNotRunning": "模型管理器未运行",
+      "serviceNotInstalled": "模型管理器未安装"
     },
     "models": {
       "localModel": "本地模型",

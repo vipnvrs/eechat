@@ -235,11 +235,11 @@ const handleInstall = async () => {
         </template>
         <template v-if="!ollamaState.running && ollamaState.installed">
           <div class="rounded-full w-2 h-2 mr-3 bg-yellow-500"></div>
-          {{ ollamaState.error }}
+          {{ t('settings.localModel.serviceNotRunning') }}
         </template>
         <template v-if="!ollamaState.installed">
           <div class="rounded-full w-2 h-2 mr-3 bg-red-500"></div>
-          {{ ollamaState.error }}
+          {{ t('settings.localModel.serviceNotInstalled') }}
         </template>
         <div class="ml-2">
           <Button @click="getOllamaState" size="icon" variant="ghost">
