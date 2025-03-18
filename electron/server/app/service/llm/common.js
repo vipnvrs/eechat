@@ -83,7 +83,7 @@ class DeepseekService extends BaseLLMService {
       // return response.choices[0].message.content
       return response
     } catch (error) {
-      throw new Error(`对话失败: ${error.message}`)
+      throw new Error(`${error.message}`)
     }
   }
 

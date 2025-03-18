@@ -7,6 +7,9 @@ import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const version = ref(pkg.version)
+const github = () => {
+  window.ipcRenderer.invoke("open-external", "https://github.com/Lucassssss/eechat")
+}
 </script>
 
 <template>
@@ -14,7 +17,7 @@ const version = ref(pkg.version)
     <div>{{ t('settings.about.description') }}</div>
     <div>v{{ version }}</div>
     <div>
-      <Button class="flex items-center space-x-1 text-sm">
+      <Button @click="github" class="flex items-center space-x-1 text-sm">
         <Github></Github>
         <span>{{ t('settings.about.star') }}</span>
         <Star class=" fill-yellow-500 text-yellow-500"></Star>

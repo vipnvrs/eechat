@@ -10,7 +10,7 @@
  Target Server Version : 3045000 (3.45.0)
  File Encoding         : 65001
 
- Date: 14/03/2025 21:14:38
+ Date: 18/03/2025 19:07:46
 */
 
 PRAGMA foreign_keys = false;
@@ -113,7 +113,7 @@ INSERT INTO "llm_models" VALUES ('gitee-ai:glm-4-9b-chat', 'gitee-ai', 'glm-4-9b
 INSERT INTO "llm_models" VALUES ('deepseek:deepseek-chat', 'deepseek', 'DeepSeek Chat', 'DeepSeek Chat', 1, 78, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 INSERT INTO "llm_models" VALUES ('gitee-ai:bge-m3', 'gitee-ai', 'bge-m3', 'BAAI', 0, 79, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 INSERT INTO "llm_models" VALUES ('gitee-ai:DeepSeek-R1-Distill-Qwen-7B', 'gitee-ai', 'DeepSeek-R1-Distill-Qwen-7B', 'DeepSeek', 1, 80, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
-INSERT INTO "llm_models" VALUES ('deepseek:deepseek-reasoner', 'deepseek', 'DeepSeek Reasoner', 'DeepSeek Reasoner', 0, 81, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
+INSERT INTO "llm_models" VALUES ('deepseek:deepseek-reasoner', 'deepseek', 'DeepSeek Reasoner', 'DeepSeek Reasoner', 1, 81, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 INSERT INTO "llm_models" VALUES ('gitee-ai:InternVL2-8B', 'gitee-ai', 'InternVL2-8B', 'OpenGVLab', 0, 72, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 INSERT INTO "llm_models" VALUES ('together:google/gemma-2-27b-it', 'together', 'gemma-2-27b-it', 'Gemma', 0, 83, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 INSERT INTO "llm_models" VALUES ('gitee-ai:Qwen2-72B-Instruct', 'gitee-ai', 'Qwen2-72B-Instruct', 'Qwen', 0, 66, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
