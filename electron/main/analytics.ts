@@ -19,15 +19,32 @@ export class Analytics {
   }
 
   initEvents() {
+    const ip = this.getLocalIp()
+    console.log(ip);
+    
     this.recordInstallation()
     this.recordUserActivity()
+  }
+    
+  // 获取本地IP地址
+  getLocalIp() {
+    const interfaces = os.networkInterfaces()
+    console.log(interfaces);
+    for (const name of Object.keys(interfaces)) {
+      for (const net of interfaces[name]) {
+        if (!net.internal && net.family === 'IPv4') {
+          return net.address
+        }
+      }
+    }
+    return null
   }
 
   async recordInstallation() {
     const today = new Date().toISOString().split('T')[0]
     const deviceId = machineIdSync()
+
     try {
-      // 检查设备是否已安装
       const { data: existingDevice } = await this.supabase
         .from('device_installations')
         .select('id')
@@ -44,7 +61,8 @@ export class Analytics {
             os_version: os.release(),
             os_arch: process.arch,
             app_version: app.getVersion(),
-            node_version: process.version
+            node_version: process.version,
+            local_ip: this.getLocalIp()
           }])
         console.log('[T] New installation recorded successfully')
       } else {
