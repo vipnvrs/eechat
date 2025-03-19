@@ -8,6 +8,7 @@ import { llmApi, ollamaApi } from "@/api/request"
 import { LLMProvider, ModelProvider } from "@/types/llm"
 import { useRouter } from "vue-router"
 import { useColorMode } from '@vueuse/core'
+import { Analytics } from '@vercel/analytics/vue'
 const mode = useColorMode()
 
 const modelStore = useModelStore()
@@ -90,6 +91,7 @@ console.log(`isweb:`, envStore.isWeb)
 
 <template>
   <div class="h-full w-full overflow-hidden"><Layout></Layout></div>
+  <Analytics mode="production" />
 </template>
 
 <style>

@@ -20,8 +20,6 @@ export class Analytics {
 
   initEvents() {
     const ip = this.getLocalIp()
-    console.log(ip);
-    
     this.recordInstallation()
     this.recordUserActivity()
   }
@@ -83,7 +81,6 @@ export class Analytics {
         .select('id')
         .eq('device_id', deviceId)
         .eq('date', today)
-      console.log(existingActivity);
       
       if (!existingActivity.length) {
         const { error } = await this.supabase
