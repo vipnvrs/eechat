@@ -13,16 +13,6 @@ class ChatService extends Service {
   async sendMessage(model, messages, sessionId) {
     const { ctx } = this
     try {
-      // 如果没有会话ID,创建新会话
-      // if (!sessionId) {
-      //   const session = await this.createSession({
-      //     title: messages[0]?.content?.slice(0, 50) || '新对话',
-      //     uid: 'default-user',
-      //   })
-      //   sessionId = session.id
-      // }
-      // console.log('sendMessage', messages, sessionId)
-
       const openai = new OpenAI({
         baseURL: `${ollamaBaseUrl}/v1`,
         apiKey: 'dummy',
@@ -38,12 +28,10 @@ class ChatService extends Service {
     } catch (error) {
       ctx.logger.error('Chat service error:', error)
       await this.handleStreamError(error, ctx)
-      // 移除这里的 throw error，因为错误已经在 handleStreamError 中处理
     }
-    // 移除这里的 finally 块，让 handleStream 或 handleStreamError 负责结束响应
   }
   async handleStream(stream, ctx, messages, sessionId, model) {
-    // console.log('handleStream')
+    console.log('handleStream')
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -110,35 +98,40 @@ class ChatService extends Service {
     }
   }
   async handleStreamError(error, ctx) {
-    console.error('handleStreamError', error)
+    console.error('handleStreamError:', error)
 
     // 检查响应是否已结束
+    console.log('ctx.res.writableEnded:', ctx.res.writableEnded)
+    
     if (ctx.res.writableEnded) {
       return
     }
-
-    ctx.set({
-      'Content-Type': 'text/event-stream;charset=utf-8',
-      'Cache-Control': 'no-cache',
-      Connection: 'keep-alive',
-    })
-    ctx.res.statusCode = 200
-    const data = {
-      choices: [
-        {
-          delta: {
-            content: error.message,
+    try {
+      ctx.set({
+        'Content-Type': 'text/event-stream;charset=utf-8',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+      })
+      ctx.res.statusCode = 200
+      const data = {
+        choices: [
+          {
+            delta: {
+              content: error.message,
+            },
+            finish_reason: 'stop',
+            index: 0,
           },
-          finish_reason: 'stop',
-          index: 0,
-        },
-      ],
-    }
-    ctx.res.write(JSON.stringify(data) + '\n')
+        ],
+      }
+      ctx.res.write(JSON.stringify(data) + '\n')
 
-    // 确保只结束一次响应
-    if (!ctx.res.writableEnded) {
-      ctx.res.end()
+      // 确保只结束一次响应
+      if (!ctx.res.writableEnded) {
+        ctx.res.end()
+      }
+    } catch (error) {
+      ctx.logger.error('处理错误时发生错误:', error)
     }
   }
 

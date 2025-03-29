@@ -8,6 +8,9 @@ class DeepseekService extends BaseLLMService {
   }
 
   async createClient(config) {
+    if (!config || !config.baseUrl || !config.apiKey) {
+      throw new Error('请先配置模型的ApiKey和BaseUrl')
+    }
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),
       apiKey: config.apiKey,
@@ -17,7 +20,6 @@ class DeepseekService extends BaseLLMService {
 
   async testConnection(config, model) {
     try {
-      console.log(config)
       const client = await this.createClient(config)
       const model_id = model.id.includes(':')
         ? model.id.split(model.provider_id + ':').pop()
