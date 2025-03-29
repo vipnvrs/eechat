@@ -83,7 +83,6 @@ async function createWindow() {
     },
   })
 
-  win.webContents.openDevTools()
   win.setMenuBarVisibility(false)
 
   if (VITE_DEV_SERVER_URL) {
