@@ -27,7 +27,7 @@
       }
     ],
     "artifactName": "${productName}-mac-${arch}-${version}-Installer.${ext}",
-    "identity": null
+    // "identity": null
   },
   "win": {
     "icon": "icon/icons/win/icon.ico",
