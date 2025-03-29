@@ -114,6 +114,18 @@ export default defineConfig(({ command }) => {
                       })
                     },
                   },
+                  {
+                    name: 'copy-package-json',
+                    writeBundle() {
+                      // 复制 package.json 到 dist-electron 目录
+                      const pkgPath = path.join(__dirname, 'package.json')
+                      const destPath = path.join(
+                        __dirname,
+                        'dist-electron/package.json',
+                      )
+                      fs.copyFileSync(pkgPath, destPath)
+                    },
+                  },
                 ],
               },
             },

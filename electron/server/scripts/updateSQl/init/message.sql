@@ -38,10 +38,6 @@ CREATE TABLE "message" (
 -- Records of message
 -- ----------------------------
 INSERT INTO "message" VALUES (1, 1, 'default-user', 'user', 'Hi 👋 ', NULL, NULL, NULL, '2025-03-14 14:03:43.159 +00:00', '2025-03-14 14:03:43.159 +00:00', NULL);
-INSERT INTO "message" VALUES (2, 1, 'default-user', 'assistant', '<think>
-
-</think>
-
-Hello! How can I assist you today? 😊', NULL, NULL, NULL, '2025-03-14 14:03:43.163 +00:00', '2025-03-14 14:03:43.163 +00:00', NULL);
+INSERT INTO "message" VALUES (2, 1, 'default-user', 'assistant', '<think></think>Hello! How can I assist you today? 😊', NULL, NULL, NULL, '2025-03-14 14:03:43.163 +00:00', '2025-03-14 14:03:43.163 +00:00', NULL);
 
 PRAGMA foreign_keys = true;

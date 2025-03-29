@@ -22,33 +22,33 @@ class AppBootHook {
     try {
       // 关闭外键约束，这对SQLite很重要
       await this.app.model.query('PRAGMA foreign_keys = OFF;')
-      console.log('[App] 暂时关闭外键约束以便同步数据库结构')
+      this.app.logger.info('[App] 暂时关闭外键约束以便同步数据库结构')
 
       // 同步所有模型到数据库
       // 使用 alter: true 允许修改现有表结构
       await this.app.model.sync({ alter: true })
-      console.log('[App] 数据库结构同步完成')
+      this.app.logger.info('[App] 数据库结构同步完成')
 
       // 重新开启外键约束
       await this.app.model.query('PRAGMA foreign_keys = ON;')
-      console.log('[App] 重新开启外键约束')
+      this.app.logger.info('[App] 重新开启外键约束')
 
       // 检查数据库中的记录数量
       const providerCount = await this.app.model.LlmProvider.count()
       const modelCount = await this.app.model.LlmModel.count()
-      console.log(
+      this.app.logger.info(
         `[App] 数据库中共有 ${providerCount} 个提供商和 ${modelCount} 个模型`,
       )
     } catch (error) {
-      console.error('[App] 数据库同步出错:')
+      this.app.logger.error('[App] 数据库同步出错:', error)
       // 如果出现错误，尝试使用更安全的方式同步
       try {
-        console.log('[App] 尝试使用备用方式同步数据库...')
+        this.app.logger.info('[App] 尝试使用备用方式同步数据库...')
         // 只同步新表，不修改现有表
         await this.app.model.sync()
-        console.log('[App] 数据库基本同步完成')
+        this.app.logger.info('[App] 数据库基本同步完成')
       } catch (secondError) {
-        console.error('[App] 备用同步方式也失败:', secondError)
+        this.app.logger.error('[App] 备用同步方式也失败:', secondError)
       }
     }
   }
@@ -57,10 +57,10 @@ class AppBootHook {
     // 应用已经启动完毕
     try {
       const updateDatabase = require('./scripts/updateDatabase')
-      await updateDatabase()
-      console.log('数据库初始化/更新成功')
+      await updateDatabase(this.app.logger)
+      this.app.logger.info('数据库初始化/更新成功')
     } catch (error) {
-      console.error('数据库初始化/更新失败:', error)
+      this.app.logger.error('数据库初始化/更新失败:', error)
       // 如果数据库初始化失败，可以选择退出应用
       // process.exit(1)
     }
