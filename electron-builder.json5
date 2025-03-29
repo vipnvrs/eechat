@@ -72,13 +72,13 @@
       "to": "server/node_modules"
     }, {
       "from": "dist-electron/main/bin",
-      // "to": "main/bin"
       "to": "bin"
+    }, {
+      "from": "dist-electron/package.json",
+      "to": "package.json"
     }
   ],
   "releaseInfo": {
-    // "releaseNotes": "更新日志： \n1.使用新的地址",
-    // "releaseDate": "2025-3-10"
   },
   "publish": [{
     // "provider": "generic",

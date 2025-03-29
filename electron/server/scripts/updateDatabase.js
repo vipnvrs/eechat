@@ -1,16 +1,32 @@
 const fs = require('fs')
 const path = require('path')
 const sqlite3 = require('sqlite3').verbose()
-const { promisify } = require('util')
-const pkg = require('../../../package.json')
+let logger = null
+let pkg = null
+// console.log('process.env.NODE_ENV:', process.env.NODE_ENV)
+// console.log('process.resourcesPath:', process.resourcesPath)
 
 // 数据库文件路径
 const dbPath = path.join(__dirname, '../database/database.db')
 
 // SQL目录
-const sqlDir = path.join(__dirname, '../database/updateSQl')
+const sqlDir = path.join(__dirname, './updateSQl')
 const initSqlDir = path.join(sqlDir, 'init')
 const updateSqlDir = path.join(sqlDir, 'update')
+
+function getPkg() {
+  let pkgPath
+  const isDev = process.env.NODE_ENV !== 'production'
+  logger.info('isDev:', isDev)
+  if (isDev) {
+    pkgPath = path.join(__dirname, '../../../package.json')
+  } else {
+    pkgPath = path.join(process.resourcesPath, 'package.json')
+  }
+  const pkg = require(pkgPath)
+  logger.info('version:', pkg.version)
+  return pkg
+}
 
 // 获取应用版本号并转换为数据库版本号
 function getAppVersion() {
@@ -54,30 +70,30 @@ function getInitSqlFiles() {
 
   return files.map(file => ({
     name: path.basename(file, '.sql'),
-    path: path.join(initSqlDir, file)
+    path: path.join(initSqlDir, file),
   }))
 }
 
 // 初始化数据库
 async function initializeDatabase(db) {
-  console.log('开始初始化数据库...')
-  
+  logger.info('开始初始化数据库...')
+
   try {
     // 获取并执行所有初始化SQL文件
     const initFiles = getInitSqlFiles()
     for (const file of initFiles) {
-      console.log(`导入${file.name}数据...`)
+      logger.info(`导入${file.name}数据...`)
       await executeSqlFile(db, file.path)
     }
-    
+
     // 设置初始版本为当前应用版本
     const appVersion = getAppVersion()
     await setVersion(db, appVersion)
-    
-    console.log(`数据库初始化完成，版本设置为 ${appVersion}`)
+
+    logger.info(`数据库初始化完成，版本设置为 ${appVersion}`)
     return true
   } catch (err) {
-    console.error('初始化数据库失败:', err)
+    logger.error('初始化数据库失败:', err)
     throw err
   }
 }
@@ -85,74 +101,103 @@ async function initializeDatabase(db) {
 // 检查数据库是否需要初始化
 async function checkNeedInitialize(db) {
   return new Promise((resolve, reject) => {
-    db.get(
-      `SELECT COUNT(*) as count FROM llm_providers`,
-      (err, row) => {
-        if (err) {
-          // 如果表不存在，说明需要初始化
-          if (err.message.includes('no such table')) {
-            resolve(true)
-            return
-          }
-          reject(err)
+    db.get(`SELECT COUNT(*) as count FROM llm_providers`, (err, row) => {
+      if (err) {
+        // 如果表不存在，说明需要初始化
+        if (err.message.includes('no such table')) {
+          resolve(true)
           return
         }
-        // 如果表存在但没有数据，也需要初始化
-        resolve(row.count === 0)
+        reject(err)
+        return
       }
-    )
+      // 如果表存在但没有数据，也需要初始化
+      resolve(row.count === 0)
+    })
   })
 }
 
 // 主函数
-async function updateDatabase() {
-  console.log('开始更新数据库...')
-
+async function updateDatabase(appLogger) {
+  logger = appLogger
+  logger.info('开始更新数据库...')
+  pkg = getPkg()
   // 确保数据库目录存在
   const dbDir = path.dirname(dbPath)
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true })
+
+  // 检查数据库文件是否存在
+  async function connectToDatabase(retryCount = 3) {
+    if (!fs.existsSync(dbPath)) {
+      if (retryCount <= 0) {
+        throw new Error('数据库文件不存在，已达到最大重试次数')
+      }
+
+      logger.info(
+        `数据库文件不存在，等待3秒后重试 (剩余重试次数: ${retryCount})`,
+      )
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      return connectToDatabase(retryCount - 1)
+    }
+
+    // 只在数据库文件存在时打开连接
+    return new Promise((resolve, reject) => {
+      const database = new sqlite3.Database(
+        dbPath,
+        sqlite3.OPEN_READWRITE, // 只读取模式，不创建
+        err => {
+          if (err) {
+            logger.error('打开数据库失败:', err)
+            reject(err)
+            return
+          }
+          resolve(database)
+        },
+      )
+    })
   }
 
-  // 打开或创建数据库
-  const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, err => {
-    if (err) {
-      console.error('打开数据库失败:', err)
-      throw err
-    }
-  })
+  let db
+
+  try {
+    db = await connectToDatabase()
+  } catch (err) {
+    logger.error('无法连接到数据库:', err)
+    throw err
+  }
 
   try {
     // 检查是否需要初始化
     const needInitialize = await checkNeedInitialize(db)
-    
+
     if (needInitialize) {
       await initializeDatabase(db)
     } else {
       // 获取当前数据库版本
       const currentVersion = await getCurrentVersion(db)
-      console.log(`当前数据库版本: ${currentVersion}`)
+      logger.info(`当前数据库版本: ${currentVersion}`)
 
       // 获取所有SQL更新文件
       const updateFiles = getSqlUpdateFiles()
-      console.log(`找到 ${updateFiles.length} 个SQL更新文件`)
+      logger.info(`找到 ${updateFiles.length} 个SQL更新文件`)
 
       // 执行版本高于当前版本的SQL文件
       for (const file of updateFiles) {
         if (file.version > currentVersion) {
-          console.log(
-            `执行SQL更新文件: ${path.basename(file.path)} (版本 ${file.version})`,
+          logger.info(
+            `执行SQL更新文件: ${path.basename(file.path)} (版本 ${
+              file.version
+            })`,
           )
           await executeSqlFile(db, file.path)
           await setVersion(db, file.version)
-          console.log(`数据库已更新到版本 ${file.version}`)
+          logger.info(`数据库已更新到版本 ${file.version}`)
         }
       }
 
-      console.log('数据库更新完成')
+      logger.info('数据库更新完成')
     }
   } catch (err) {
-    console.error('更新数据库时出错:', err)
+    logger.error('更新数据库时出错:', err)
     throw err
   } finally {
     db.close()
@@ -161,7 +206,6 @@ async function updateDatabase() {
 
 // 导出更新函数
 module.exports = updateDatabase
-
 
 // 获取当前数据库版本
 async function getCurrentVersion(db) {
@@ -224,7 +268,7 @@ async function executeSqlFile(db, filePath) {
     if (statement.trim()) {
       try {
         await new Promise((resolve, reject) => {
-          console.log(
+          logger.info(
             `执行SQL: ${statement.substring(0, 100)}${
               statement.length > 100 ? '...' : ''
             }`,
@@ -236,7 +280,7 @@ async function executeSqlFile(db, filePath) {
                 err.message.includes('duplicate column name') ||
                 err.message.includes('already exists')
               ) {
-                console.log(`警告: ${err.message}`)
+                logger.info(`警告: ${err.message}`)
                 resolve()
                 return
               }
@@ -247,8 +291,8 @@ async function executeSqlFile(db, filePath) {
           })
         })
       } catch (error) {
-        console.error(`执行SQL语句失败: ${statement}`)
-        console.error(`错误信息: ${error.message}`)
+        logger.error(`执行SQL语句失败: ${statement}`)
+        logger.error(`错误信息: ${error.message}`)
         throw error
       }
     }

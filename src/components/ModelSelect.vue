@@ -57,6 +57,9 @@ onMounted(() => {
   const chatingModel = localStorage.getItem("chating_model")
   if (chatingModel) {
     chatStore.setModel(JSON.parse(chatingModel))
+  } else {
+    const initModel = {"id":"deepseek:deepseek-chat","provider_id":"deepseek","name":"DeepSeek Chat","group_name":"DeepSeek Chat","state":true,"sort":78,"created_at":null,"updated_at":null,"deleted_at":null,"createdAt":null,"updatedAt":null,"deletedAt":null,"from":"common"}
+    chatStore.setModel(initModel)
   }
 })
 </script>

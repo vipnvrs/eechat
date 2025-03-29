@@ -360,7 +360,7 @@ class LLMService extends BaseLLMService {
       await chatService.handleStream(stream, ctx, messages, sessionId, model)
       // todo: 这里的错误没有handle到
     } catch (error) {
-      console.error('模型请求失败:', error)
+      console.error('模型请求失败(chat):', error)
       await chatService.handleStreamError(error, ctx, sessionId)
       throw error
     }
