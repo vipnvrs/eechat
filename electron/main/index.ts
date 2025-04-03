@@ -5,7 +5,7 @@ import path from 'node:path'
 import os from 'node:os'
 import { spawn } from 'child_process'
 import { AppUpdater, registerUpdaterHandlers } from './updater'
-import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
+// import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
 import { Playground } from './playground/playground'
 import { Analytics } from './analytics'
 const require = createRequire(import.meta.url)
@@ -111,8 +111,8 @@ async function createWindow() {
     registerUpdaterHandlers(updater)
   }
   // 保存返回的 llamaService 实例
-  const nodeLlamaCpp = registerLlamaHandlers()
-  console.log('Llama handlers registered successfully')
+  // const nodeLlamaCpp = registerLlamaHandlers()
+  // console.log('Llama handlers registered successfully')
 }
 
 let appServer: any = null
