@@ -113,7 +113,7 @@ window.onmessage = ev => {
 }
 
 // 减少超时时间以加快启动速度
-setTimeout(removeLoading, 1500)
+setTimeout(removeLoading, 5000)
 
 // 通知主进程预加载完成
 ipcRenderer.send('preload-ready')

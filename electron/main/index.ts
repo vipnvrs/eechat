@@ -16,11 +16,11 @@ if (!process.env.NODE_ENV) {
 }
 
 const log = require('electron-log')
+log.transports.file.resolvePathFn = variables =>
+  path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
 log.transports.file.level = 'debug'
-log.transports.file.resolvePathFn = () =>
-  path.join(app.getPath('userData'), 'logs/main.log')
 log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
-// Object.assign(console, log.functions)
+Object.assign(console, log.functions)
 
 // 捕获未处理的异常
 process.on('uncaughtException', error => {
