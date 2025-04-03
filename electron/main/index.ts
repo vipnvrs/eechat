@@ -242,6 +242,69 @@ ipcMain.handle('open-url', (_, url) => {
   return shell.openExternal(url)
 })
 
+// 保存窗口原始状态
+let originalBounds = null
+
+// 处理迷你模式切换
+ipcMain.handle('set-mini-mode', (event, isMini) => {
+  console.log('set-mini-mode');
+  
+  // const win = BrowserWindow.fromWebContents(event.sender)
+  // if (!win) return false
+  
+  if (isMini) {
+    originalBounds = win.getBounds()
+    const { width, height } = screen.getPrimaryDisplay().workAreaSize
+    const miniHeight = Math.floor(height * 2 / 3); // 屏幕高度的2/3
+    const miniWidth = Math.floor(miniHeight * 350 / 700); // 按照350:700的比例计算宽度
+    // win.setAlwaysOnTop(true)
+    win.setMinimizable(false)
+    win.setMaximizable(false)
+    // win.setResizable(false)
+    win.setSize(miniWidth, miniHeight)
+    win.setPosition(width - miniWidth - 20, Math.floor((height - miniHeight) / 2))
+    win.setOpacity(0.96)
+    return true
+  } else {
+    // 恢复原始窗口状态
+    win.setAlwaysOnTop(false)
+    win.setMinimizable(true)
+    win.setMaximizable(true)
+    win.setResizable(true)
+    
+    if (originalBounds) {
+      win.setBounds(originalBounds)
+      originalBounds = null
+    } else {
+      const { width, height } = screen.getPrimaryDisplay().workAreaSize
+      const windowWidth = Math.min(1200, width * 0.8)
+      const windowHeight = Math.min(800, height * 0.8)
+      // 先设置不透明度
+      win.setOpacity(1)
+      // 计算居中位置
+      const x = Math.floor((width - windowWidth) / 2)
+      const y = Math.floor((height - windowHeight) / 2)
+      win.setBounds({
+        x: x,
+        y: y,
+        width: windowWidth,
+        height: windowHeight
+      })
+    }
+    return true
+  }
+})
+
+// 处理窗口置顶状态切换
+ipcMain.handle('toggle-always-on-top', (event) => {
+  if (!win) return false
+  
+  const isAlwaysOnTop = win.isAlwaysOnTop()
+  win.setAlwaysOnTop(!isAlwaysOnTop)
+  
+  return !isAlwaysOnTop
+})
+
 // startEggServer
 ipcMain.handle('startEggServer', async (_, pathArg) => {
   try {

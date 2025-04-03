@@ -17,7 +17,7 @@ const mode = useColorMode()
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="outline">
+      <Button variant="outline" class="max-sm:hidden">
         <Moon></Moon>
         <Sun></Sun>
         <Cog></Cog>

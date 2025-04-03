@@ -98,7 +98,7 @@ const props = withDefaults(defineProps<SidebarProps>(), {
     collapsible="none"
     class="!w-[calc(var(--sidebar-width-icon)_+_1px)] border-r"
     :class="
-      !envStore.isWeb ? '!min-h-[calc(100dvh-30px)] h-[calc(100dvh-30px)]' : 'hello'
+      !envStore.isWeb ? '!min-h-[calc(100dvh-30px)] h-[calc(100dvh-30px)] max-sm:hidden' : 'hello'
     "
   >
     <SidebarHeader>

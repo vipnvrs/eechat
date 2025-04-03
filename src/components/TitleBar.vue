@@ -7,7 +7,7 @@ const envStore = useEnvStore()
 <template>
   <div
     style="-webkit-app-region: drag"
-    class="bg-sidebar h-[30px] flex items-center justify-center text-center border-b text-xs font-bold"
+    class="bg-sidebar h-[30px] flex items-center justify-center text-center border-b text-xs font-bold max-sm:text-left max-sm:justify-start max-sm:px-6"
     :class="envStore.isWeb && 'hidden'"
   >
     eechat
