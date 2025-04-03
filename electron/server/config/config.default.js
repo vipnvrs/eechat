@@ -1,3 +1,6 @@
+const { app } = require('electron')
+const path = require('path')
+
 module.exports = appInfo => {
   const config = (exports = {})
 
@@ -41,10 +44,9 @@ module.exports = appInfo => {
   // }
 
   // 添加数据库配置
-  const path = require('path')
   config.sequelize = {
     dialect: 'sqlite',
-    storage: path.join(__dirname, '../database/database.db'),
+    storage: path.join(app.getPath('userData'), 'database', 'database.db'),
     define: {
       freezeTableName: true,
       timestamps: true,

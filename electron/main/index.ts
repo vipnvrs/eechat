@@ -15,12 +15,14 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = app.isPackaged ? 'production' : 'development'
 }
 
-const log = require('electron-log')
+import log from 'electron-log/main'
 log.transports.file.resolvePathFn = variables =>
   path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
 log.transports.file.level = 'debug'
 log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
+const AppLog = log.scope('APP')
 Object.assign(console, log.functions)
+AppLog.info('%cUserData:' + app.getPath('userData'), 'color: yellow')
 
 // 捕获未处理的异常
 process.on('uncaughtException', error => {
