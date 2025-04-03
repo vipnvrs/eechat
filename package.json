@@ -22,6 +22,7 @@
   "scripts": {
     "dev": "vite",
     "build:win": "vue-tsc --noEmit && vite build && electron-builder --publish always --win",
+    "package": "vue-tsc --noEmit && vite build && electron-builder",
     "build:mac": "vue-tsc --noEmit && vite build && electron-builder --publish always --mac",
     "build:pord": "vite build --mode production && electron-builder",
     "preview": "vite preview",

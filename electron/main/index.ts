@@ -123,7 +123,7 @@ async function startEggServer(pathArg): Promise<void> {
     log.info('isDev:', isDev)
     const baseDir = isDev
       ? path.join(__dirname, '../../electron/server')
-      : path.join(process.resourcesPath, 'app', '../server')
+      : path.join(process.resourcesPath, 'app.asar.unpacked')
     log.info('baseDir:', baseDir)
     try {
       appServer = await egg.start({

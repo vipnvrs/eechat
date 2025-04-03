@@ -12,7 +12,7 @@
     "egg-cors": "^3.0.1",
     "egg-scripts": "2",
     "egg-sequelize": "^6.0.0",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "5.1.6"
   },
   "devDependencies": {
     "egg-bin": "6",
