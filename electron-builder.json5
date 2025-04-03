@@ -13,15 +13,16 @@
   ],
   "mac": {
     "icon": "icon/icons/mac/AppIcon.icns",
-    // "target": [
-    //   "dmg",
-    // ],
     "target": [
       {
-        "target": "zip",
-        // "target": "dmg",
+        "target": "dmg",
         "arch": [
-          // "x64",
+          "arm64"
+        ]
+      },
+      {
+        "target": "zip",
+        "arch": [
           "arm64"
         ]
       }
