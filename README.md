@@ -26,12 +26,12 @@ eechat is an AI chat application focused on local deployment, providing users wi
 
 - **Fully Local Storage**: All conversation data is stored locally, eliminating privacy leak risks
 
- <img src="./resources/localmodel_light.png" alt="EE Chat Application Screenshot" width="800" />
+ <img src="./resources/localmodel_dark.png" alt="EE Chat Application Screenshot" width="800" />
 
 - **Offline Capability**: No continuous internet connection required after initial setup
 - **API Customization**: Connect to your own AI model API or third-party services, maintaining full data flow control
 
- <img src="./resources/apimodel_dark.png" alt="EE Chat Application Screenshot" width="800" />
+ <img style="" src="./resources/apimodel_light.png" alt="EE Chat Application Screenshot" width="800" />
 
 ### 💬 Superior Conversation Experience
 
