@@ -53,6 +53,9 @@
     "promptEditor": {
       "title": "编辑提示词",
       "placeholder": "请在此输入提示词..."
+    },
+    "discover":{
+      "title": "发现"
     }
   },
   "discover": {
