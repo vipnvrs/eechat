@@ -113,9 +113,26 @@ export class AppUpdater {
   // 安装更新
   public async installUpdate(): Promise<boolean> {
     try {
-      console.log('开始安装更新')
-      autoUpdater.quitAndInstall(false, true)
-      return true
+      const { response } = await dialog.showMessageBox({
+        type: 'info',
+        title: '应用更新',
+        message: '新版本已下载完成，是否立即安装？',
+        buttons: ['立即安装', '稍后安装'],
+      })
+      if (response === 0) {
+        console.log('用户选择立即安装更新')
+        setImmediate(() => {
+          app.removeAllListeners('window-all-closed')
+          if (this.mainWindow) {
+            this.mainWindow.close()
+          }
+          autoUpdater.quitAndInstall(false)
+        })
+        return true
+      } else {
+        console.log('用户选择稍后安装')
+        return false
+      }
     } catch (err) {
       console.error('安装更新出错:', err)
       throw err
