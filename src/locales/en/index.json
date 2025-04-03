@@ -53,6 +53,9 @@
     "promptEditor": {
       "title": "Edit Prompt",
       "placeholder": "Enter your prompt here..."
+    },
+    "discover":{
+      "title": "Discover"
     }
   },
   "discover": {

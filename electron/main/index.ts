@@ -263,7 +263,7 @@ ipcMain.handle('set-mini-mode', (event, isMini) => {
     // win.setResizable(false)
     win.setSize(miniWidth, miniHeight)
     win.setPosition(width - miniWidth - 20, Math.floor((height - miniHeight) / 2))
-    win.setOpacity(0.96)
+    // win.setOpacity(0.96)
     return true
   } else {
     // 恢复原始窗口状态
@@ -280,7 +280,7 @@ ipcMain.handle('set-mini-mode', (event, isMini) => {
       const windowWidth = Math.min(1200, width * 0.8)
       const windowHeight = Math.min(800, height * 0.8)
       // 先设置不透明度
-      win.setOpacity(1)
+      // win.setOpacity(1)
       // 计算居中位置
       const x = Math.floor((width - windowWidth) / 2)
       const y = Math.floor((height - windowHeight) / 2)
