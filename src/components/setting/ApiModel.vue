@@ -35,7 +35,7 @@ import type {
   APIConfig,
   ProviderConfig,
 } from "@/types/llm"
-import { Loader2, Check } from "lucide-vue-next"
+import { Loader2, Check, EyeClosed, Eye } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
 
 // 定义props接收providerId
@@ -132,19 +132,19 @@ onMounted(() => {
   getProviders(true)
 })
 
-const handleProviderChange = async (provider: string, value: object) => {
+const handleProviderChange = async (provider: string, value) => {
   currentProvider.value = provider
   getModels()
   // 查询配置
   const res = await getConfigProvider()
   if (res) {
-    apiConfig.apiKey = res.api_key ? "sk-configed" : ""
+    apiConfig.apiKey = res.api_key
     apiConfig.baseUrl = res.base_url
     apiConfig.state = res.state ? true : false
   } else {
     apiConfig.apiKey = ""
-    apiConfig.baseUrl = (value as any).api?.url || ""
-    apiConfig.state = false
+    apiConfig.baseUrl = value.api.url
+    apiConfig.state = value.state
   }
   apiConfig.info = value
   console.log(apiConfig)
@@ -209,7 +209,7 @@ const saveConfigModelState = async (
     state,
     models: flattenedModels,
   }
-  const model_id = modelItem.from === "config" ? modelItem.model_id : modelItem.id
+  const model_id = modelItem.id
   // @ts-ignore
   const res = await llmApi.saveConfigModelState(model_id, config)
   console.log(res)
@@ -231,6 +231,11 @@ const currentCheckModelObject = ref<LLMModel | undefined>({} as LLMModel)
 const handleCurrentCheckModelUpdate = (modelId: string) => {
   const selectedModel = modelsArray.value.find((model) => model.id === modelId)
   currentCheckModelObject.value = selectedModel
+}
+
+const isShowApiKey = ref(false)
+const toggleShowApiKey = () => {
+  isShowApiKey.value = !isShowApiKey.value
 }
 </script>
 
@@ -304,11 +309,18 @@ const handleCurrentCheckModelUpdate = (modelId: string) => {
           <Label>{{ t('settings.apiModel.modelConfig') }}</Label>
           <div class="grid gap-2">
             <Label class="font-bold">API Key</Label>
-            <Input
-              v-model="apiConfig.apiKey"
-              type="password"
-              :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
-            />
+            <div class="flex items-center space-x-2">
+              <Input
+                v-model="apiConfig.apiKey"
+                :type="isShowApiKey? 'text' : 'password'"
+                :disabled="!isShowApiKey"
+                :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
+              />
+              <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 
+                <EyeClosed v-if="isShowApiKey" />
+                <Eye v-else/>
+              </Button>
+            </div>
           </div>
 
           <div class="grid gap-2">

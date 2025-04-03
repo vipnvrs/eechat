@@ -3,6 +3,8 @@ import { ref, onMounted, watch, reactive, computed } from "vue"
 import { useI18n } from "vue-i18n"
 import { useModelStore } from "@/stores/model"
 import { useChatStore } from "@/stores/chatStore"
+import { llmApi, ollamaApi } from "@/api/request"
+import { LLMProvider, ModelProvider } from "@/types/llm"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
@@ -53,7 +55,63 @@ const handleConfigModel = (key) => {
   router.push({ path: "/setting", query: { action: key } })
 }
 
+async function initModelConfig() {
+  try {
+    modelStore.isLoading = true
+    modelStore.initLocalProvider()
+    const providers = await llmApi.getProviders()
+    for (const [providerId, providerInfo] of Object.entries(providers) as [
+      string,
+      LLMProvider
+    ][]) {
+      const config = await llmApi.getConfigProvider(providerId)
+      const models = await llmApi.getModels(providerId)
+      const provider: ModelProvider = {
+        id: providerId,
+        name: providerInfo.name || providerId,
+        type: "api",
+        state: providerInfo.state,
+        models: models.map((model) => ({
+          ...model,
+          state: model.state,
+        })),
+        config: {
+          apiKey: config?.api_key || "",
+          baseUrl: config?.base_url || providerInfo.api_url || "",
+        },
+        description: providerInfo.description,
+        icon: providerId,
+      }
+      modelStore.setProvider(providerId, provider)
+    }
+    console.log(modelStore.providers)
+    // 获取本地模型配置
+    const localModels = await ollamaApi.listModel()
+    const modelsData = localModels.data.models
+    if (modelsData?.length) {
+      // 转换本地模型格式
+      const formattedModels = modelsData.map((model) => ({
+        id: model.name,
+        name: model.name,
+        provider_id: "local",
+        group_name: "Local",
+        state: true, // 本地模型默认启用
+        type: "local",
+        capabilities: ["chat", "completion"],
+        from: "local",
+      }))
+      modelStore.updateLocalModels(formattedModels)
+    }
+  } catch (error) {
+    console.log(error)
+    modelStore.error = (error as Error).message
+  } finally {
+    modelStore.isLoading = false
+  }
+}
+
 onMounted(() => {
+  initModelConfig()
   const chatingModel = localStorage.getItem("chating_model")
   if (chatingModel) {
     chatStore.setModel(JSON.parse(chatingModel))
