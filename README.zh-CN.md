@@ -27,7 +27,7 @@ eechat是一款专注于本地化部署的 AI 聊天应用，为用户提供安�
 - **完全本地存储**：所有对话数据均存储于本地，杜绝隐私泄露风险
 
 
-<img src="./resources/localmodel_light.png" alt="本地模型界面" width="800" />
+<img src="./resources/localmodel_dark.png" alt="本地模型界面" width="800" />
 
 
 - **离线能力**：初始化设置后无需持续联网
@@ -35,7 +35,7 @@ eechat是一款专注于本地化部署的 AI 聊天应用，为用户提供安�
 
 
 
-<img src="./resources/apimodel_dark.png" alt="API 模型设置" width="800" />
+<img src="./resources/apimodel_light.png" alt="API 模型设置" width="800" />
 
 ### 💬 卓越对话体验
 
