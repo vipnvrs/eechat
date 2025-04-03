@@ -27,7 +27,6 @@ export class Analytics {
   // 获取本地IP地址
   getLocalIp() {
     const interfaces = os.networkInterfaces()
-    console.log(interfaces);
     for (const name of Object.keys(interfaces)) {
       for (const net of interfaces[name]) {
         if (!net.internal && net.family === 'IPv4') {

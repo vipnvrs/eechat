@@ -1,6 +1,6 @@
 {
   "name": "eechat",
-  "version": "0.6.32",
+  "version": "0.6.33",
   "main": "dist-electron/main/index.js",
   "description": "a light weight chat tool for llm.",
   "author": "eechat <oodoobvideo@gmail.com>",
@@ -75,7 +75,6 @@
     "markdown-it-highlightjs": "^4.2.0",
     "marked": "^15.0.7",
     "mermaid": "^11.4.1",
-    "node-llama-cpp": "^3.6.0",
     "node-machine-id": "^1.1.12",
     "openai": "^4.83.0",
     "pinia": "^3.0.1",
