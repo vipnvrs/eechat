@@ -15,7 +15,8 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = app.isPackaged ? 'production' : 'development'
 }
 
-import log from 'electron-log/main'
+// import log from 'electron-log/main'
+const log = require('electron-log')
 log.transports.file.resolvePathFn = variables =>
   path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
 log.transports.file.level = 'debug'
@@ -130,6 +131,8 @@ async function startEggServer(pathArg): Promise<void> {
     try {
       appServer = await egg.start({
         baseDir: baseDir,
+        mode: 'single',
+        typescript: false,
       })
       appServer.listen(7002)
       log.info(`Server started on ${7002}`)

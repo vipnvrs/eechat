@@ -142,7 +142,5 @@ export const useSessionStore = defineStore('session', {
       state.sessions.find(session => session.id === state.activeSessionId),
   },
 
-  persist: {
-    enabled: true,
-  },
+  persist: true,
 })
