@@ -18,6 +18,8 @@ class AppBootHook {
   async willReady() {
     // 所有的插件都已启动完毕，但是应用整体还未 ready
     // 可以做一些数据初始化等操作，这些操作成功才会启动应用
+    const res = await this.app.model.sync({ alter: true })
+    this.app.logger.info('数据库结构同步成功')
   }
 
   async didReady() {

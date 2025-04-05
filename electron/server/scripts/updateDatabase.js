@@ -9,6 +9,7 @@ let pkg = null
 
 // 数据库文件路径
 const dbPath = path.join(app.getPath('userData'), 'database', 'database.db')
+// const dbPath = path.join(__dirname, '../database/database.db')
 
 // SQL目录
 const sqlDir = path.join(__dirname, './updateSQl')
@@ -35,7 +36,7 @@ function getAppVersion() {
   return parseInt(version[0]) * 100 + parseInt(version[1])
 }
 
-// 获取所有SQL更新文件
+// 获取所有SQL升级文件
 function getSqlUpdateFiles() {
   const files = fs
     .readdirSync(updateSqlDir)
@@ -121,7 +122,7 @@ async function checkNeedInitialize(db) {
 // 主函数
 async function updateDatabase(appLogger) {
   logger = appLogger
-  logger.info('开始更新数据库...')
+  logger.info('开始升级数据库...')
   pkg = getPkg()
   // 确保数据库目录存在
   const dbDir = path.dirname(dbPath)
@@ -177,35 +178,35 @@ async function updateDatabase(appLogger) {
       const currentVersion = await getCurrentVersion(db)
       logger.info(`当前数据库版本: ${currentVersion}`)
 
-      // 获取所有SQL更新文件
+      // 获取所有SQL升级文件
       const updateFiles = getSqlUpdateFiles()
-      logger.info(`找到 ${updateFiles.length} 个SQL更新文件`)
+      logger.info(`找到 ${updateFiles.length} 个SQL升级文件`)
 
       // 执行版本高于当前版本的SQL文件
       for (const file of updateFiles) {
         if (file.version > currentVersion) {
           logger.info(
-            `执行SQL更新文件: ${path.basename(file.path)} (版本 ${
+            `执行SQL升级文件: ${path.basename(file.path)} (版本 ${
               file.version
             })`,
           )
           await executeSqlFile(db, file.path)
           await setVersion(db, file.version)
-          logger.info(`数据库已更新到版本 ${file.version}`)
+          logger.info(`数据库已升级到版本 ${file.version}`)
         }
       }
 
-      logger.info('数据库更新完成')
+      logger.info('数据库升级完成')
     }
   } catch (err) {
-    logger.error('更新数据库时出错:', err)
+    logger.error('升级数据库时出错:', err)
     throw err
   } finally {
     db.close()
   }
 }
 
-// 导出更新函数
+// 导出升级函数
 module.exports = updateDatabase
 
 // 获取当前数据库版本

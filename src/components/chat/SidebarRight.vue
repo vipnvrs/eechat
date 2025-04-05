@@ -41,11 +41,11 @@ watch(
       try {
         await sessionStore.fetchSettings(session.id)
       } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: (error as Error).message,
-        })
+        // toast({
+        //   variant: 'destructive',
+        //   title: t('common.error'),
+        //   description: (error as Error).message,
+        // })
       }
     }
   },

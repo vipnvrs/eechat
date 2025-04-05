@@ -68,6 +68,9 @@ export const useSessionStore = defineStore('session', {
       try {
         const res = await chatApi.getSessions()
         this.sessions = res.data
+        if (this.sessions.length > 0 && !this.currentSession) {
+          this.setActiveSession(this.sessions[0])
+        }
         return res.data
       } catch (error) {
         console.error('Failed to fetch sessions:', error)
