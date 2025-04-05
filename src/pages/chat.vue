@@ -151,7 +151,9 @@ const sendMsg = async (msg: string) => {
     sendMsgLlmApi(chatStore.model, msg)
   }
   scrollToBottom(true)
-  if (chatHistory.value.length == 2) {
+  
+  // 只有在非助手创建的会话且是第一次对话时才进行总结
+  if (chatHistory.value.length == 2 && activeSession.value.title == '👋 Hi') {
     const config = {
       model: chatStore.model,
       messages: chatHistory.value,
