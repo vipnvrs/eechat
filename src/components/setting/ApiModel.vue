@@ -313,7 +313,6 @@ const toggleShowApiKey = () => {
               <Input
                 v-model="apiConfig.apiKey"
                 :type="isShowApiKey? 'text' : 'password'"
-                :disabled="!isShowApiKey"
                 :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
               />
               <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 

@@ -29,6 +29,9 @@ module.exports = appInfo => {
     csrf: {
       enable: false,
     },
+    xframe: {
+      enable: false,
+    },
     domainWhiteList: ['*'],
   }
 
@@ -47,6 +50,7 @@ module.exports = appInfo => {
   config.sequelize = {
     dialect: 'sqlite',
     storage: path.join(app.getPath('userData'), 'database', 'database.db'),
+    // storage: path.join(__dirname, '../database/database.db'),
     define: {
       freezeTableName: true,
       timestamps: true,
@@ -56,7 +60,7 @@ module.exports = appInfo => {
     },
     logging: false, // 关闭 SQL 日志
     // logging: console.log,
-    sync: process.env.NODE_ENV !== 'production', // 非生产环境下自动同步
+    // sync: process.env.NODE_ENV !== 'production', // 非生产环境下自动同步
   }
   config.cors = {
     // credentials: true,

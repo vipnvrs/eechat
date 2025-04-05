@@ -8,6 +8,7 @@ import { AppUpdater, registerUpdaterHandlers } from './updater'
 // import { registerLlamaHandlers } from './playground/nodeLlamaCpp'
 import { Playground } from './playground/playground'
 import { Analytics } from './analytics'
+import { Ipc } from './ipc'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -15,13 +16,15 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = app.isPackaged ? 'production' : 'development'
 }
 
-import log from 'electron-log/main'
+// import log from 'electron-log/main'
+const log = require('electron-log')
 log.transports.file.resolvePathFn = variables =>
   path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
 log.transports.file.level = 'debug'
 log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
 const AppLog = log.scope('APP')
-Object.assign(console, log.functions)
+// Object.assign(console, log.functions)
+AppLog.info('App Version:' + app.getVersion())
 AppLog.info('%cUserData:' + app.getPath('userData'), 'color: yellow')
 
 // 捕获未处理的异常
@@ -89,8 +92,8 @@ async function createWindow() {
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
-    // Open devTool if the app is not packaged 
-    if(!app.isPackaged) win.webContents.openDevTools()
+    // Open devTool if the app is not packaged
+    if (!app.isPackaged) win.webContents.openDevTools()
   } else {
     win.loadFile(indexHtml)
   }
@@ -126,10 +129,12 @@ async function startEggServer(pathArg): Promise<void> {
     const baseDir = isDev
       ? path.join(__dirname, '../../electron/server')
       : path.join(process.resourcesPath, 'app.asar.unpacked')
-    log.info('baseDir:', baseDir)
+    // log.info('baseDir:', baseDir)
     try {
       appServer = await egg.start({
         baseDir: baseDir,
+        // mode: 'single',
+        // typescript: false,
       })
       appServer.listen(7002)
       log.info(`Server started on ${7002}`)
@@ -198,6 +203,9 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+// 初始化 Ipc 实例
+new Ipc()
 
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {

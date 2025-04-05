@@ -18,39 +18,8 @@ class AppBootHook {
   async willReady() {
     // 所有的插件都已启动完毕，但是应用整体还未 ready
     // 可以做一些数据初始化等操作，这些操作成功才会启动应用
-
-    try {
-      // 关闭外键约束，这对SQLite很重要
-      await this.app.model.query('PRAGMA foreign_keys = OFF;')
-      this.app.logger.info('[App] 暂时关闭外键约束以便同步数据库结构')
-
-      // 同步所有模型到数据库
-      // 使用 alter: true 允许修改现有表结构
-      await this.app.model.sync({ alter: true })
-      this.app.logger.info('[App] 数据库结构同步完成')
-
-      // 重新开启外键约束
-      await this.app.model.query('PRAGMA foreign_keys = ON;')
-      this.app.logger.info('[App] 重新开启外键约束')
-
-      // 检查数据库中的记录数量
-      const providerCount = await this.app.model.LlmProvider.count()
-      const modelCount = await this.app.model.LlmModel.count()
-      this.app.logger.info(
-        `[App] 数据库中共有 ${providerCount} 个提供商和 ${modelCount} 个模型`,
-      )
-    } catch (error) {
-      this.app.logger.error('[App] 数据库同步出错:', error)
-      // 如果出现错误，尝试使用更安全的方式同步
-      try {
-        this.app.logger.info('[App] 尝试使用备用方式同步数据库...')
-        // 只同步新表，不修改现有表
-        await this.app.model.sync()
-        this.app.logger.info('[App] 数据库基本同步完成')
-      } catch (secondError) {
-        this.app.logger.error('[App] 备用同步方式也失败:', secondError)
-      }
-    }
+    const res = await this.app.model.sync({ alter: true })
+    this.app.logger.info('数据库结构同步成功')
   }
 
   async didReady() {

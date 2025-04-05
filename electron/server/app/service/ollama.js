@@ -7,17 +7,52 @@ const { read } = require('fs')
 const execAsync = util.promisify(exec)
 const ollamaBaseUrl = 'http://127.0.0.1:11434'
 class OllamaService extends Service {
+  async findOllamaPath() {
+    const { platform } = process
+    const possiblePaths = {
+      darwin: [
+        '/usr/local/bin/ollama',
+        '/opt/homebrew/bin/ollama',
+        '/Applications/Ollama.app/Contents/MacOS/ollama',
+      ],
+      linux: [
+        '/usr/local/bin/ollama',
+        '/usr/bin/ollama',
+        '/opt/ollama/ollama',
+        `${process.env.HOME}/.local/bin/ollama`,
+      ],
+      win32: ['ollama.exe'],
+    }
+
+    const paths = possiblePaths[platform] || []
+
+    for (const path of paths) {
+      try {
+        if (platform === 'win32') {
+          await execAsync(`where ${path}`)
+        } else {
+          await execAsync(`${path} -v`)
+        }
+        this.ctx.logger.info(`Ollama 已安装，路径为 ${path}`)
+        return path
+      } catch (error) {
+        continue
+      }
+    }
+
+    throw new Error('未找到 Ollama 安装路径')
+  }
+
   /**
    * 检查 Ollama 状态
    * @returns {Promise<Object>} 返回 Ollama 的状态信息
    */
   async checkState() {
     const { platform } = process
-    const checkCmd = platform === 'win32' ? 'where ollama' : 'which ollama'
 
     try {
-      // 首先检查是否安装
-      await execAsync(checkCmd)
+      // 查找 Ollama 安装路径
+      const ollamaPath = await this.findOllamaPath()
 
       // 检查是否运行中
       try {
@@ -40,6 +75,7 @@ class OllamaService extends Service {
           error: '模型管理器未运行',
         }
       } catch (error) {
+        this.ctx.logger.error('模型管理器未运行:', error)
         return {
           installed: true,
           running: false,
@@ -47,6 +83,7 @@ class OllamaService extends Service {
         }
       }
     } catch (error) {
+      this.ctx.logger.error('模型管理器未安装:', error)
       return {
         installed: false,
         running: false,
@@ -54,6 +91,49 @@ class OllamaService extends Service {
       }
     }
   }
+  // async checkState() {
+  //   const { platform } = process
+  //   try {
+  //     // 首先检查是否安装
+  //     const ollamaPath = await this.findOllamaPath()
+
+  //     // 检查是否运行中
+  //     try {
+  //       const response = await this.ctx.curl(`${ollamaBaseUrl}/api/version`, {
+  //         timeout: 3000,
+  //         dataType: 'json',
+  //       })
+
+  //       if (response.status === 200) {
+  //         return {
+  //           installed: true,
+  //           running: true,
+  //           version: response.data.version,
+  //         }
+  //       }
+
+  //       return {
+  //         installed: true,
+  //         running: false,
+  //         error: '模型管理器未运行',
+  //       }
+  //     } catch (error) {
+  //       this.ctx.logger.error('模型管理器未运行:', error)
+  //       return {
+  //         installed: true,
+  //         running: false,
+  //         error: '模型管理器未运行',
+  //       }
+  //     }
+  //   } catch (error) {
+  //     this.ctx.logger.error('模型管理器未安装:', error)
+  //     return {
+  //       installed: false,
+  //       running: false,
+  //       error: '模型管理器未安装',
+  //     }
+  //   }
+  // }
 
   /**
    * 启动 Ollama
