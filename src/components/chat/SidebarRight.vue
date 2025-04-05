@@ -13,23 +13,15 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { SquarePen } from 'lucide-vue-next'
 import { reactive, ref } from 'vue'
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PromptEditor from '@/components/chat/PromptEditor.vue'
 import { chatApi } from '@/api/request'
 import { useToast } from '@/components/ui/toast/use-toast'
+import { useSessionStore } from '@/stores/session'
 
 const { t } = useI18n()
 const { toast } = useToast()
-
-const formData = reactive({
-  title: '',
-  systemPrompt: 'you are a helpful assistant',
-  temperature: [0.6],
-  top_p: [1],
-  presence_penalty: [0],
-  frequency_penalty: [0],
-})
 
 const props = defineProps({
   activeSession: {
@@ -38,18 +30,16 @@ const props = defineProps({
   }
 })
 
+
+const sessionStore = useSessionStore()
+const formData = computed(() => sessionStore.settings)
+
 watch(
   () => props.activeSession,
   async (session) => {
     if (session?.id) {
       try {
-        const settings = await chatApi.getSettings(session.id)
-        formData.title = settings.title
-        formData.systemPrompt = settings.systemPrompt || 'You are a helpful assistant'
-        formData.temperature = [settings.temperature ?? 0.6]
-        formData.top_p = [settings.top_p ?? 1]
-        formData.presence_penalty = [settings.presence_penalty ?? 0]
-        formData.frequency_penalty = [settings.frequency_penalty ?? 0]
+        await sessionStore.fetchSettings(session.id)
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -68,14 +58,7 @@ const handleSubmit = async () => {
       throw new Error('会话不存在')
     }
     
-    await chatApi.updateSettings(props.activeSession.id, {
-      title: formData.title,
-      systemPrompt: formData.systemPrompt,
-      temperature: formData.temperature,
-      top_p: formData.top_p,
-      presence_penalty: formData.presence_penalty,
-      frequency_penalty: formData.frequency_penalty,
-    })
+    await sessionStore.updateSettings(props.activeSession.id, formData.value)
     
     toast({
       title: t('common.success'),
@@ -92,22 +75,25 @@ const handleSubmit = async () => {
 
 const isPromptEditorOpen = ref(false)
 
-watch(
-  () => props.activeSession,
-  session => {
-    if (session) {
-      formData.title = session.title
-    }
-  },
-  { deep: true },
-)
+// 更新 savePrompt 方法
+const savePrompt = async (newPrompt: string) => {
+  try {
+    if (!props.activeSession?.id) return
+    await sessionStore.updateSettings(props.activeSession.id, {
+      ...formData.value,
+      systemPrompt: newPrompt
+    })
+  } catch (error) {
+    toast({
+      variant: 'destructive',
+      title: t('common.error'),
+      description: (error as Error).message,
+    })
+  }
+}
 
 const openPromptEditor = () => {
   isPromptEditorOpen.value = true
-}
-
-const savePrompt = (newPrompt: string) => {
-  formData.systemPrompt = newPrompt
 }
 </script>
 

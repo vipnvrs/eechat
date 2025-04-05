@@ -56,7 +56,9 @@ import Icon from '@/components/Icon.vue'
 import router from '@/router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
+import { useSessionStore } from '@/stores/session'
 
+const sessionStore = useSessionStore()
 // 设置语言为中文
 dayjs.locale('zh-cn')
 
@@ -64,70 +66,15 @@ const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
 })
 
-const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  navMain: [
-    {
-      title: '对话',
-      url: '/',
-      icon: Inbox,
-      isActive: true,
-    },
-    {
-      title: '智能体',
-      url: 'box',
-      icon: File,
-      isActive: false,
-    },
-    {
-      title: '设置',
-      url: 'setting',
-      icon: SlidersHorizontal,
-      isActive: false,
-    },
-  ],
-  chats: [
-    {
-      name: '新对话',
-      teaser: '对话的内容简短展示的内容',
-    },
-  ],
-}
 const emit = defineEmits(['sessionChange'])
 
-const activeItem = ref(data.navMain[0])
-const chats = ref(data.chats)
-// const { setOpen } = useSidebar()
-
-const activeSessionId = ref<number>(0)
-const sessions = ref<ChatSession[]>([])
-
-// 获取会话列表
-const fetchSessions = async localActiveSessionId => {
-  try {
-    const res = await chatApi.getSessions()
-    sessions.value = res.data
-    console.log(sessions.value)
-    if (sessions.value.length > 0 && !localActiveSessionId) {
-      activeSessionId.value = sessions.value[0].id
-      emit('sessionChange', sessions.value[0])
-    }
-  } catch (error) {
-    console.error('Failed to fetch sessions:', error)
-  }
-}
+const sessions = computed(() => sessionStore.sessions)
+const activeSessionId = computed(() => sessionStore.activeSessionId)
 
 // 创建新对话
 const createNewChat = async () => {
   try {
-    const res = await chatApi.createChat()
-    const newSession = res
-    sessions.value.unshift(newSession)
-    activeSessionId.value = newSession.id
+    const newSession = await sessionStore.createChat()
     emit('sessionChange', newSession)
   } catch (error) {
     console.error('Failed to create chat:', error)
@@ -136,8 +83,7 @@ const createNewChat = async () => {
 
 // 切换会话
 const handleSessionChange = session => {
-  const sessoionId = session.id
-  activeSessionId.value = sessoionId
+  sessionStore.setActiveSession(session)
   emit('sessionChange', session)
 }
 
@@ -161,13 +107,11 @@ const confirmDeleteSession = async () => {
   if (!sessionToDelete.value) return
   deleteLoading.value = true
   try {
-    const res = await chatApi.removeSession(sessionToDelete.value.id)
-    // @ts-ignore
-    sessions.value = sessions.value.filter(s => s.id !== sessionToDelete.value.id)
+    const res = await sessionStore.removeSession(sessionToDelete.value.id)
     if(res) {
-      // 如果删除的是当前活动会话，切换到第一个会话
-      if (activeSessionId.value === sessionToDelete.value.id && sessions.value.length > 0) {
-        handleSessionChange(sessions.value[0])
+      // 如果还有其他会话，切换到第一个
+      if (sessionStore.sessions.length > 0) {
+        handleSessionChange(sessionStore.sessions[0])
       }
       toast({
         title: t('chat.sidebar.deleteSuccess'),
@@ -187,17 +131,14 @@ const confirmDeleteSession = async () => {
   }
 }
 const activeSessionTitle = ref<string>('')
-onMounted(() => {
+onMounted( async () => {
   const localActiveSession = localStorage.getItem('activeSession')
-  let localActiveSessionId = null
   if (localActiveSession) {
     const activeSession = JSON.parse(localActiveSession)
-    activeSessionId.value = activeSession.id
-    activeSessionTitle.value = activeSession.title
-    localActiveSessionId = activeSession.id
+    sessionStore.setActiveSession(activeSession)
     handleSessionChange(activeSession)
   }
-  fetchSessions(localActiveSessionId)
+  await sessionStore.fetchSessions()
 })
 
 // 添加时间分组函数

@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import SidebarDiscover from "@/components/discover/SidebarDiscover.vue"
 import LocalModel from "@/components/setting/LocalModel.vue"
+import {useRouter} from "vue-router"
 import {
   Card,
   CardContent,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/card"
 import { ref, markRaw } from "vue"
 import { SquareArrowOutUpRight } from "lucide-vue-next"
-
+import { useAssistantStore } from '@/stores/assistant'
 import { useI18n } from "vue-i18n"
 
 const { t } = useI18n()
@@ -246,6 +247,18 @@ const catList = [
     key: "教育",
   },
 ]
+
+const router = useRouter()
+const assistantStore = useAssistantStore()
+const handleToChat = item => {
+  assistantStore.setCurrentAssistant(item)
+  router.push({
+    path: "/",
+    query: {
+      assistantId: item.key,
+    },
+  })
+}
 // const dataList = ref(dataList)
 </script>
 
@@ -300,7 +313,7 @@ const catList = [
                   <div class="ml-2 text-sm">{{ item.type }}</div>
                 </div>
                 <!-- <Badge class="mt-2" variant="secondary">{{ item.type }}</Badge> -->
-                <Button variant="ghost" size="icon"
+                <Button @click="handleToChat(item)" variant="ghost" size="icon"
                   ><SquareArrowOutUpRight class="text-gray-400"></SquareArrowOutUpRight
                 ></Button>
               </div>

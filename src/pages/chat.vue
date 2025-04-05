@@ -31,6 +31,15 @@ import {
   Pin,
   PinOff,
 } from "lucide-vue-next"
+import { useAssistantStore } from '@/stores/assistant'
+import { useRoute } from 'vue-router'
+
+// 导入 sessionStore
+import { useSessionStore } from '@/stores/session'
+const sessionStore = useSessionStore()
+
+const route = useRoute()
+const assistantStore = useAssistantStore()
 
 interface Message {
   role: "system" | "user" | "assistant"
@@ -201,12 +210,37 @@ const toggleAlwaysOnTop = async () => {
   isAlwaysOnTop.value = await window.ipcRenderer.invoke("toggle-always-on-top")
 }
 
+const initializeChat = async (assistant) => {
+  try {
+    // 创建新会话
+    const newSession = await sessionStore.createChat()
+    // 更新会话设置
+    await sessionStore.updateSettings(newSession.id, {
+      title: assistant.title,
+      systemPrompt: assistant.prompt,
+      ...(assistant.settings || {})
+    })
+    // 切换到新会话
+    handleSessionChange(newSession)
+  } catch (error) {
+    console.error('Failed to initialize chat:', error)
+  }
+}
+
 onMounted(() => {
   const viewport = (scrollAreaRef.value as any)?.$el?.querySelector(
     "[data-radix-scroll-area-viewport]"
   )
   if (viewport) {
     viewport.addEventListener("scroll", handleScroll)
+  }
+  const assistantId = route.query.assistantId as string
+  if (assistantId) {
+    const assistant = assistantStore.currentAssistant
+    if (assistant) {
+      // 使用助手信息初始化聊天
+      initializeChat(assistant)
+    }
   }
 })
 </script>
