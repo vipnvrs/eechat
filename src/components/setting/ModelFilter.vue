@@ -5,7 +5,6 @@ import { useI18n } from "vue-i18n"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-vue-next"
-import { modelsData } from "@/lib/models"
 import { useOllamaStore } from "@/stores/ollama"
 
 const { t } = useI18n()
@@ -31,7 +30,7 @@ const emits = defineEmits<{
 // 筛选逻辑保持不变
 const filteredModels = computed(() => {
   const query = props.searchQuery.toLowerCase().trim()
-  let filtered = modelsData
+  let filtered = ollamaStore.allModels
 
   if (!props.modelValue.includes("all")) {
     filtered = filtered

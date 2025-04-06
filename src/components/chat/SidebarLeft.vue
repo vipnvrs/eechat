@@ -75,7 +75,7 @@ const activeSessionId = computed(() => sessionStore.activeSessionId)
 const createNewChat = async () => {
   try {
     const newSession = await sessionStore.createChat()
-    emit('sessionChange', newSession)
+    // emit('sessionChange', newSession)
   } catch (error) {
     console.error('Failed to create chat:', error)
   }
@@ -84,7 +84,7 @@ const createNewChat = async () => {
 // 切换会话
 const handleSessionChange = session => {
   sessionStore.setActiveSession(session)
-  emit('sessionChange', session)
+  // emit('sessionChange', session)
 }
 
 // 删除会话

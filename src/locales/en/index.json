@@ -198,7 +198,12 @@
       "installSuccess": "{model} Installation Successful",
       "installSuccessDesc": "Model has been installed successfully. You can start using it now.",
       "serviceNotRunning": "Model Manager Not Running",
-      "serviceNotInstalled": "Model Manager Not Installed"
+      "serviceNotInstalled": "Model Manager Not Installed",
+      "syncModel": "Synchronize ollama models",
+      "syncModelSuccess": "Model Synchronization Successful",
+      "syncModelSuccessDesc": "Model has been synchronized successfully. You can start using it now.",
+      "syncModelFailed": "Model Synchronization Failed",
+      "syncModelFailedDesc": "Model synchronization failed. Please check your network connection."
     },
     "sidebar": {
       "models": "Models",

@@ -40,7 +40,7 @@ class OllamaService extends Service {
       }
     }
 
-    throw new Error('未找到 Ollama 安装路径')
+    throw new Error(this.ctx.__('ollama.not_found'))
   }
 
   /**
@@ -152,14 +152,14 @@ class OllamaService extends Service {
         try {
           await execAsync('open -a ollama')
         } catch (error) {
-          throw new Error('启动模型管理器失败')
+          throw new Error(ctx.__('ollama.start_failed'))
         }
         break
       case 'linux':
         try {
           await execAsync('ollama')
         } catch (error) {
-          throw new Error('启动模型管理器失败')
+          throw new Error(ctx.__('ollama.start_failed'))
         }
         break
     }
@@ -188,7 +188,7 @@ class OllamaService extends Service {
       attempts++
     }
 
-    throw new Error('启动模型管理器超时')
+    throw new Error(ctx.__('ollama.start_timeout'))
   }
 
   /**
@@ -213,21 +213,21 @@ class OllamaService extends Service {
             console.log(e)
           }
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
       case 'darwin':
         try {
           await execAsync('pkill -9 ollama Ollama')
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
       case 'linux':
         try {
           await execAsync('pkill -9 ollama Ollama')
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
     }
@@ -326,7 +326,7 @@ class OllamaService extends Service {
     } catch (error) {
       console.log('模型安装失败:', error)
       ctx.res.end()
-      throw new Error('模型安装失败')
+      throw new Error(ctx.__('ollama.model_install_failed'))
     }
   }
 
@@ -385,7 +385,7 @@ class OllamaService extends Service {
         return response
       }
     } catch (error) {
-      throw new Error('获取模型列表失败')
+      throw new Error(ctx.__('ollama.get_models_failed'))
     }
   }
 
@@ -432,6 +432,107 @@ class OllamaService extends Service {
       ctx.logger.error('Chat error:', error)
       throw new Error(error.message)
     }
+  }
+
+  async getLocalOllamaModels() {
+    const { ctx } = this
+    try {
+      const models = await ctx.model.LocalOllamaModels.findAll({
+        order: [['sort', 'ASC']],
+      })
+      if (models.length === 0) {
+        await this.syncModelFromOllama()
+        return await this.getLocalOllamaModels()
+      }
+      return models
+    } catch (error) {
+      ctx.logger.error('获取本地模型列表失败:', error)
+      throw new Error(ctx.__('ollama.get_models_failed'))
+    }
+  }
+
+  async syncModelFromOllama() {
+    const html = await this.ctx.curl('https://ollama.com/search', {
+      timeout: 20000,
+      dataType: 'text',
+    })
+    const ollamaModels = await this.parseModelHtml(html.data)
+    this.storeModels(ollamaModels)
+    return ollamaModels
+  }
+
+  async storeModels(models) {
+    const { ctx } = this
+
+    try {
+      for (const model of models) {
+        const { name, description, capabilities, sizes, sort } = model
+        if (!name) {
+          ctx.logger.warn('跳过无效模型数据:', model)
+          continue
+        }
+        // 先删除已存在的记录
+        await ctx.model.LocalOllamaModels.destroy({
+          where: { name },
+          force: true,
+        })
+
+        // 然后创建新记录
+        await ctx.model.LocalOllamaModels.create({
+          name,
+          description,
+          capabilities,
+          sizes,
+          sort,
+        })
+      }
+    } catch (error) {
+      ctx.logger.error('存储模型信息失败:', error)
+      // throw new Error('存储模型信息失败')
+    }
+  }
+
+  async parseModelHtml(html) {
+    const models = []
+    const { JSDOM } = require('jsdom')
+    const dom = new JSDOM(html)
+
+    // 先检查整个文档是否正确加载
+    // console.log(
+    //   'Document body:',
+    //   dom.window.document.body.innerHTML.substring(0, 100),
+    // )
+    const modelElements =
+      dom.window.document.querySelectorAll('li[x-test-model]')
+
+    modelElements.forEach((li, index) => {
+      const title = li.querySelector('h2 span').textContent.trim()
+      const description = li.querySelector('p').textContent.trim()
+      const capabilities = []
+      const sizes = []
+      // const pullCount = li.querySelector('span[x-test-pull-count]').textContent
+      // const tagCount = li.querySelector('span[x-test-tag-count]').textContent
+      // const updated = li.querySelector('span[x-test-updated]').textContent
+      // 提取能力标签
+      li.querySelectorAll('span[x-test-capability]').forEach(span => {
+        capabilities.push(span.textContent.trim())
+      })
+      // 提取大小标签
+      li.querySelectorAll('span[x-test-size]').forEach(span => {
+        sizes.push(span.textContent.trim())
+      })
+      // 构建模型对象
+      const model = {
+        name: title,
+        description,
+        capabilities,
+        sizes,
+        sort: index,
+      }
+      models.push(model)
+    })
+
+    return models
   }
 }
 

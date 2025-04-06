@@ -270,11 +270,11 @@ async function executeSqlFile(db, filePath) {
     if (statement.trim()) {
       try {
         await new Promise((resolve, reject) => {
-          logger.info(
-            `执行SQL: ${statement.substring(0, 100)}${
-              statement.length > 100 ? '...' : ''
-            }`,
-          )
+          // logger.info(
+          //   `执行SQL: ${statement.substring(0, 100)}${
+          //     statement.length > 100 ? '...' : ''
+          //   }`,
+          // )
           db.run(statement, err => {
             if (err) {
               // 忽略"column already exists"错误

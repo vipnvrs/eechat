@@ -198,7 +198,12 @@
       "installSuccess": "{model} 安装成功",
       "installSuccessDesc": "模型已安装成功，快去使用吧。",
       "serviceNotRunning": "模型管理器未运行",
-      "serviceNotInstalled": "模型管理器未安装"
+      "serviceNotInstalled": "模型管理器未安装",
+      "syncModel": "同步Ollama最新模型",
+      "syncModelSuccess": "模型同步成功",
+      "syncModelSuccessDesc": "模型已同步成功，快去使用吧。",
+      "syncModelFailed": "模型同步失败",
+      "syncModelFailedDesc": "模型同步失败，请检查网络连接。"
     },
     "models": {
       "localModel": "本地模型",

@@ -9,7 +9,7 @@ class DeepseekService extends BaseLLMService {
 
   async createClient(config) {
     if (!config || !config.baseUrl || !config.apiKey) {
-      throw new Error('请先配置模型的ApiKey和BaseUrl')
+      throw new Error(this.ctx.__('chat.key_empty'))
     }
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),
@@ -32,9 +32,9 @@ class DeepseekService extends BaseLLMService {
       return response.choices.length > 0
     } catch (error) {
       if (error.status == 401) {
-        throw new Error('连接失败，请检查您的 ApiKey')
+        throw new Error(this.ctx.__('connection.auth_failed'))
       } else {
-        throw new Error(`连接测试失败: ${error.message}`)
+        throw new Error(this.ctx.__('connection.test_failed') + error.message)
       }
     }
   }

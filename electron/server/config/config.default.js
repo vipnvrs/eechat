@@ -69,5 +69,13 @@ module.exports = appInfo => {
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
   }
 
+  config.i18n = {
+    defaultLocale: 'en-US',
+    writeCookie: false,
+    queryField: 'locale',
+    cookieField: 'locale',
+    cookieMaxAge: '1y',
+  }
+
   return config
 }

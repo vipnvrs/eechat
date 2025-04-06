@@ -110,8 +110,9 @@ export const useSessionStore = defineStore('session', {
         }
         return settings
       } catch (error) {
-        console.error('Failed to fetch settings:', error)
-        throw error
+        // console.error('Failed to fetch settings:', error)
+        // if session not found, set active session to first session
+        this.setActiveSession(this.sessions[0])
       }
     },
 

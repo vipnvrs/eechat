@@ -16,11 +16,16 @@ import {
   PaginationNext,
   PaginationPrev,
 } from "@/components/ui/pagination"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Search, RefreshCw } from "lucide-vue-next"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Rocket } from "lucide-vue-next"
-import { modelsData } from "@/lib/models"
 import { getIconName, modelSizeToGB } from "@/lib/utils"
 import Icon from "@/components/Icon.vue"
 import { LoaderCircle, Download, Trash } from "lucide-vue-next"
@@ -44,6 +49,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { Loader2 } from "lucide-vue-next"
+import { ModelData } from '@/types/ollama'
+
 // import { useDialog, useMessage } from 'naive-ui'
 
 // const dialog = useDialog()
@@ -140,6 +147,30 @@ const handlePullModel = async (model: string) => {
   }
 }
 
+const isSyncing = ref(false)
+const syncModel = async () => {
+  if(isSyncing.value) return
+  isSyncing.value = true
+  try {
+    const res = await ollamaApi.syncModel()
+    console.log(res)
+    ollamaStore.fetchAllModels()
+    isSyncing.value = false
+    toast({
+      title: t('settings.localModel.syncModelSuccess'),
+      description: t('settings.localModel.syncModelSuccessDesc'),
+    })
+  } catch (error) {
+    console.log(error)
+    toast({
+      title: t('settings.localModel.syncModelFailed'),
+      variant: "destructive",
+      description: t('settings.localModel.syncModelFailedDesc'),
+    })
+  }
+}
+// syncModel()
+
 const listModel = async () => {
   try {
     const res = await ollamaApi.listModel()
@@ -166,14 +197,16 @@ const listModel = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await ollamaStore.fetchAllModels()
+  filteredModels.value = JSON.parse(JSON.stringify(ollamaStore.allModels))
   getOllamaState()
 })
 
 // 筛选和搜索状态
 const selectedFilters = ref<FilterOption[]>(["all"])
 const searchQuery = ref("")
-const filteredModels = ref(modelsData)
+const filteredModels = ref<ModelData[]>([])
 
 const deleteModel = async (model: string) => {
   try {
@@ -242,9 +275,16 @@ const handleInstall = async () => {
           {{ t('settings.localModel.serviceNotInstalled') }}
         </template>
         <div class="ml-2">
-          <Button @click="getOllamaState" size="icon" variant="ghost">
-            <RefreshCw class="w-2 h-2 text-gray-300"></RefreshCw>
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+              <Button @click="getOllamaState" size="icon" variant="ghost">
+                <RefreshCw class="w-2 h-2 text-gray-300"></RefreshCw>
+              </Button>
+              </TooltipTrigger>
+              <TooltipContent class="text-sm">{{ t('settings.localModel.refreshStatus') }}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
       <div>
@@ -266,7 +306,19 @@ const handleInstall = async () => {
       </div>
     </div>
     <div class="flex justify-between items-center pt-2">
-      <div class="font-bold">{{ t('settings.localModel.modelManagement') }}</div>
+      <div class="flex items-center space-x-1">
+        <div class="font-bold">{{ t('settings.localModel.modelManagement') }}</div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <Button :disable="isSyncing" @click="syncModel" size="icon" variant="ghost">
+                <RefreshCw  class="!size-3 text-gray-300" :class="isSyncing ? 'animate-spin' : ''"></RefreshCw>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent class="text-sm">{{ t('settings.localModel.syncModel') }}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
       <Button variant="link" class="text-gray-400">{{ t('settings.localModel.moreModels') }}</Button>
     </div>
 

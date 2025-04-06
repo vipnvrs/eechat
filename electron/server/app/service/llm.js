@@ -124,8 +124,8 @@ class LLMService extends BaseLLMService {
       }, {})
       return data
     } catch (error) {
-      console.error('获取提供商失败:', error)
-      throw new Error('获取提供商失败: ' + error.message)
+      console.error(ctx.__('provider.get_failed'), error)
+      throw new Error(ctx.__('provider.get_failed') + error.message)
     }
   }
 
@@ -142,8 +142,8 @@ class LLMService extends BaseLLMService {
       })
       return res
     } catch (error) {
-      console.error('获取提供商配置失败:', error)
-      throw new Error('获取提供商配置失败: ' + error.message)
+      console.error(ctx.__('provider.config_get_failed'), error)
+      throw new Error(ctx.__('provider.config_get_failed') + error.message)
     }
   }
 
@@ -178,8 +178,8 @@ class LLMService extends BaseLLMService {
       console.log(res)
       return res
     } catch (error) {
-      console.error('保存提供商配置失败:', error)
-      throw new Error('保存提供商配置失败: ' + error.message)
+      console.error(ctx.__('provider.config_save_failed'), error)
+      throw new Error(ctx.__('provider.config_save_failed') + error.message)
     }
   }
 
@@ -224,7 +224,7 @@ class LLMService extends BaseLLMService {
       await this.saveConfigModelList(uid, providerId, modelConfigList)
       return res
     } catch (error) {
-      throw new Error('保存提供商配置失败: ' + error.message)
+      throw new Error(ctx.__('provider.config_save_failed') + error.message)
     }
   }
 
@@ -241,8 +241,8 @@ class LLMService extends BaseLLMService {
       })
       return res
     } catch (error) {
-      console.error('获取模型配置失败:', error)
-      throw new Error('获取模型配置失败:' + error.message)
+      console.error(ctx.__('model.config_get_failed'), error)
+      throw new Error(ctx.__('model.config_get_failed') + error.message)
     }
   }
 
@@ -261,8 +261,8 @@ class LLMService extends BaseLLMService {
       })
       return res
     } catch (error) {
-      console.error('获取模型配置列表失败:', error)
-      throw new Error('获取模型配置列表失败:' + error.message)
+      console.error(ctx.__('model.config_list_failed'), error)
+      throw new Error(ctx.__('model.config_list_failed') + error.message)
     }
   }
   // 保存模型配置列表
@@ -296,8 +296,8 @@ class LLMService extends BaseLLMService {
     } catch (error) {
       // 发生错误时回滚事务
       await transaction.rollback()
-      console.error('保存模型配置列表失败:', error)
-      throw new Error('保存模型配置列表失败:' + error.message)
+      console.error(ctx.__('model.config_save_failed'), error)
+      throw new Error(ctx.__('model.config_save_failed') + error.message)
     }
   }
 
@@ -333,7 +333,7 @@ class LLMService extends BaseLLMService {
       }
       return res
     } catch (error) {
-      throw new Error('保存模型配置失败:' + error.message)
+      throw new Error(ctx.__('model.config_save_failed') + error.message)
     }
   }
 

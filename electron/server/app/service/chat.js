@@ -27,7 +27,10 @@ class ChatService extends Service {
       await this.handleStream(stream, ctx, messages, sessionId, model)
     } catch (error) {
       ctx.logger.error('Chat service error:', error)
-      await this.handleStreamError(error, ctx)
+      await this.handleStreamError(
+        new Error(ctx.__('chat.service_error') + error.message),
+        ctx,
+      )
     }
   }
   async handleStream(stream, ctx, messages, sessionId, model) {
@@ -93,7 +96,10 @@ class ChatService extends Service {
       ctx.logger.error('Stream error:', error)
       // 只在响应尚未结束时处理错误
       if (!ctx.res.writableEnded && !hasEnded) {
-        await this.handleStreamError(error, ctx)
+        await this.handleStreamError(
+          new Error(ctx.__('chat.stream_error') + error.message),
+          ctx,
+        )
       }
     }
   }
@@ -131,7 +137,7 @@ class ChatService extends Service {
         ctx.res.end()
       }
     } catch (error) {
-      ctx.logger.error('处理错误时发生错误:', error)
+      ctx.logger.error(ctx.__('chat.handle_error_failed'), error)
     }
   }
 
@@ -148,12 +154,12 @@ class ChatService extends Service {
 
     // 参数验证
     if (!uid || !role || !content || !sessionId) {
-      throw new Error('参数不完整')
+      throw new Error(ctx.__('chat.incomplete_params'))
     }
 
     // 验证角色是否合法
     if (!['user', 'assistant', 'system'].includes(role)) {
-      throw new Error('无效的角色类型')
+      throw new Error(ctx.__('chat.invalid_role'))
     }
 
     try {
@@ -170,7 +176,7 @@ class ChatService extends Service {
       return message
     } catch (error) {
       ctx.logger.error('保存消息失败:', error)
-      throw new Error('保存消息失败: ' + error.message)
+      throw new Error(ctx.__('chat.save_message_failed') + error.message)
     }
   }
 
@@ -188,7 +194,7 @@ class ChatService extends Service {
     const { ctx } = this
 
     if (!uid || !sessionId) {
-      throw new Error('getHistory参数不完整')
+      throw new Error(ctx.__('chat.incomplete_params'))
     }
 
     try {
@@ -212,7 +218,7 @@ class ChatService extends Service {
       }
     } catch (error) {
       ctx.logger.error('获取历史记录失败:', error)
-      throw new Error('获取历史记录失败: ' + error.message)
+      throw new Error(ctx.__('chat.get_history_failed') + error.message)
     }
   }
 
@@ -239,7 +245,7 @@ class ChatService extends Service {
       return session
     } catch (error) {
       ctx.logger.error('创建会话失败:', error)
-      throw new Error('创建会话失败: ' + error.message)
+      throw new Error(ctx.__('chat.create_session_failed') + error.message)
     }
   }
 
@@ -247,7 +253,7 @@ class ChatService extends Service {
     const { ctx } = this
 
     if (!id) {
-      throw new Error('会话ID不能为空')
+      throw new Error(ctx.__('chat.incomplete_params'))
     }
 
     try {
@@ -265,7 +271,7 @@ class ChatService extends Service {
       return session
     } catch (error) {
       ctx.logger.error('获取会话失败:', error)
-      throw new Error('获取会话失败: ' + error.message)
+      throw new Error(ctx.__('chat.get_history_failed') + error.message)
     }
   }
 
@@ -289,7 +295,7 @@ class ChatService extends Service {
       }
     } catch (error) {
       ctx.logger.error('获取会话列表失败:', error)
-      throw new Error('获取会话列表失败: ' + error.message)
+      throw new Error(ctx.__('chat.get_history_failed') + error.message)
     }
   }
 
@@ -297,13 +303,13 @@ class ChatService extends Service {
     const { ctx } = this
 
     if (!id) {
-      throw new Error('会话ID不能为空')
+      throw new Error(ctx.__('chat.incomplete_params'))
     }
 
     try {
       const session = await ctx.model.ChatSession.findByPk(id)
       if (!session) {
-        throw new Error('会话不存在')
+        throw new Error(ctx.__('chat.session_not_found'))
       }
       await session.destroy()
       await ctx.model.Message.destroy({
@@ -314,14 +320,14 @@ class ChatService extends Service {
       return true
     } catch (error) {
       ctx.logger.error('删除会话失败:', error)
-      throw new Error('删除会话失败:' + error.message)
+      throw new Error(ctx.__('chat.delete_session_failed') + error.message)
     }
   }
 
   async summary(model, messages, sessionId) {
     const { ctx } = this
     if (!sessionId || !messages) {
-      throw new Error('参数不完整')
+      throw new Error(ctx.__('chat.incomplete_params'))
     }
     let messagesStr = ''
     messages.forEach(item => {
@@ -361,7 +367,7 @@ class ChatService extends Service {
       }
       const session = await ctx.model.ChatSession.findByPk(sessionId.id)
       if (!session) {
-        throw new Error('会话不存在')
+        throw new Error(ctx.__('chat.session_not_found'))
       }
 
       // 移除思考过程的内容
@@ -381,7 +387,7 @@ class ChatService extends Service {
       return session
     } catch (error) {
       ctx.logger.error('修改会话标题失败:', error)
-      throw new Error('修改会话标题失败:' + error.message)
+      throw new Error(ctx.__('chat.update_title_failed') + error.message)
     }
   }
 
@@ -390,7 +396,7 @@ class ChatService extends Service {
     try {
       const session = await ctx.model.ChatSession.findByPk(sessionId)
       if (!session) {
-        throw new Error('会话不存在')
+        throw new Error(ctx.__('chat.session_not_found'))
       }
 
       // 更新会话设置
@@ -407,7 +413,7 @@ class ChatService extends Service {
       return session
     } catch (error) {
       ctx.logger.error('更新会话设置失败:', error)
-      throw new Error('更新会话设置失败: ' + error.message)
+      throw new Error(ctx.__('chat.update_settings_failed') + error.message)
     }
   }
 
@@ -416,7 +422,7 @@ class ChatService extends Service {
     try {
       const session = await ctx.model.ChatSession.findByPk(sessionId)
       if (!session) {
-        throw new Error('会话不存在')
+        throw new Error(ctx.__('chat.session_not_found'))
       }
 
       return {
@@ -429,7 +435,7 @@ class ChatService extends Service {
       }
     } catch (error) {
       ctx.logger.error('获取会话设置失败:', error)
-      throw new Error('获取会话设置失败: ' + error.message)
+      throw new Error(ctx.__('chat.get_settings_failed') + error.message)
     }
   }
 }
