@@ -229,6 +229,12 @@ export const ollamaApi = {
   async removeModel(modelName: string) {
     return request.delete(`/api/ollama/remove/${modelName}`)
   },
+  async syncModel() {
+    return request.get('/api/ollama/sync')
+  },
+  async getAllModels() {
+    return request.get('/api/ollama/models')
+  },
 }
 
 export const llmApi = {

@@ -433,6 +433,107 @@ class OllamaService extends Service {
       throw new Error(error.message)
     }
   }
+
+  async getLocalOllamaModels() {
+    const { ctx } = this
+    try {
+      const models = await ctx.model.LocalOllamaModels.findAll({
+        order: [['sort', 'ASC']],
+      })
+      if (models.length === 0) {
+        await this.syncModelFromOllama()
+        return await this.getLocalOllamaModels()
+      }
+      return models
+    } catch (error) {
+      ctx.logger.error('获取本地模型列表失败:', error)
+      throw new Error('获取本地模型列表失败')
+    }
+  }
+
+  async syncModelFromOllama() {
+    const html = await this.ctx.curl('https://ollama.com/search', {
+      timeout: 20000,
+      dataType: 'text',
+    })
+    const ollamaModels = await this.parseModelHtml(html.data)
+    this.storeModels(ollamaModels)
+    return ollamaModels
+  }
+
+  async storeModels(models) {
+    const { ctx } = this
+
+    try {
+      for (const model of models) {
+        const { name, description, capabilities, sizes, sort } = model
+        if (!name) {
+          ctx.logger.warn('跳过无效模型数据:', model)
+          continue
+        }
+        // 先删除已存在的记录
+        await ctx.model.LocalOllamaModels.destroy({
+          where: { name },
+          force: true,
+        })
+
+        // 然后创建新记录
+        await ctx.model.LocalOllamaModels.create({
+          name,
+          description,
+          capabilities,
+          sizes,
+          sort,
+        })
+      }
+    } catch (error) {
+      ctx.logger.error('存储模型信息失败:', error)
+      // throw new Error('存储模型信息失败')
+    }
+  }
+
+  async parseModelHtml(html) {
+    const models = []
+    const { JSDOM } = require('jsdom')
+    const dom = new JSDOM(html)
+
+    // 先检查整个文档是否正确加载
+    // console.log(
+    //   'Document body:',
+    //   dom.window.document.body.innerHTML.substring(0, 100),
+    // )
+    const modelElements =
+      dom.window.document.querySelectorAll('li[x-test-model]')
+
+    modelElements.forEach((li, index) => {
+      const title = li.querySelector('h2 span').textContent.trim()
+      const description = li.querySelector('p').textContent.trim()
+      const capabilities = []
+      const sizes = []
+      // const pullCount = li.querySelector('span[x-test-pull-count]').textContent
+      // const tagCount = li.querySelector('span[x-test-tag-count]').textContent
+      // const updated = li.querySelector('span[x-test-updated]').textContent
+      // 提取能力标签
+      li.querySelectorAll('span[x-test-capability]').forEach(span => {
+        capabilities.push(span.textContent.trim())
+      })
+      // 提取大小标签
+      li.querySelectorAll('span[x-test-size]').forEach(span => {
+        sizes.push(span.textContent.trim())
+      })
+      // 构建模型对象
+      const model = {
+        name: title,
+        description,
+        capabilities,
+        sizes,
+        sort: index,
+      }
+      models.push(model)
+    })
+
+    return models
+  }
 }
 
 module.exports = OllamaService

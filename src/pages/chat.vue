@@ -54,6 +54,11 @@ const currentAssistantMessage = ref("")
 const sidebarLeftOpen = ref(true)
 const sidebarRightOpen = ref(false)
 
+watch(() => sessionStore.currentSession, (newValue) => {
+  console.log("Active session changed:", newValue)
+  handleSessionChange(newValue)
+}, { deep: true})
+
 const handleSessionChange = async (session) => {
   activeSession.value = session
   console.log("Session changed:", session.id)
@@ -254,7 +259,7 @@ onMounted(() => {
       :style="{ '--sidebar-width': '200px' }"
       v-model:open="sidebarLeftOpen"
     >
-      <SidebarLeft @session-change="handleSessionChange" />
+      <SidebarLeft />
     </SidebarProvider>
     <div class="w-full h-[100vh] max-h-[100vh] flex flex-col grow">
       <header

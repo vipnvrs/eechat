@@ -1,6 +1,6 @@
 // src/stores/ollama.ts
 import { defineStore } from 'pinia'
-import { modelsData } from '@/lib/models'
+import { ollamaApi } from '@/api/request'
 
 interface ModelDetails {
   parent_model: string
@@ -31,15 +31,28 @@ interface DownloadStatus {
 interface OllamaState {
   downloadStatus: Record<string, DownloadStatus>
   localModels: LocalModel[]
+  allModels: any[]
 }
 
 export const useOllamaStore = defineStore('ollama', {
   state: (): OllamaState => ({
     downloadStatus: {},
     localModels: [],
+    allModels: [],
   }),
 
   actions: {
+    async fetchAllModels() {
+      try {
+        const res = await ollamaApi.getAllModels()
+        if (res) {
+          this.allModels = res
+        }
+      } catch (error) {
+        console.error('获取所有模型列表失败:', error)
+      }
+    },
+
     updateDownloadStatus(modelName: string, status: DownloadStatus) {
       this.downloadStatus[modelName] = status
     },
@@ -75,7 +88,7 @@ export const useOllamaStore = defineStore('ollama', {
           }
 
           // 如果没有已安装版本,则从 modelsData 中找到对应模型的第一个 size
-          const modelInfo = modelsData.find(m => m.name === baseName)
+          const modelInfo = this.allModels.find(m => m.name === baseName)
           if (modelInfo && modelInfo.sizes.length > 0) {
             return {
               ...model,
@@ -91,6 +104,7 @@ export const useOllamaStore = defineStore('ollama', {
   },
 
   getters: {
+    getAllModels: state => state.allModels,
     getDownloadStatus: state => {
       return (modelName: string) => state.downloadStatus[modelName]
     },

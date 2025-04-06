@@ -17,6 +17,8 @@ module.exports = app => {
   router.get('/api/session/:id/settings', controller.chat.getSettings)
   router.post('/api/session/:id/settings', controller.chat.updateSettings)
 
+  router.get('/api/ollama/models', controller.ollama.getLocalOllamaModels)
+  router.get('/api/ollama/sync', controller.ollama.syncModelFromOllama)
   router.get('/api/ollama/state', controller.ollama.state)
   router.post('/api/ollama/start', controller.ollama.start)
   router.post('/api/ollama/stop', controller.ollama.stop)
