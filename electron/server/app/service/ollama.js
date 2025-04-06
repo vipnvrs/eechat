@@ -40,7 +40,7 @@ class OllamaService extends Service {
       }
     }
 
-    throw new Error('未找到 Ollama 安装路径')
+    throw new Error(this.ctx.__('ollama.not_found'))
   }
 
   /**
@@ -152,14 +152,14 @@ class OllamaService extends Service {
         try {
           await execAsync('open -a ollama')
         } catch (error) {
-          throw new Error('启动模型管理器失败')
+          throw new Error(ctx.__('ollama.start_failed'))
         }
         break
       case 'linux':
         try {
           await execAsync('ollama')
         } catch (error) {
-          throw new Error('启动模型管理器失败')
+          throw new Error(ctx.__('ollama.start_failed'))
         }
         break
     }
@@ -188,7 +188,7 @@ class OllamaService extends Service {
       attempts++
     }
 
-    throw new Error('启动模型管理器超时')
+    throw new Error(ctx.__('ollama.start_timeout'))
   }
 
   /**
@@ -213,21 +213,21 @@ class OllamaService extends Service {
             console.log(e)
           }
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
       case 'darwin':
         try {
           await execAsync('pkill -9 ollama Ollama')
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
       case 'linux':
         try {
           await execAsync('pkill -9 ollama Ollama')
         } catch (error) {
-          throw new Error('停止模型管理器失败')
+          throw new Error(ctx.__('ollama.stop_failed'))
         }
         break
     }
@@ -326,7 +326,7 @@ class OllamaService extends Service {
     } catch (error) {
       console.log('模型安装失败:', error)
       ctx.res.end()
-      throw new Error('模型安装失败')
+      throw new Error(ctx.__('ollama.model_install_failed'))
     }
   }
 
@@ -385,7 +385,7 @@ class OllamaService extends Service {
         return response
       }
     } catch (error) {
-      throw new Error('获取模型列表失败')
+      throw new Error(ctx.__('ollama.get_models_failed'))
     }
   }
 
@@ -447,7 +447,7 @@ class OllamaService extends Service {
       return models
     } catch (error) {
       ctx.logger.error('获取本地模型列表失败:', error)
-      throw new Error('获取本地模型列表失败')
+      throw new Error(ctx.__('ollama.get_models_failed'))
     }
   }
 
