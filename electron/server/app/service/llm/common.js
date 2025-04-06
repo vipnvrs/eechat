@@ -9,7 +9,10 @@ class DeepseekService extends BaseLLMService {
 
   async createClient(config) {
     if (!config || !config.baseUrl || !config.apiKey) {
-      throw new Error('请先配置模型的ApiKey和BaseUrl')
+      const locale = this.ctx.get('Accept-Language')
+      console.log('locale:', locale)
+
+      throw new Error(this.ctx.__('chat.key_empty'))
     }
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),

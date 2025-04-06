@@ -2,6 +2,7 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { LLMModel } from '@/types/llm'
+import i18n from '@/i18n'
 
 export const API_BASE_URL =
   process.env.NODE_ENV === 'production'
@@ -38,6 +39,8 @@ class Request {
     this.instance.interceptors.request.use(
       config => {
         // 这里可以添加 token 等通用请求头
+        const currentLang = i18n.global.locale.value
+        config.headers['Accept-Language'] = currentLang
         return config
       },
       error => Promise.reject(error),
@@ -112,6 +115,13 @@ class Request {
 // 导出请求实例
 export const request = new Request()
 
+export const systemApi = {
+  // 获取系统信息
+  async locale(locale: string) {
+    return request.get('/', { locale })
+  },
+}
+
 // 聊天相关的 API 方法
 export const chatApi = {
   // 创建新对话
@@ -147,10 +157,12 @@ export const chatApi = {
     onProgress?: (content: string) => void,
   ) {
     try {
+      const currentLang = i18n.global.locale.value
       const response = await fetch(API_BASE_URL + '/api/local/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': currentLang,
         },
         body: JSON.stringify({ model, messages, sessionId }),
       })
@@ -217,6 +229,7 @@ export const ollamaApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': i18n.global.locale.value,
         },
         body: JSON.stringify({ modelName }),
       })
@@ -291,6 +304,7 @@ export const llmApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': i18n.global.locale.value,
         },
         body: JSON.stringify({ model, provider, messages, sessionId }),
       })

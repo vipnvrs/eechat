@@ -1,0 +1,9 @@
+{
+  "success": "Success",
+  "params.error": "Parameter Error",
+  "unauthorized": "Unauthorized",
+  "forbidden": "Forbidden",
+  "not.found": "Resource Not Found",
+  "internal.error": "Internal Server Error",
+  "chat.key_empty": "Please configure your ApiKey and BaseUrl in the settings"
+}
