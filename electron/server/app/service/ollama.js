@@ -376,6 +376,7 @@ class OllamaService extends Service {
    * 获取ollama模型列表
    */
   async listModel() {
+    const { ctx } = this
     try {
       const response = await this.ctx.curl(`${ollamaBaseUrl}/api/tags`, {
         timeout: 3000,

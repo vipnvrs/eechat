@@ -4,7 +4,7 @@ import { useI18n } from "vue-i18n"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUpToLine } from "lucide-vue-next"
-import { CornerDownLeft } from "lucide-vue-next"
+import { CornerDownLeft, Mic } from "lucide-vue-next"
 
 const { t } = useI18n()
 
@@ -41,6 +41,33 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 }
 
+const isRecording = ref(false)
+const handleRecord = () => {
+  isRecording.value = !isRecording.value
+  // 添加类型声明以解决 TypeScript 报错
+  const recognition = new (window as any).webkitSpeechRecognition()
+  recognition.lang = "cmn-Hans-CN"
+  recognition.continuous = true
+  recognition.interimResults = true
+  recognition.addEventListener('result', (event) => {
+    const transcript = event.results[0][0].transcript
+    msg.value = `You said: ${transcript}`
+  });
+
+  recognition.addEventListener('speechend', () => {
+    recognition.stop()
+    isRecording.value = false
+  });
+
+  recognition.addEventListener('error', (event) => {
+    console.log(event);
+    
+    msg.value = `Error occurred in recognition: ${event.error}`
+    isRecording.value = false
+  })
+  recognition.start()
+}
+
 // 删除 initEvent 函数及其调用
 </script>
 
@@ -53,6 +80,15 @@ const handleKeyDown = (e: KeyboardEvent) => {
         :placeholder="t('chat.inputPlaceholder')"
         @keydown="handleKeyDown"
       ></Textarea>
+      <Button
+        @click="handleRecord"
+        :variant="isRecording ? 'destructive' : 'outline'"
+        :disabled="isRecording"
+        size="icon"
+        class="ml-auto gap-1.5 absolute bottom-12 right-16"
+      >
+        <Mic class="size-3.5" />
+      </Button>
       <Button
         type="submit"
         :disabled="disabled"

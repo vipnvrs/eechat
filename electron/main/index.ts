@@ -53,6 +53,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+app.commandLine.appendSwitch('enable-features', 'WebSpeechAPI')
 
 let win: BrowserWindow | null = null
 let updater: AppUpdater | null = null
