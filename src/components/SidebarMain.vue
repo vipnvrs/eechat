@@ -53,7 +53,7 @@ const data = {
     },
     {
       title: t('chat.mcp.title'),
-      url: '/',
+      url: '/mcp',
       icon: McpIcon,
       isActive: false,
     },

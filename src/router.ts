@@ -3,11 +3,7 @@ import { createWebHistory, createWebHashHistory, createRouter } from 'vue-router
 import Chat from '@/pages/chat.vue'
 import Discover from '@/pages/discover.vue'
 import Setting from '@/pages/setting.vue'
-// import AboutView from './AboutView.vue'
-// electron-google-analytics4
-// import Analytics from 'electron-google-analytics4'
-// const analytics = new Analytics('G-SX8YF600ZG', 'HM_cyI-lRxCqRAyqx3pv5Q')
-// analytics.event('page_view')
+import Mcp from '@/pages/mcp.vue'
 import Analytics from 'analytics'
 import googleAnalytics from '@analytics/google-analytics'
 
@@ -26,6 +22,7 @@ const routes = [
   { path: '/', component: Chat },
   { path: '/discover', component: Discover },
   { path: '/setting', component: Setting },
+  { path: '/mcp', component: Mcp },
   // { path: '/about', component: AboutView },
 ]
 

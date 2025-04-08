@@ -51,7 +51,7 @@ const handleRecord = () => {
   recognition.interimResults = true
   recognition.addEventListener('result', (event) => {
     const transcript = event.results[0][0].transcript
-    msg.value = `You said: ${transcript}`
+    msg.value = `${transcript}`
   });
 
   recognition.addEventListener('speechend', () => {
@@ -62,7 +62,7 @@ const handleRecord = () => {
   recognition.addEventListener('error', (event) => {
     console.log(event);
     
-    msg.value = `Error occurred in recognition: ${event.error}`
+    msg.value = `Error: ${event.error}`
     isRecording.value = false
   })
   recognition.start()
