@@ -9,6 +9,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
     "noEmit": true,
@@ -16,7 +17,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "noImplicitAny": false,
+    "noImplicitAny": false
   },
   "include": ["src"],
   "references": [

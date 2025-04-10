@@ -49,8 +49,8 @@ module.exports = appInfo => {
   // 添加数据库配置
   config.sequelize = {
     dialect: 'sqlite',
-    storage: path.join(app.getPath('userData'), 'database', 'database.db'),
-    // storage: path.join(__dirname, '../database/database.db'),
+    // storage: path.join(app.getPath('userData'), 'database', 'database.db'),
+    storage: path.join(__dirname, '../database/database.db'),
     define: {
       freezeTableName: true,
       timestamps: true,

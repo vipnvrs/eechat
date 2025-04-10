@@ -4,37 +4,66 @@ const OpenAI = require('openai')
 const ollamaBaseUrl = 'http://127.0.0.1:11434'
 
 class ChatService extends Service {
+  accumulatedContent = ''
+  currentToolCall = {}
+  toolCallArguments = ''
+  cachedParams = null
+
   /**
    * 发送消息到大模型
    * @param {string} messages - 聊天内容
    * @param {string} sessionId - 会话ID
    * @reurns {Promise<string>} - 返回聊天结果
    */
-  async sendMessage(model, messages, sessionId) {
-    const { ctx } = this
-    try {
-      const openai = new OpenAI({
-        baseURL: `${ollamaBaseUrl}/v1`,
-        apiKey: 'dummy',
-      })
+  // async sendMessage(model, messages, sessionId) {
+  //   this.cachedParams = { model, messages, sessionId }
+  //   const { ctx } = this
+  //   try {
+  //     const openai = new OpenAI({
+  //       baseURL: `${ollamaBaseUrl}/v1`,
+  //       apiKey: 'dummy',
+  //     })
 
-      const requestParams = {
-        model: model.id,
-        messages,
-        stream: true,
-      }
-      const stream = await openai.chat.completions.create(requestParams)
-      await this.handleStream(stream, ctx, messages, sessionId, model)
-    } catch (error) {
-      ctx.logger.error('Chat service error:', error)
-      await this.handleStreamError(
-        new Error(ctx.__('chat.service_error') + error.message),
-        ctx,
-      )
-    }
-  }
-  async handleStream(stream, ctx, messages, sessionId, model) {
+  //     const requestParams = {
+  //       model: model.id,
+  //       messages,
+  //       stream: true,
+  //     }
+  //     const stream = await openai.chat.completions.create(requestParams)
+  //     await this.handleStream(
+  //       stream,
+  //       ctx,
+  //       messages,
+  //       sessionId,
+  //       model,
+  //       messages,
+  //       sessionId,
+  //     )
+  //   } catch (error) {
+  //     ctx.logger.error('Chat service error:', error)
+  //     await this.handleStreamError(
+  //       new Error(ctx.__('chat.service_error') + error.message),
+  //       ctx,
+  //     )
+  //   }
+  // }
+  async handleStream(
+    stream,
+    ctx,
+    messages,
+    sessionId,
+    model,
+    loopArgs,
+    msgSaved,
+  ) {
     console.log('handleStream')
+    // 保存用户最后一条消息
+    await this.saveMsg(
+      'default-user',
+      messages[messages.length - 1].role,
+      messages[messages.length - 1].content,
+      sessionId,
+    )
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -52,10 +81,20 @@ class ChatService extends Service {
         }
         // reasoning_content,
         // finish_reason
+        // this.handleToolCall(chunk, model, messages, sessionId)
+        const hasToolCall = await this.handleToolCall(
+          chunk,
+          sessionId,
+          loopArgs,
+        )
+        if (hasToolCall) {
+          // 如果是工具调用，不要结束流
+          continue
+        }
         if (!chunk.choices[0].delta.content) {
           continue
         }
-        // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
+        // console.log(JSON.stringify(chunk) + '\n')
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
           (chunk.choices[0] &&
@@ -69,16 +108,10 @@ class ChatService extends Service {
         // todo: session 会话信息
       }
 
-      // 保存用户最后一条消息
-      await this.saveMsg(
-        'default-user',
-        messages[messages.length - 1].role,
-        messages[messages.length - 1].content,
-        sessionId,
-      )
-
       // 保存助手的完整回复
-      if (assistantMessage) {
+      if (msgSaved) {
+        await this.appendMsg(msgSaved.id, assistantMessage)
+      } else {
         await this.saveMsg(
           'default-user',
           'assistant',
@@ -103,12 +136,142 @@ class ChatService extends Service {
       }
     }
   }
+
+  async handleToolCall(chunk, sessionId, loopArgs) {
+    const { ctx } = this
+    let isToolCall = false
+    // 处理工具调用开始
+    if (chunk.choices[0]?.delta?.tool_calls?.[0]) {
+      isToolCall = true
+      const toolCall = chunk.choices[0].delta.tool_calls[0]
+      // 如果是新的工具调用
+      if (toolCall.index === 0 && toolCall.function?.name) {
+        this.currentToolCall = {
+          index: toolCall.index,
+          id: toolCall.id,
+          name: toolCall.function.name,
+          arguments: '',
+        }
+
+        const data = JSON.stringify({
+          type: 'tool_call_started',
+          name: toolCall.function.name,
+          id: toolCall.id,
+        })
+        // controller.enqueue(`data: ${data}\n\n`)
+      }
+
+      // 处理参数增量
+      if (toolCall.function?.arguments) {
+        this.toolCallArguments += toolCall.function.arguments
+        this.currentToolCall.arguments += toolCall.function.arguments
+
+        const data = JSON.stringify({
+          type: 'tool_call_arguments',
+          id: this.currentToolCall.id,
+          delta: toolCall.function.arguments,
+        })
+        // controller.enqueue(`data: ${data}\n\n`)
+      }
+    }
+    // 检查是否完成
+    if (chunk.choices[0]?.finish_reason === 'tool_calls') {
+      isToolCall = true
+      // 发送工具调用开始消息
+      const chunkToolCallStart = {
+        choices: [
+          {
+            delta: {
+              content: JSON.stringify({
+                type: 'tool_call_start',
+                id: this.currentToolCall.id,
+                name: this.currentToolCall.name,
+                arguments: this.currentToolCall.arguments,
+              }),
+            },
+            finish_reason: null,
+            index: 0,
+          },
+        ],
+      }
+      const chunkToolCallStartMsg = JSON.stringify(chunkToolCallStart)
+      ctx.res.write(chunkToolCallStartMsg + '\n')
+      const msgSaved = await this.saveMsg(
+        'default-user',
+        'assistant',
+        chunkToolCallStart.choices[0].delta.content + '\n',
+        sessionId,
+      )
+      // 运行工具
+      const res = await ctx.service.tools.runTools(
+        this.currentToolCall.name,
+        this.currentToolCall.arguments,
+      )
+      // 发送工具调用结束消息
+      const chunkToolCallEnd = {
+        choices: [
+          {
+            delta: {
+              content: JSON.stringify({
+                type: 'tool_call_end',
+                id: this.currentToolCall.id,
+                name: this.currentToolCall.name,
+                arguments: this.currentToolCall.arguments,
+                result: res,
+              }),
+            },
+            finish_reason: null,
+            index: 0,
+          },
+        ],
+      }
+      ctx.res.write(JSON.stringify(chunkToolCallEnd) + '\n')
+      await this.appendMsg(
+        msgSaved.id,
+        chunkToolCallEnd.choices[0].delta.content + '\n',
+      )
+      if (res) {
+        // 使用更新后的消息重新发起对话
+        ctx.logger.info('工具调用完成，重新发起对话')
+        const { model, provider, messages, sessionId, config } = loopArgs
+        messages.push({
+          role: 'assistant',
+          content: res,
+        })
+        await ctx.service.llm.chat(
+          model,
+          provider,
+          messages,
+          sessionId,
+          config,
+          msgSaved,
+        )
+      }
+      return isToolCall
+    }
+
+    // 检查是否完成
+    // if (chunk.choices[0]?.finish_reason === 'stop') {
+    //   const data = JSON.stringify({
+    //     type: 'done',
+    //     content: this.accumulatedContent,
+    //     toolCall: this.currentToolCall
+    //       ? {
+    //           name: this.currentToolCall.name,
+    //           arguments: this.currentToolCall.arguments,
+    //         }
+    //       : null,
+    //   })
+    //   // controller.enqueue(`data: ${data}\n\n`)
+    // }
+  }
+
   async handleStreamError(error, ctx) {
     console.error('handleStreamError:', error)
 
     // 检查响应是否已结束
     console.log('ctx.res.writableEnded:', ctx.res.writableEnded)
-    
+
     if (ctx.res.writableEnded) {
       return
     }
@@ -177,6 +340,23 @@ class ChatService extends Service {
     } catch (error) {
       ctx.logger.error('保存消息失败:', error)
       throw new Error(ctx.__('chat.save_message_failed') + error.message)
+    }
+  }
+
+  async appendMsg(messageId, message) {
+    const { ctx } = this
+    try {
+      const msg = await ctx.model.Message.findByPk(messageId)
+      if (!msg) {
+        throw new Error(ctx.__('chat.message_not_found'))
+      }
+      msg.content += message
+      msg.updated_at = new Date()
+      await msg.save()
+      return msg
+    } catch (error) {
+      ctx.logger.error('追加消息失败:', error)
+      throw new Error(ctx.__('chat.append_message_failed') + error.message)
     }
   }
 

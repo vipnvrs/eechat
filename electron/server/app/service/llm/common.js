@@ -56,6 +56,7 @@ class DeepseekService extends BaseLLMService {
    * }
    */
   async chat(model, messages, config, sessionSettings) {
+    const { ctx } = this
     try {
       const configSaved = await this.getConfig(model.provider_id)
       console.log(configSaved)
@@ -72,6 +73,27 @@ class DeepseekService extends BaseLLMService {
         : messages
       console.log(sessionSettings)
 
+      const tools = [
+        {
+          "type": "function",
+          "function": {
+              "name": "get_weather",
+              "description": "Get weather of an location, the user shoud supply a location first",
+              "parameters": {
+                  "type": "object",
+                  "properties": {
+                      "location": {
+                          "type": "string",
+                          "description": "The city and state, e.g. San Francisco, CA",
+                      }
+                  },
+                  "required": ["location"]
+              },
+          }
+      },
+      ]
+      console.log('tools:', tools)
+
       const response = await client.chat.completions.create({
         model: model_id,
         messages: messagesWithSystemPrompt,
@@ -81,6 +103,7 @@ class DeepseekService extends BaseLLMService {
         // top_p: sessionSettings.top_p,
         // presence_penalty: sessionSettings.presence_penalty,
         // frequency_penalty: sessionSettings.frequency_penalty,
+        tools,
       })
       // return response.choices[0].message.content
       return response

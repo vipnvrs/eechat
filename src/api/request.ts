@@ -338,7 +338,11 @@ const handleStream = async (response, onProgress) => {
           if (!line.trim()) return
           try {
             const data = JSON.parse(line)
+            if (line.includes('tool')) {
+              // debugger
+            }
             const content = data.choices[0]?.delta?.content || ''
+            console.log(content)
 
             // 处理思考标记
             if (content === '<think>') {

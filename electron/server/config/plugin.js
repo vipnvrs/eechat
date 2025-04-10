@@ -8,8 +8,4 @@ module.exports = {
     enable: true,
     package: 'egg-cors',
   },
-  i18n: {
-    enable: true,
-    package: 'egg-i18n',
-  },
 }

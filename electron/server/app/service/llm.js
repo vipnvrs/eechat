@@ -16,9 +16,9 @@ class LLMService extends BaseLLMService {
 
   getProviderService(provider) {
     let service
-    service = this.providers[provider] 
+    service = this.providers[provider]
     if (!service) {
-      console.log(`使用openai通道`);
+      console.log(`使用openai通道`)
       service = this.providers['common']
     }
     return service
@@ -26,9 +26,9 @@ class LLMService extends BaseLLMService {
 
   async testConnection(provider, config, model) {
     let service
-    service = this.providers[provider] 
+    service = this.providers[provider]
     if (!service) {
-      console.log(`使用openai通道`);
+      console.log(`使用openai通道`)
       service = this.providers['common']
     }
     return service.testConnection(config, model)
@@ -344,9 +344,16 @@ class LLMService extends BaseLLMService {
    * @param {*} messages
    * @param {*} config
    */
-  async chat(model, provider, messages, sessionId, config) {
+  async chat(model, provider, messages, sessionId, config, msgSaved) {
     const { ctx } = this
     const chatService = ctx.service.chat
+    const loopArgs = {
+      model,
+      provider,
+      messages,
+      sessionId,
+      config,
+    }
     try {
       let service = this.getProviderService(provider)
       const sessionSettings = await chatService.getSettings(sessionId)
@@ -357,7 +364,15 @@ class LLMService extends BaseLLMService {
         sessionSettings,
       )
       // 使用 ChatService 的 handleStream 处理流数据
-      await chatService.handleStream(stream, ctx, messages, sessionId, model)
+      await chatService.handleStream(
+        stream,
+        ctx,
+        messages,
+        sessionId,
+        model,
+        loopArgs,
+        msgSaved,
+      )
       // todo: 这里的错误没有handle到
     } catch (error) {
       console.error('模型请求失败(chat):', error)
@@ -369,7 +384,7 @@ class LLMService extends BaseLLMService {
   async chatNoStream(messages, model, provider_id) {
     const { ctx } = this
     try {
-      let service= this.getProviderService(provider_id)
+      let service = this.getProviderService(provider_id)
       const res = await service.chatNoStream(messages, model, provider_id)
       return res.choices[0].message.content
     } catch (error) {
