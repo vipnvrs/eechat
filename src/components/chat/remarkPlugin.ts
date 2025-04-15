@@ -14,21 +14,20 @@ export default function remarkPlugin() {
         if (node.name == 'tool_call') {
           const data = node.data || (node.data = {})
           const content = toString(node)
-          console.log(`指令: ${node.name}`)
-          
+
           // 提取工具信息，不使用 JSON.parse
           let toolInfo = { type: '', id: '', name: '', arguments: {} }
           let rawContent = content
-          
+
           // 尝试提取基本信息
           const typeMatch = content.match(/"type"\s*:\s*"([^"]+)"/)
           const idMatch = content.match(/"id"\s*:\s*"([^"]+)"/)
           const nameMatch = content.match(/"name"\s*:\s*"([^"]+)"/)
-          
+
           if (typeMatch) toolInfo.type = typeMatch[1]
           if (idMatch) toolInfo.id = idMatch[1]
           if (nameMatch) toolInfo.name = nameMatch[1]
-          
+
           // 尝试安全解析完整 JSON，但不依赖它
           try {
             if (content.trim()) {
@@ -38,11 +37,13 @@ export default function remarkPlugin() {
               }
             }
           } catch (error) {
-            console.log('解析工具调用内容失败，使用正则提取的信息:', error)
+            // console.log('解析工具调用内容失败，使用正则提取的信息:', error)
           }
 
           // 显示名称处理
-          const displayName = toolInfo.name ? toolInfo.name.replace(/^mcp_[^_]+_/, '') : '未知工具'
+          const displayName = toolInfo.name
+            ? toolInfo.name.replace(/^mcp_[^_]+_/, '')
+            : '未知工具'
 
           data.hName = 'div'
           data.hProperties = {
@@ -84,7 +85,7 @@ export default function remarkPlugin() {
                     onclick:
                       'this.parentElement.nextElementSibling.classList.toggle("hidden")',
                   },
-                  'Detail',
+                  '详情',
                 ),
               ],
             ),
@@ -94,7 +95,7 @@ export default function remarkPlugin() {
                 'div',
                 {
                   class:
-                    'bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto',
+                    'bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto break-all whitespace-pre-wrap',
                 },
                 // 显示原始内容，确保内容始终可见
                 rawContent,

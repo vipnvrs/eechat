@@ -184,7 +184,7 @@ class ChatService extends Service {
       // 返回客户端指令流
       ctx.res.write(`${JSON.stringify(messageWithDirective)}\n\n`)
       const content = messageWithDirective.choices[0].delta.content
-      this.appendMsg(sessionId, 'assistant', content)
+      // this.appendMsg(sessionId, 'assistant', content)
       saveRes.push(content)
     }
     return saveRes

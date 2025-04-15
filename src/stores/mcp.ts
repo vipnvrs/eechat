@@ -40,7 +40,7 @@ export const useMcpStore = defineStore('mcp', {
         this.loading = true
         this.error = null
         const response = await mcpApi.listAllTools()
-        this.tools = response || []
+        this.tools = response.tools || []
         this.initialized = true
       } catch (error) {
         console.error('获取MCP工具列表失败:', error)

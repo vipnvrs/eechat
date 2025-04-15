@@ -26,9 +26,12 @@ const uploadFiles = async () => {
   const versionDir = path.join(config.localReleaseDir, config.version);
 
   const allFiles = [
-    ...(await glob(`${versionDir}/**/*`, { nodir: true, ignore: [`**/win-unpacked/**`] })),
-    ...(await glob(`${config.localReleaseDir}/*.yml`, { nodir: true }))
-  ];
+    ...(await glob(`${versionDir}/**/*`, {
+      nodir: true,
+      ignore: [`**/win-unpacked/**`, `**/mac-arm64/**`],
+    })),
+    ...(await glob(`${config.localReleaseDir}/*.yml`, { nodir: true })),
+  ]
   
   const files = allFiles.filter(file => {
     const ext = path.extname(file);

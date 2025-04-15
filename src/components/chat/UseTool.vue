@@ -43,7 +43,6 @@ const toolsEnabled = computed({
 // 按 serverKey 分组的工具
 const groupedTools = computed(() => {
   const groups = {}
-  
   tools.value.forEach(tool => {
     const serverKey = tool.metadata?.serverKey || '其他'
     if (!groups[serverKey]) {
