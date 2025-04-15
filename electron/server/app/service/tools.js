@@ -4,8 +4,7 @@ const { type } = require('os')
 module.exports = class ToolsService extends Service {
   constructor(ctx) {
     super(ctx)
-    this.tools = 
-    [
+    this.tools = [
       //   {
       //     "type": "function",
       //     "function": {
@@ -33,39 +32,43 @@ module.exports = class ToolsService extends Service {
   // 解析工具名称，提取服务器键和原始工具名
   parseMcpToolName(name) {
     if (name.startsWith('mcp_')) {
-      const parts = name.split('_');
+      const parts = name.split('_')
       if (parts.length >= 3) {
-        const serverKey = parts[1];
+        const serverKey = parts[1]
         // 原始工具名可能包含下划线，需要重新组合
-        const originalName = parts.slice(2).join('_');
-        return { serverKey, originalName };
+        const originalName = parts.slice(2).join('_')
+        return { serverKey, originalName }
       }
     }
-    return { serverKey: null, originalName: name };
+    return { serverKey: null, originalName: name }
   }
 
   async runTools(name, args) {
-    console.log('run tools', name, args);
-    
+    console.log('run tools', name, args)
+
     // 检查是否是MCP工具
     if (name.startsWith('mcp_')) {
       try {
-        const { serverKey, originalName } = this.parseMcpToolName(name);
-        
+        const { serverKey, originalName } = this.parseMcpToolName(name)
+
         // 调用MCP服务的工具
         if (serverKey) {
           // 这里需要实现MCP工具的调用逻辑
-          const result = await this.ctx.service.mcp.callTool(serverKey, originalName, args);
-          return result;
+          const result = await this.ctx.service.mcp.callTool(
+            serverKey,
+            originalName,
+            args,
+          )
+          return result
         }
       } catch (error) {
-        this.ctx.logger.error('MCP工具调用失败:', error);
-        return `工具调用失败: ${error.message}`;
+        this.ctx.logger.error('MCP工具调用失败:', error)
+        return `工具调用失败: ${error.message}`
       }
     }
-    
+
     // 处理内置工具
-    return 'tool: done, 北京：25℃';
+    return 'tool: done, 北京：25℃'
   }
 
   async getTools() {
