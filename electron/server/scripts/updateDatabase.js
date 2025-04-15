@@ -8,8 +8,8 @@ let pkg = null
 // console.log('process.resourcesPath:', process.resourcesPath)
 
 // 数据库文件路径
-const dbPath = path.join(app.getPath('userData'), 'database', 'database.db')
-// const dbPath = path.join(__dirname, '../database/database.db')
+// const dbPath = path.join(app.getPath('userData'), 'database', 'database.db')
+const dbPath = path.join(__dirname, '../database/database.db')
 
 // SQL目录
 const sqlDir = path.join(__dirname, './updateSQl')
