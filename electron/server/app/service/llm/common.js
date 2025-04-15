@@ -73,25 +73,26 @@ class DeepseekService extends BaseLLMService {
         : messages
       console.log(sessionSettings)
 
-      const tools = [
-        {
-          "type": "function",
-          "function": {
-              "name": "get_weather",
-              "description": "Get weather of an location, the user shoud supply a location first",
-              "parameters": {
-                  "type": "object",
-                  "properties": {
-                      "location": {
-                          "type": "string",
-                          "description": "The city and state, e.g. San Francisco, CA",
-                      }
-                  },
-                  "required": ["location"]
-              },
-          }
-      },
-      ]
+      // const tools = [
+      //   {
+      //     "type": "function",
+      //     "function": {
+      //         "name": "get_weather",
+      //         "description": "Get weather of an location, the user shoud supply a location first",
+      //         "parameters": {
+      //             "type": "object",
+      //             "properties": {
+      //                 "location": {
+      //                     "type": "string",
+      //                     "description": "The city and state, e.g. San Francisco, CA",
+      //                 }
+      //             },
+      //             "required": ["location"]
+      //         },
+      //     }
+      // },
+      // ]
+      const tools = await ctx.service.tools.getTools()
       console.log('tools:', tools)
 
       const response = await client.chat.completions.create({
