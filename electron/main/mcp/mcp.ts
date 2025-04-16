@@ -14,7 +14,7 @@ import log, { McpLog } from '../utils/logger'  // 导入共享的日志模块
 
 dotenv.config();
 
-const OPENAI_API_KEY = 'sk-c61a217bfb0d4ea0aa8ea83522b2509c'
+const OPENAI_API_KEY = dotenv.config().parsed?.OPENAI_API_KEY
 const OPENAI_BASE_URL ='https://api.deepseek.com/v1'
 
 class MCPClient {
