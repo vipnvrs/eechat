@@ -9,7 +9,6 @@ import { AppUpdater, registerUpdaterHandlers } from './updater'
 import { Playground } from './playground/playground'
 import { Analytics } from './analytics'
 import { Ipc } from './ipc'
-import { initClient } from './mcp/mcp'
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -19,7 +18,6 @@ if (!process.env.NODE_ENV) {
 
 // import log from 'electron-log/main'
 import log, { AppLog } from './utils/logger'
-
 
 // 捕获未处理的异常
 process.on('uncaughtException', error => {
@@ -167,7 +165,6 @@ app.whenReady().then(async () => {
     createWindow()
     await startEggServer('')
     initUpdate()
-    initClient()
     const playground = new Playground(win)
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
