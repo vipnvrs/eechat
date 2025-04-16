@@ -135,6 +135,8 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
       activeSession.value.id,
       (content: string) => {
         // 更新最后一条消息的内容
+        console.log( chatHistory.value);
+        
         const lastMessage = chatHistory.value[chatHistory.value.length - 1]
         lastMessage.content += content
       }

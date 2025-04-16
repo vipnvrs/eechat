@@ -93,7 +93,6 @@ class DeepseekService extends BaseLLMService {
       // },
       // ]
       const tools = await ctx.service.tools.getTools()
-      console.log('tools:', tools)
 
       const response = await client.chat.completions.create({
         model: model_id,

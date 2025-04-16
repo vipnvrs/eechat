@@ -57,13 +57,15 @@ class ChatService extends Service {
     msgSaved,
   ) {
     console.log('handleStream')
-    // 保存用户最后一条消息
-    await this.saveMsg(
-      'default-user',
-      messages[messages.length - 1].role,
-      messages[messages.length - 1].content,
-      sessionId,
-    )
+    if(!msgSaved) {
+      // 保存用户最后一条消息
+      await this.saveMsg(
+        'default-user',
+        messages[messages.length - 1].role,
+        messages[messages.length - 1].content,
+        sessionId,
+      )
+    }
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -153,11 +155,11 @@ class ChatService extends Service {
           arguments: '',
         }
 
-        const data = JSON.stringify({
-          type: 'tool_call_started',
-          name: toolCall.function.name,
-          id: toolCall.id,
-        })
+        // const data = JSON.stringify({
+        //   type: 'tool_call_started',
+        //   name: toolCall.function.name,
+        //   id: toolCall.id,
+        // })
         // controller.enqueue(`data: ${data}\n\n`)
       }
 
@@ -166,40 +168,42 @@ class ChatService extends Service {
         this.toolCallArguments += toolCall.function.arguments
         this.currentToolCall.arguments += toolCall.function.arguments
 
-        const data = JSON.stringify({
-          type: 'tool_call_arguments',
-          id: this.currentToolCall.id,
-          delta: toolCall.function.arguments,
-        })
+        // const data = JSON.stringify({
+        //   type: 'tool_call_arguments',
+        //   id: this.currentToolCall.id,
+        //   delta: toolCall.function.arguments,
+        // })
         // controller.enqueue(`data: ${data}\n\n`)
       }
     }
     // 检查是否完成
     if (chunk.choices[0]?.finish_reason === 'tool_calls') {
       isToolCall = true
-      // 发送工具调用开始消息
-      const chunkToolCallStart = {
-        choices: [
-          {
-            delta: {
-              content: JSON.stringify({
-                type: 'tool_call_start',
-                id: this.currentToolCall.id,
-                name: this.currentToolCall.name,
-                arguments: this.currentToolCall.arguments,
-              }),
-            },
-            finish_reason: null,
-            index: 0,
-          },
-        ],
-      }
-      const chunkToolCallStartMsg = JSON.stringify(chunkToolCallStart)
-      ctx.res.write(chunkToolCallStartMsg + '\n')
+      // 格式化参数
+      this.currentToolCall = this.ctx.helper.toolCallStrArgsToObj(this.currentToolCall)
+      // 转换为标准消息
+      const messageStand = this.ctx.helper.factoryMessageContent(
+        {
+          type: 'tool_call_start',
+          id: this.currentToolCall.id,
+          name: this.currentToolCall.name,
+          arguments: this.currentToolCall.arguments,
+        }
+      )
+      // 添加指令
+      const messageWithDirective = this.ctx.helper.toolCallFucntionToDirective(
+        messageStand, 
+        'tool_call'
+      )
+      // 返回客户端指令流
+      ctx.res.write(`${JSON.stringify(messageWithDirective)}\n\n`)
+      
+      const content = messageWithDirective.choices[0].delta.content
+      // todo 再次工具调用会存储为新的会议，需要修复
       const msgSaved = await this.saveMsg(
         'default-user',
         'assistant',
-        chunkToolCallStart.choices[0].delta.content + '\n',
+        content,
         sessionId,
       )
       // 运行工具
@@ -208,27 +212,24 @@ class ChatService extends Service {
         this.currentToolCall.arguments,
       )
       // 发送工具调用结束消息
-      const chunkToolCallEnd = {
-        choices: [
-          {
-            delta: {
-              content: JSON.stringify({
-                type: 'tool_call_end',
-                id: this.currentToolCall.id,
-                name: this.currentToolCall.name,
-                arguments: this.currentToolCall.arguments,
-                result: res,
-              }),
-            },
-            finish_reason: null,
-            index: 0,
-          },
-        ],
-      }
-      ctx.res.write(JSON.stringify(chunkToolCallEnd) + '\n')
+      const messageStandWithRes = this.ctx.helper.factoryMessageContent(
+        {
+          type: 'tool_call_end',
+          id: this.currentToolCall.id,
+          name: this.currentToolCall.name,
+          arguments: this.currentToolCall.arguments,
+          result: res,
+        }
+      )
+      const messageWithDirectiveWithRes = this.ctx.helper.toolCallFucntionToDirective(
+        messageStandWithRes,
+        'tool_call'
+      )
+      ctx.res.write(`${JSON.stringify(messageWithDirectiveWithRes)}\n\n`)
+
       await this.appendMsg(
         msgSaved.id,
-        chunkToolCallEnd.choices[0].delta.content + '\n',
+        messageWithDirectiveWithRes.choices[0].delta.content + '\n',
       )
       if (res) {
         // 使用更新后的消息重新发起对话
@@ -236,7 +237,7 @@ class ChatService extends Service {
         const { model, provider, messages, sessionId, config } = loopArgs
         messages.push({
           role: 'assistant',
-          content: res,
+          content: JSON.stringify(res),
         })
         await ctx.service.llm.chat(
           model,

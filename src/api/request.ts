@@ -363,6 +363,8 @@ const handleStream = async (response, onProgress) => {
             onProgress?.(content)
           } catch (e) {
             console.error('解析错误:', e)
+            console.log('原始数据:', line)
+            console.log('原始数据类型:', typeof line)
           }
         })
       }

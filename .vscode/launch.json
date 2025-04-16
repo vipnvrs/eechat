@@ -46,5 +46,19 @@
         "http://127.0.0.1:3344/**"
       ]
     },
+    {
+      "name": "Debug Egg Server",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/electron/server",
+      "runtimeExecutable": "npm",
+      "windows": { "runtimeExecutable": "npm.cmd" },
+      "runtimeArgs": [ "run", "debug" ],
+      "console": "integratedTerminal",
+      "protocol": "auto",
+      "restart": true,
+      "port": 9229,
+      "autoAttachChildProcesses": true
+    }
   ]
 }
