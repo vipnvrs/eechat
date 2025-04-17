@@ -14,6 +14,7 @@ export class Ipc {
     ipcMain.handle('get-app-paths', () => {
       const userData = app.getPath('userData')
       return {
+        config: path.join(userData, 'config'),
         database: path.join(userData, 'database'),
         executable: path.join(userData, 'bin'),
         logs: path.join(userData, 'logs')

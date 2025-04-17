@@ -225,6 +225,10 @@
     },
     "data": {
       "title": "数据管理",
+      "config": {
+        "title": "配置",
+        "description": "管理系统配置文件"
+      },
       "database": {
         "title": "数据库",
         "description": "您可以通过此目录来备份/恢复聊天内容"

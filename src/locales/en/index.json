@@ -224,6 +224,10 @@
     },
     "data": {
       "title": "Data Management",
+      "config": {
+        "title": "Data Configuration",
+        "description": "Configure system files"
+      },
       "database": {
         "title": "Database",
         "description": "You can backup/restore chat content through this directory"

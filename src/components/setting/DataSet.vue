@@ -9,6 +9,7 @@ import ThemeSwitcher from '@/components/setting/ThemeSwitcher.vue'
 const { t } = useI18n()
 
 // 定义路径变量
+const configPath = ref('')
 const databasePath = ref('')
 const executablePath = ref('')
 const logsPath = ref('')
@@ -16,6 +17,7 @@ const logsPath = ref('')
 // 获取应用路径
 onMounted(async () => {
   const paths = await window.ipcRenderer.invoke('get-app-paths')
+  configPath.value = paths.config
   databasePath.value = paths.database
   executablePath.value = paths.executable
   logsPath.value = paths.logs
@@ -31,6 +33,18 @@ const openDirectory = async (dirPath: string) => {
   <div class="h-full space-y-6">
     <div class="text-gray-500 text-sm">
       {{ t('settings.data.title') }}
+    </div>
+    <div class="space-y-2 items-center">
+      <div class="min-w-20 text-gray-700 text-sm">
+        {{ t('settings.data.config.title') }}
+      </div>
+      <div class="text-xs text-zinc-400">{{ t('settings.data.config.description') }}</div>
+      <div class="flex space-x-2 items-center">
+        <Input class="w-[500px]" v-model="configPath" readonly />
+        <Button variant="outline" @click="openDirectory(configPath)">
+          {{ t('settings.data.openDirectory') }}
+        </Button>
+      </div>
     </div>
     <div class="space-y-2 items-center">
       <div class="min-w-20 text-gray-700 text-sm">
