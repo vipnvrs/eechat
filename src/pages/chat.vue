@@ -54,9 +54,11 @@ const currentAssistantMessage = ref("")
 const sidebarLeftOpen = ref(true)
 const sidebarRightOpen = ref(false)
 
-watch(() => sessionStore.currentSession, (newValue) => {
-  console.log("Active session changed:", newValue)
-  handleSessionChange(newValue)
+watch(() => sessionStore.currentSession, (newValue, oldValue) => {
+  if(newValue?.id != oldValue?.id) {
+    console.log("Active session changed:", newValue)
+    handleSessionChange(newValue) 
+  }
 }, { deep: true})
 
 const handleSessionChange = async (session) => {
@@ -250,6 +252,9 @@ onMounted(() => {
       // 使用助手信息初始化聊天
       initializeChat(assistant)
     }
+  }
+  if(sessionStore.currentSession) {
+    handleSessionChange(sessionStore.currentSession)
   }
 })
 </script>

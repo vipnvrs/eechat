@@ -360,7 +360,9 @@ const handleStream = async (response, onProgress) => {
             }
 
             // 直接发送增量内容，不在这里累加
-            onProgress?.(content)
+            if (content && onProgress) {
+              onProgress(content)
+            }
           } catch (e) {
             console.error('解析错误:', e)
             console.log('原始数据:', line)
