@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const paths = require('../config/paths')
 const { app } = require('electron')
 const sqlite3 = require('sqlite3').verbose()
 let logger = null
@@ -9,7 +10,8 @@ let pkg = null
 
 // 数据库文件路径
 // const dbPath = path.join(app.getPath('userData'), 'database', 'database.db')
-const dbPath = path.join(__dirname, '../database/database.db')
+// const dbPath = path.join(__dirname, '../database/database.db')
+const dbPath = paths.databasePath
 
 // SQL目录
 const sqlDir = path.join(__dirname, './updateSQl')

@@ -17,11 +17,12 @@ import {
   type SidebarProps,
 } from '@/components/ui/sidebar'
 import Icon from '@/components/icon.vue'
-import { Brain, HardDrive, Heart,PocketKnife } from 'lucide-vue-next'
+import { Brain, HardDrive, Heart,PocketKnife, Database } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
 import About from '@/components/setting/About.vue'
 import Appearance from '@/components/setting/Appearance.vue'
+import DataSet from '@/components/setting/DataSet.vue'
 import Playground from '@/components/setting/Playground.vue'
 
 const { t } = useI18n()
@@ -57,6 +58,12 @@ const menuData = [
         icon: HardDrive,
         key: 'appearance',
         component: markRaw(Appearance),
+      },
+      {
+        label: t('settings.sidebar.data'),
+        icon: Database,
+        key: 'data',
+        component: markRaw(DataSet),
       },
       {
         label: t('settings.sidebar.about'),
