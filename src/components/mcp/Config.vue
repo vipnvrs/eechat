@@ -115,6 +115,7 @@ const saveConfigFile = async () => {
       })
       const res = await mcpStore.restartServer()
       const desStr = res.details.failedServers.map(server => `${server.key}: ${server.error}`).join('，  \n')
+      mcpStore.fetchTools()
       toast({
         title: res.message,
         description: desStr ? desStr : '重启服务成功',

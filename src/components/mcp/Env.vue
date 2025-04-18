@@ -115,7 +115,7 @@ const downloadTool = async (tool) => {
               <Terminal class="w-4 h-4" />
               <span class="font-medium">{{ tool.name }}</span>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 text-sm">
               <span :class="tool.installed ? 'text-green-500' : 'text-red-500'">
                 {{ tool.installed ? '已安装' : '未安装' }}
               </span>
