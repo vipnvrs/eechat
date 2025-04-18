@@ -245,6 +245,7 @@ class ChatService extends Service {
           messages,
           sessionId,
           config,
+          [],
           msgSaved,
         )
       }

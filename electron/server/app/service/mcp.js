@@ -72,8 +72,83 @@ class McpService extends Service {
       await client.connect(transport)
       this.clients.set(key, client)
       this.ctx.logger.info('Init mcp client success')
+      return { success: true }
     } catch (error) {
       this.ctx.logger.error('Init mcp client error', error)
+      return { success: false, error: error.message || '未知错误' }
+    }
+  }
+
+  /**
+   * 重启所有MCP服务器
+   */
+  async restartServer() {
+    try {
+      this.ctx.logger.info('正在重启所有MCP服务器')
+      
+      // 停止所有服务器
+      await this.stopServer()
+      
+      // 清除所有缓存
+      this.clearToolsCache()
+      
+      // 重置初始化状态
+      GLOBAL_CACHE.initialized = false
+      this.initialized = false
+      
+      // 重新初始化，但收集错误信息而不是中断
+      const config = await this.getConfig()
+      const results = {
+        total: Object.keys(config).length,
+        success: 0,
+        failed: 0,
+        failedServers: []
+      }
+      
+      for (const key in config) {
+        const serverConfig = config[key]
+        const result = await this.connectServer(key, serverConfig)
+        
+        if (result.success) {
+          results.success++
+        } else {
+          results.failed++
+          results.failedServers.push({
+            key,
+            error: result.error
+          })
+        }
+      }
+      
+      // 更新初始化状态
+      if (results.success > 0) {
+        GLOBAL_CACHE.initialized = true
+        this.initialized = true
+      }
+      
+      this.ctx.logger.info('MCP服务器重启结果:', results)
+      
+      // 构建返回消息
+      let message = `共 ${results.total} 个服务，`
+      if (results.failed > 0) {
+        message += `其中 ${results.failed} 个未启动成功 (${results.failedServers.map(s => s.key).join(', ')})。`
+      } else {
+        message += `全部启动成功。`
+      }
+      
+      return {
+        success: results.success > 0,
+        message,
+        details: results
+      }
+        
+    } catch (error) {
+      this.ctx.logger.error('重启MCP服务器时发生错误:', error)
+      return {
+        success: false,
+        message: `重启失败: ${error.message || '未知错误'}`,
+        details: { error: error.message }
+      }
     }
   }
 
@@ -99,29 +174,6 @@ class McpService extends Service {
     // 清空客户端列表
     this.clients.clear()
     this.ctx.logger.info('所有MCP服务器已停止')
-  }
-
-  /**
-   * 重启所有MCP服务器
-   */
-  async restartServer() {
-    this.ctx.logger.info('正在重启所有MCP服务器')
-    
-    // 停止所有服务器
-    await this.stopServer()
-    
-    // 清除所有缓存
-    this.clearToolsCache()
-    
-    // 重置初始化状态
-    GLOBAL_CACHE.initialized = false
-    this.initialized = false
-    
-    // 重新初始化
-    await this.ensureInitialized()
-    
-    this.ctx.logger.info('所有MCP服务器已重启')
-    return true
   }
 
   /**

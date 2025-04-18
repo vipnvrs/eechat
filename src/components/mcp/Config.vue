@@ -13,6 +13,9 @@ import { ref, onMounted } from 'vue'
 import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import MonacoEditor from "@/components/common/MonacoEditor.vue"
+import { useMcpStore } from "@/stores/mcp"
+
+const mcpStore = useMcpStore()
 
 // 正确获取 toast 函数
 const { toast } = useToast() // 使用解构赋值获取 toast 函数
@@ -105,15 +108,25 @@ const saveConfigFile = async () => {
     await window.ipcRenderer.invoke('save-mcp-config', configContent.value)
     originalContent.value = configContent.value
     
-    // 修改 toast 调用方式
-    toast({  // 直接调用 toast，不需要 toast.toast
-      title: "保存成功",
-      description: "MCP配置文件已更新",
-    })
-    
-    // 通知后端重新加载配置
-    await window.ipcRenderer.invoke('restart-mcp-server')
-    
+    try {
+      toast({
+        title: "保存成功，正在重启服务",
+        description: "MCP配置文件已更新",
+      })
+      const res = await mcpStore.restartServer()
+      const desStr = res.details.failedServers.map(server => `${server.key}: ${server.error}`).join('，  \n')
+      toast({
+        title: res.message,
+        description: desStr ? desStr : '重启服务成功',
+      })
+      dialogOpen.value = false
+    } catch (error) {
+      toast({  // 直接调用 toast，不需要 toast.toast
+        title: "重启服务失败",
+        description: error.message || "重启服务失败",
+        variant: "destructive",
+      })
+    }
   } catch (error) {
     console.error('保存配置文件失败:', error)
     // 修改 toast 调用方式

@@ -344,7 +344,7 @@ class LLMService extends BaseLLMService {
    * @param {*} messages
    * @param {*} config
    */
-  async chat(model, provider, messages, sessionId, config, msgSaved) {
+  async chat(model, provider, messages, sessionId, config, tools, msgSaved) {
     const { ctx } = this
     const chatService = ctx.service.chat
     const loopArgs = {
@@ -362,6 +362,7 @@ class LLMService extends BaseLLMService {
         messages,
         config,
         sessionSettings,
+        tools,
       )
       // 使用 ChatService 的 handleStream 处理流数据
       await chatService.handleStream(

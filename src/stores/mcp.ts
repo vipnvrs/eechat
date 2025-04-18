@@ -41,6 +41,17 @@ export const useMcpStore = defineStore('mcp', {
       }
     },
 
+    async restartServer() {
+      try {
+        const res = await mcpApi.restartServer()
+        console.log('MCP服务器已重启') 
+        return res
+      } catch (error) {
+        console.error('重启MCP服务器失败:', error)
+        throw error
+      }
+    },
+
     // 选择单个工具
     selectTool(tool: any) {
       this.selectedTool = tool
@@ -78,7 +89,13 @@ export const useMcpStore = defineStore('mcp', {
 
   getters: {
     // 获取当前选中的工具列表
-    getSelectedTools: (state) => state.selectedTools,
+    // getSelectedTools: (state) => state.selectedTools,
+    getSelectedTools: (state) => {
+      if(!state.toolsEnabled) {
+        return []
+      }
+      return state.selectedTools
+    },
     
     // 检查是否有工具被选中
     hasSelectedTools: (state) => state.selectedTools.length > 0,

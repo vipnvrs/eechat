@@ -253,6 +253,9 @@ export const ollamaApi = {
 export const mcpApi = {
   async listAllTools() {
     return request.get('/api/mcp/listAllTools') 
+  },
+  async restartServer() {
+    return request.get('/api/mcp/restartServer') 
   }
 }
 
@@ -303,8 +306,19 @@ export const llmApi = {
     messages: Array<{ role: string; content: string }>,
     sessionId,
     onProgress?: (content: string) => void,
+    tools?: any[],
   ) {
     const provider = model.provider_id
+
+    const requestBody: any = { model, provider, messages, sessionId }
+    
+    // 只有当tools存在且长度大于0时才添加到请求体中
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools
+    } else {
+      console.log('没有tools，不添加到请求体中')
+    }
+
     try {
       const response = await fetch(API_BASE_URL + '/api/llm/chat', {
         method: 'POST',
@@ -312,7 +326,7 @@ export const llmApi = {
           'Content-Type': 'application/json',
           'Accept-Language': i18n.global.locale.value,
         },
-        body: JSON.stringify({ model, provider, messages, sessionId }),
+        body: JSON.stringify(requestBody)
       })
       handleStream(response, onProgress)
     } catch (error) {

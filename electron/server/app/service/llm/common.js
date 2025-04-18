@@ -55,7 +55,7 @@ class DeepseekService extends BaseLLMService {
    *   frequency_penalty: 0,
    * }
    */
-  async chat(model, messages, config, sessionSettings) {
+  async chat(model, messages, config, sessionSettings, tools) {
     const { ctx } = this
     try {
       const configSaved = await this.getConfig(model.provider_id)
@@ -92,9 +92,8 @@ class DeepseekService extends BaseLLMService {
       //     }
       // },
       // ]
-      const tools = await ctx.service.tools.getTools()
-
-      const response = await client.chat.completions.create({
+      // const tools = await ctx.service.tools.getTools()
+      const params = {
         model: model_id,
         messages: messagesWithSystemPrompt,
         stream: true,
@@ -103,8 +102,11 @@ class DeepseekService extends BaseLLMService {
         // top_p: sessionSettings.top_p,
         // presence_penalty: sessionSettings.presence_penalty,
         // frequency_penalty: sessionSettings.frequency_penalty,
-        tools,
-      })
+      }
+      if(tools && tools.length > 0) {
+        params.tools = this.ctx.service.tools.convertMcpToolsToOpenaiTools(tools)
+      }
+      const response = await client.chat.completions.create(params)
       // return response.choices[0].message.content
       return response
     } catch (error) {

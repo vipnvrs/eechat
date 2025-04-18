@@ -63,6 +63,7 @@ module.exports = app => {
   router.post('/api/llm/configModel/state', controller.llm.saveConfigModelState)
 
   router.post('/api/llm/chat', controller.llm.chat)
-
+  // mcp
   router.get('/api/mcp/listAllTools', controller.mcp.listAllTools)
+  router.get('/api/mcp/restartServer', controller.mcp.restartServer)
 }
