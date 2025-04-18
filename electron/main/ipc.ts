@@ -30,14 +30,22 @@ export class Ipc {
       }
     })
 
-    // 打开目录
-    ipcMain.handle('open-directory', (_, dirPath: string) => {
-      if (dirPath) {
-        return shell.openPath(dirPath)
-      }
-      return false
+    // 获取MCP配置文件的完整路径
+    ipcMain.handle('get-mcp-config-path', () => {
+      const configDir = path.join(app.getPath('userData'), 'config')
+      const configFile = path.join(configDir, 'mcp.config.json')
+      return configFile
     })
-
+    
+    // 打开目录
+    ipcMain.handle('open-directory', (_, dirPath) => {
+      if (fs.existsSync(dirPath)) {
+        shell.openPath(dirPath)
+      } else {
+        throw new Error(`目录不存在: ${dirPath}`)
+      }
+    })
+    
     // 检查工具是否安装
     ipcMain.handle('check-tool', (_, name: string) => {
       const binPath = path.join(app.getPath('userData'), 'bin')
@@ -119,5 +127,78 @@ export class Ipc {
         throw new Error(`下载工具失败: ${error.message}`);
       }
     });
+    
+    // 读取MCP配置文件
+    ipcMain.handle('read-mcp-config', async () => {
+      try {
+        const configDir = path.join(app.getPath('userData'), 'config')
+        const configFile = path.join(configDir, 'mcp.config.json')
+        
+        // 确保配置目录存在
+        if (!fs.existsSync(configDir)) {
+          fs.mkdirSync(configDir, { recursive: true })
+        }
+        
+        // 如果配置文件不存在，创建默认配置
+        if (!fs.existsSync(configFile)) {
+          const defaultConfig = {
+            "mcpServers": {
+              "default": {
+                "command": "npx",
+                "args": ["@modelcontextprotocol/server", "start"],
+                "enabled": true
+              }
+            }
+          }
+          fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 2), 'utf8')
+        }
+        
+        // 读取配置文件
+        const content = fs.readFileSync(configFile, 'utf8')
+        return content
+      } catch (error) {
+        console.error('读取MCP配置文件失败:', error)
+        throw new Error(`读取配置文件失败: ${error.message}`)
+      }
+    })
+    
+    // 保存MCP配置文件
+    ipcMain.handle('save-mcp-config', async (_, content: string) => {
+      try {
+        const configDir = path.join(app.getPath('userData'), 'config')
+        const configFile = path.join(configDir, 'mcp.config.json')
+        
+        // 确保配置目录存在
+        if (!fs.existsSync(configDir)) {
+          fs.mkdirSync(configDir, { recursive: true })
+        }
+        
+        // 验证JSON格式
+        JSON.parse(content)
+        
+        // 保存配置文件
+        fs.writeFileSync(configFile, content, 'utf8')
+        return true
+      } catch (error) {
+        console.error('保存MCP配置文件失败:', error)
+        throw new Error(`保存配置文件失败: ${error.message}`)
+      }
+    })
+    
+    // 重启MCP服务器
+    ipcMain.handle('restart-mcp-server', async () => {
+      try {
+        // 这里需要调用后端的重启方法
+        // 假设我们有一个全局的egg实例可以访问
+        if (global.eggApp && global.eggApp.messenger) {
+          global.eggApp.messenger.sendToApp('restart-mcp-server')
+          return true
+        }
+        return false
+      } catch (error) {
+        console.error('重启MCP服务器失败:', error)
+        throw new Error(`重启服务器失败: ${error.message}`)
+      }
+    })
   }
 }

@@ -250,6 +250,12 @@ export const ollamaApi = {
   },
 }
 
+export const mcpApi = {
+  async listAllTools() {
+    return request.get('/api/mcp/listAllTools') 
+  }
+}
+
 export const llmApi = {
   // 获取模型列表
   async getModels(provider: string) {

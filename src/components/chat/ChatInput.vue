@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUpToLine } from "lucide-vue-next"
 import { CornerDownLeft, Mic } from "lucide-vue-next"
+import UseTool from "@/components/chat/UseTool.vue" // 导入 UseTool 组件
 
 const { t } = useI18n()
 
@@ -19,6 +20,7 @@ const props = defineProps({
 })
 
 const handleSendMsg = (e: Event) => {
+  if(!msg.value.trim()) return
   emit("sendMsg", msg.value)
   msg.value = ""
 }
@@ -80,23 +82,26 @@ const handleRecord = () => {
         :placeholder="t('chat.inputPlaceholder')"
         @keydown="handleKeyDown"
       ></Textarea>
-      <Button
-        @click="handleRecord"
-        :variant="isRecording ? 'destructive' : 'outline'"
-        :disabled="isRecording"
-        size="icon"
-        class="ml-auto gap-1.5 absolute bottom-12 right-16"
-      >
-        <Mic class="size-3.5" />
-      </Button>
-      <Button
-        type="submit"
-        :disabled="disabled"
-        size="icon"
-        class="ml-auto gap-1.5 absolute bottom-12 right-4"
-      >
-        <CornerDownLeft class="size-3.5" />
-      </Button>
+      <div class="ml-auto gap-1.5 absolute bottom-12 right-4 flex items-center space-x-1">
+        <UseTool class="relative"></UseTool>
+        <Button
+          @click="handleRecord"
+          :variant="isRecording ? 'destructive' : 'outline'"
+          :disabled="isRecording"
+          size="icon"
+          class="ml-auto gap-1.5"
+        >
+          <Mic class="size-3.5" />
+        </Button>
+        <Button
+          type="submit"
+          :disabled="disabled"
+          size="icon"
+          class="ml-auto gap-1.5 "
+        >
+          <CornerDownLeft class="size-3.5" />
+        </Button>
+      </div>
     </form>
   </div>
 </template>

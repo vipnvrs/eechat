@@ -11,6 +11,7 @@ import mcpMock from '@/api/mcpMock.json'
 import { Plus } from "lucide-vue-next"
 import { Settings, Terminal, FileText } from "lucide-vue-next"
 import Env from "@/components/mcp/Env.vue"
+import Config from "@/components/mcp/Config.vue"
 
 const { t } = useI18n()
 
@@ -98,14 +99,7 @@ const handleAddNew = () => {
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <Button>
-          <Settings class="w-4 h-4 mr-2" />
-          配置文件
-        </Button>
-        <!-- <Button variant="outline">
-          <Terminal class="w-4 h-4 mr-2" />
-          运行环境
-        </Button> -->
+        <Config></Config>
         <Env></Env>
         <Button variant="outline">
           <FileText class="w-4 h-4 mr-2" />
