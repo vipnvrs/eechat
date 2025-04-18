@@ -27,7 +27,10 @@
     "build:pord": "vite build --mode production && electron-builder",
     "preview": "vite preview",
     "release": "node scripts/release.js",
-    "i18n:extract": "vue-i18n-extract report --vueFiles \"src/**/*.?(js|vue)\" --languageFiles \"src/locales/zh/index.json\""
+    "i18n:extract": "vue-i18n-extract report --vueFiles \"src/**/*.?(js|vue)\" --languageFiles \"src/locales/zh/index.json\"",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.3",
