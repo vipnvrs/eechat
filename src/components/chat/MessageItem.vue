@@ -251,13 +251,13 @@ li pre {
   text-align: left;
 }
 
-:deep(th) {
+/* :deep(th) {
   background-color: #f2f2f2;
-}
+} */
 
-:deep(tr:nth-child(even)) {
+/* :deep(tr:nth-child(even)) {
   background-color: #f9f9f9;
-}
+} */
 
 /* 暗黑模式表格样式 */
 :root[class~="dark"] :deep(th) {
@@ -270,7 +270,7 @@ li pre {
 }
 
 :root[class~="dark"] :deep(tr:nth-child(even)) {
-  background-color: #2a2a2a;
+  background-color: #2a2a2a !important;
 }
 
 /* Graphviz 图表样式 */
