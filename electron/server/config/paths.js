@@ -28,4 +28,5 @@ module.exports = {
   databasePath: path.join(getAppDataPath(), 'database', 'database.db'),
   logsPath: path.join(getAppDataPath(), 'logs'),
   binPath: path.join(getAppDataPath(), 'bin'),
+  configPath: path.join(getAppDataPath(), 'config'),
 }

@@ -6,6 +6,7 @@ const {
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
+const paths = require('../../config/paths')
 
 class McpService extends Service {
   constructor(ctx) {
@@ -74,6 +75,7 @@ class McpService extends Service {
       tools.push(...serverTools.tools)
     }
     this.ctx.logger.info('List tools success')
+    this.ctx.logger.info('Tools names:', tools.map(tool => tool.name))
     return tools
   }
 
@@ -145,17 +147,32 @@ class McpService extends Service {
   // Config
   async getConfig() {
     try {
-      this.ctx.logger.info('Get config')
-      const configFile = fs.readFileSync(
-        path.join(__dirname, './mcp.config.json'),
-        'utf8',
-      )
-      const configJSON = JSON.parse(configFile.toString('utf8'))
+      // 配置文件路径
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      const defaultConfigFile = path.join(__dirname, './mcp.config.default.json')
+      this.ctx.logger.info('[MCP]Config file path:', configFile)
+
+      // 确保配置目录存在
+      if (!fs.existsSync(paths.configPath)) {
+        fs.mkdirSync(paths.configPath, { recursive: true })
+      }
+      
+      // 如果配置文件不存在，复制默认配置
+      if (!fs.existsSync(configFile)) {
+        this.ctx.logger.info('[MCP]Config file not found, creating from default template')
+        const defaultConfig = fs.readFileSync(defaultConfigFile, 'utf8')
+        fs.writeFileSync(configFile, defaultConfig, 'utf8')
+      }
+
+      // 读取配置文件
+      const config = fs.readFileSync(configFile, 'utf8')
+      const configJSON = JSON.parse(config)
       const servers = configJSON.mcpServers
-      this.ctx.logger.info('Get config success:', servers)
+      
+      this.ctx.logger.info('[MCP]Get config success:', servers)
       return servers
     } catch (error) {
-      this.ctx.logger.error('Get config error:', error)
+      this.ctx.logger.error('[MCP]Get config error:', error)
       throw error
     }
   }
@@ -193,22 +210,22 @@ class McpService extends Service {
       if (serverConfig.command === 'npx') {
         args.unshift('x')  // 添加 bun x 命令，等同于 npx
       }
-    } else if (command === 'uv' || command === 'pip' || command === 'python' || command === 'python3') {
+    } 
+    else if (command === 'uv' || command === 'uvx' || command === 'pip' || command === 'python' || command === 'python3') {
       if (isWindows) {
         command = path.join(toolsDir, 'uv.exe')
       } else if (isMac || isLinux) {
         command = path.join(toolsDir, 'uv')
       }
-      
-      // 根据原始命令调整参数
-      if (serverConfig.command === 'pip') {
-        // 将pip命令转换为uv命令
-        // 例如: pip install 转换为 uv pip install
-        args.unshift('pip', ...args)
+
+      // 处理不同的命令类型
+      if (serverConfig.command === 'uvx') {
+        // uvx is an alias for 'uv tool run'
+        args.unshift('tool', 'run')
+      } else if (serverConfig.command === 'pip') {
+        args.unshift('pip')
       } else if (serverConfig.command === 'python' || serverConfig.command === 'python3') {
-        // 使用uv run命令运行python脚本
-        // 例如: python script.py 转换为 uv python script.py
-        args.unshift('python', ...args)
+        args.unshift('python')
       }
     }
     
