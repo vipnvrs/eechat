@@ -4,7 +4,8 @@ import { useI18n } from "vue-i18n"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowUpToLine } from "lucide-vue-next"
-import { CornerDownLeft } from "lucide-vue-next"
+import { CornerDownLeft, Mic } from "lucide-vue-next"
+import UseTool from "@/components/chat/UseTool.vue" // 导入 UseTool 组件
 
 const { t } = useI18n()
 
@@ -19,6 +20,7 @@ const props = defineProps({
 })
 
 const handleSendMsg = (e: Event) => {
+  if(!msg.value.trim()) return
   emit("sendMsg", msg.value)
   msg.value = ""
 }
@@ -41,6 +43,33 @@ const handleKeyDown = (e: KeyboardEvent) => {
   }
 }
 
+const isRecording = ref(false)
+const handleRecord = () => {
+  isRecording.value = !isRecording.value
+  // 添加类型声明以解决 TypeScript 报错
+  const recognition = new (window as any).webkitSpeechRecognition()
+  recognition.lang = "cmn-Hans-CN"
+  recognition.continuous = true
+  recognition.interimResults = true
+  recognition.addEventListener('result', (event) => {
+    const transcript = event.results[0][0].transcript
+    msg.value = `${transcript}`
+  });
+
+  recognition.addEventListener('speechend', () => {
+    recognition.stop()
+    isRecording.value = false
+  });
+
+  recognition.addEventListener('error', (event) => {
+    console.log(event);
+    
+    msg.value = `Error: ${event.error}`
+    isRecording.value = false
+  })
+  recognition.start()
+}
+
 // 删除 initEvent 函数及其调用
 </script>
 
@@ -53,14 +82,26 @@ const handleKeyDown = (e: KeyboardEvent) => {
         :placeholder="t('chat.inputPlaceholder')"
         @keydown="handleKeyDown"
       ></Textarea>
-      <Button
-        type="submit"
-        :disabled="disabled"
-        size="icon"
-        class="ml-auto gap-1.5 absolute bottom-12 right-4"
-      >
-        <CornerDownLeft class="size-3.5" />
-      </Button>
+      <div class="ml-auto gap-1.5 absolute bottom-12 right-4 flex items-center space-x-1">
+        <UseTool class="relative"></UseTool>
+        <Button
+          @click="handleRecord"
+          :variant="isRecording ? 'destructive' : 'outline'"
+          :disabled="isRecording"
+          size="icon"
+          class="ml-auto gap-1.5"
+        >
+          <Mic class="size-3.5" />
+        </Button>
+        <Button
+          type="submit"
+          :disabled="disabled"
+          size="icon"
+          class="ml-auto gap-1.5 "
+        >
+          <CornerDownLeft class="size-3.5" />
+        </Button>
+      </div>
     </form>
   </div>
 </template>

@@ -17,15 +17,7 @@ if (!process.env.NODE_ENV) {
 }
 
 // import log from 'electron-log/main'
-const log = require('electron-log')
-log.transports.file.resolvePathFn = variables =>
-  path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
-log.transports.file.level = 'debug'
-log.info('%cRed text. %cGreen text', 'color: red', 'color: green')
-const AppLog = log.scope('APP')
-// Object.assign(console, log.functions)
-AppLog.info('App Version:' + app.getVersion())
-AppLog.info('%cUserData:' + app.getPath('userData'), 'color: yellow')
+import log, { AppLog } from './utils/logger'
 
 // 捕获未处理的异常
 process.on('uncaughtException', error => {
@@ -53,6 +45,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+app.commandLine.appendSwitch('enable-features', 'WebSpeechAPI')
 
 let win: BrowserWindow | null = null
 let updater: AppUpdater | null = null

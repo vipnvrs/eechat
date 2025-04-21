@@ -11,6 +11,8 @@ import rehypeRaw from "rehype-raw"
 import rehypeStringify from "rehype-stringify"
 import remarkRehype from "remark-rehype"
 import rehypeHighlight from "rehype-highlight"
+import remarkDirective from 'remark-directive'
+import remarkPlugin from './remarkPlugin'
 import "highlight.js/styles/atom-one-dark.css"
 import { unified } from "unified"
 
@@ -48,6 +50,8 @@ watch(() => props.message, (newMessage) => {
 // 使用 remark 处理 Markdown
 const processor = unified()
   .use(remarkParse) // 解析 Markdown
+  .use(remarkDirective)
+  .use(remarkPlugin)
   .use(remarkGfm) // 支持 GFM (GitHub Flavored Markdown)
   .use(remarkMath) // 支持数学公式
   .use(remarkRehype, { allowDangerousHtml: true }) // 转换为 HTML，允许原始 HTML
@@ -247,13 +251,13 @@ li pre {
   text-align: left;
 }
 
-:deep(th) {
+/* :deep(th) {
   background-color: #f2f2f2;
-}
+} */
 
-:deep(tr:nth-child(even)) {
+/* :deep(tr:nth-child(even)) {
   background-color: #f9f9f9;
-}
+} */
 
 /* 暗黑模式表格样式 */
 :root[class~="dark"] :deep(th) {
@@ -266,7 +270,7 @@ li pre {
 }
 
 :root[class~="dark"] :deep(tr:nth-child(even)) {
-  background-color: #2a2a2a;
+  background-color: #2a2a2a !important;
 }
 
 /* Graphviz 图表样式 */

@@ -56,6 +56,9 @@
     },
     "discover":{
       "title": "发现"
+    },
+    "mcp": {
+      "title": "MCP"
     }
   },
   "discover": {
@@ -153,6 +156,7 @@
     "apiSettings": "API 设置",
     "modelSettings": "模型设置",
     "configureInterface": "配置您的软件界面",
+    "configureData": "管理存储与数据",
     "system": "系统",
     "light": "浅色",
     "dark": "深色",
@@ -216,7 +220,28 @@
       "general": "通用",
       "interface": "界面",
       "about": "关于",
+      "data": "数据",
       "playground": "Playground"
+    },
+    "data": {
+      "title": "数据管理",
+      "config": {
+        "title": "配置",
+        "description": "管理系统配置文件"
+      },
+      "database": {
+        "title": "数据库",
+        "description": "您可以通过此目录来备份/恢复聊天内容"
+      },
+      "executable": {
+        "title": "可执行文件",
+        "description": "如 bun/uv 等运行环境，下载有误时可手动添加至此目录"
+      },
+      "logs": {
+        "title": "系统日志",
+        "description": "记录系统运行日志"
+      },
+      "openDirectory": "打开"
     },
     "about": {
       "description": "一款简单易用，本地化部署的大模型工具。",

@@ -55,7 +55,8 @@ class DeepseekService extends BaseLLMService {
    *   frequency_penalty: 0,
    * }
    */
-  async chat(model, messages, config, sessionSettings) {
+  async chat(model, messages, config, sessionSettings, tools) {
+    const { ctx } = this
     try {
       const configSaved = await this.getConfig(model.provider_id)
       console.log(configSaved)
@@ -63,7 +64,19 @@ class DeepseekService extends BaseLLMService {
       const model_id = model.id.includes(':')
         ? model.id.split(model.provider_id + ':').pop()
         : model.id
+      //       if (tools && tools.length > 0) {
+      //         sessionSettings.systemPrompt += `
+      // You must respond ONLY with a valid and well-formed JSON object.
 
+      // - Use double quotes '"' around all keys and string values.
+      // - Do NOT include any extra text, comments, markdown, explanations, or code blocks.
+      // - The JSON must be directly parsable using "JSON.parse()" in JavaScript.
+      // - Do NOT include newlines ("\n") or trailing commas.
+      // - All values must be correctly escaped according to JSON standards.
+      // - The output must start with "{" and end with "}" (or "[" and "]" if it’s an array).
+
+      // `
+      //       }
       const messagesWithSystemPrompt = sessionSettings.systemPrompt
         ? [
             { role: 'system', content: sessionSettings.systemPrompt },
@@ -72,7 +85,27 @@ class DeepseekService extends BaseLLMService {
         : messages
       console.log(sessionSettings)
 
-      const response = await client.chat.completions.create({
+      // const tools = [
+      //   {
+      //     "type": "function",
+      //     "function": {
+      //         "name": "get_weather",
+      //         "description": "Get weather of an location, the user shoud supply a location first",
+      //         "parameters": {
+      //             "type": "object",
+      //             "properties": {
+      //                 "location": {
+      //                     "type": "string",
+      //                     "description": "The city and state, e.g. San Francisco, CA",
+      //                 }
+      //             },
+      //             "required": ["location"]
+      //         },
+      //     }
+      // },
+      // ]
+      // const tools = await ctx.service.tools.getTools()
+      const params = {
         model: model_id,
         messages: messagesWithSystemPrompt,
         stream: true,
@@ -81,7 +114,12 @@ class DeepseekService extends BaseLLMService {
         // top_p: sessionSettings.top_p,
         // presence_penalty: sessionSettings.presence_penalty,
         // frequency_penalty: sessionSettings.frequency_penalty,
-      })
+      }
+      if (tools && tools.length > 0) {
+        params.tools =
+          this.ctx.service.tools.convertMcpToolsToOpenaiTools(tools)
+      }
+      const response = await client.chat.completions.create(params)
       // return response.choices[0].message.content
       return response
     } catch (error) {

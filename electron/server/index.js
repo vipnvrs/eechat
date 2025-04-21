@@ -1,25 +1,26 @@
-// const egg = require('egg')
+const egg = require('egg')
 
-// const workers = Number(process.env.EGG_WORKERS) || 1
+async function startEggServer(pathArg) {
+  return new Promise(async (resolve, reject) => {
+    const isDev = process.env.NODE_ENV !== 'production'
+    // log.info('isDev:', isDev)
+    // const baseDir = isDev
+    //   ? path.join(__dirname, '../../electron/server')
+    //   : path.join(process.resourcesPath, 'app.asar.unpacked')
+    // // log.info('baseDir:', baseDir)
+    try {
+      appServer = await egg.start({
+        baseDir: __dirname,
+        // mode: 'single',
+        // typescript: false,
+      })
+      appServer.listen(7002)
+      log.info(`Server started on ${7002}`)
+      resolve()
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
 
-// const startCluster = () => {
-//   egg.startCluster({
-//     workers,
-//     baseDir: __dirname,
-//     port: process.env.PORT || 7001,
-//   })
-// }
-// module.exports = startCluster
-
-const egg = require('egg');
-
-const app = new egg.Application({
-  env: process.env.NODE_ENV,
-  mode: 'single',
-});
-
-app.ready().then(() => {
-  console.log('egg started');
-});
-
-app.listen(process.env.PORT || 7002);
+startEggServer()

@@ -32,6 +32,8 @@ import router from '@/router'
 import { useRoute } from 'vue-router'
 import { useEnvStore } from "@/stores/env"
 import { useI18n } from 'vue-i18n'
+import McpIcon from '@/components/icons/McpIcon.vue'
+
 const envStore = useEnvStore()
 const { t } = useI18n()
 const route = useRoute()
@@ -47,6 +49,12 @@ const data = {
       title: t('chat.newChat'),
       url: '/',
       icon: Inbox,
+      isActive: false,
+    },
+    {
+      title: t('chat.mcp.title'),
+      url: '/mcp',
+      icon: McpIcon,
       isActive: false,
     },
     {

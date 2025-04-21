@@ -56,6 +56,9 @@
     },
     "discover":{
       "title": "Discover"
+    },
+    "mcp": {
+      "title": "MCP"
     }
   },
   "discover": {
@@ -212,11 +215,32 @@
       "general": "General",
       "interface": "Interface",
       "about": "About",
+      "data": "Data",
       "playground": "Playground"
     },
     "models": {
       "localModel": "Local Model",
       "apiModel": "API Model Configuration"
+    },
+    "data": {
+      "title": "Data Management",
+      "config": {
+        "title": "Data Configuration",
+        "description": "Configure system files"
+      },
+      "database": {
+        "title": "Database",
+        "description": "You can backup/restore chat content through this directory"
+      },
+      "executable": {
+        "title": "Executable Files",
+        "description": "For runtime environments like bun/uv, manually add to this directory if download fails"
+      },
+      "logs": {
+        "title": "System Logs",
+        "description": "Record system running logs"
+      },
+      "openDirectory": "Open"
     },
     "about": {
       "description": "A simple and easy-to-use, locally deployed LLM tool.",

@@ -63,4 +63,18 @@ module.exports = app => {
   router.post('/api/llm/configModel/state', controller.llm.saveConfigModelState)
 
   router.post('/api/llm/chat', controller.llm.chat)
+  // mcp
+  router.get('/api/mcp/listAllTools', controller.mcp.listAllTools)
+  router.get('/api/mcp/restartServer', controller.mcp.restartServer)
+  // MCP相关接口
+  router.get('/api/mcp/fetch-readme', controller.mcp.fetchReadme)
+  router.post('/api/mcp/add-server', controller.mcp.addServer)
+  router.put('/api/mcp/update-server', controller.mcp.updateServer) // 新增更新接口
+  // 新增：获取已安装的MCP服务器列表
+  router.get('/api/mcp/installed-servers', controller.mcp.getInstalledServers)
+  
+  // MCP服务器管理
+  router.delete('/api/mcp/server/:key', controller.mcp.deleteServer)
+  router.post('/api/mcp/server/:key/start', controller.mcp.startServer)
+  router.post('/api/mcp/server/:key/stop', controller.mcp.stopServer)
 }

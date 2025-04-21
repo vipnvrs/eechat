@@ -197,9 +197,17 @@ const listModel = async () => {
   }
 }
 
-onMounted(async () => {
-  await ollamaStore.fetchAllModels()
-  filteredModels.value = JSON.parse(JSON.stringify(ollamaStore.allModels))
+const initAllModels = async () => {
+  try {  
+    await ollamaStore.fetchAllModels()
+    filteredModels.value = JSON.parse(JSON.stringify(ollamaStore.allModels))
+  } catch (error) {
+    console.error('初始化所有模型失败:', error)
+  }
+}
+
+onMounted(() => {
+  initAllModels()
   getOllamaState()
 })
 

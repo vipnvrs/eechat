@@ -2,39 +2,71 @@ const Transform = require('stream').Transform
 const { Service } = require('egg')
 const OpenAI = require('openai')
 const ollamaBaseUrl = 'http://127.0.0.1:11434'
+const ToolCallMerger = require('./ToolCallMerger')
 
 class ChatService extends Service {
+  accumulatedContent = ''
+  currentToolCall = {}
+  toolCallArguments = ''
+  cachedParams = null
+
   /**
    * 发送消息到大模型
    * @param {string} messages - 聊天内容
    * @param {string} sessionId - 会话ID
    * @reurns {Promise<string>} - 返回聊天结果
    */
-  async sendMessage(model, messages, sessionId) {
-    const { ctx } = this
-    try {
-      const openai = new OpenAI({
-        baseURL: `${ollamaBaseUrl}/v1`,
-        apiKey: 'dummy',
-      })
+  // async sendMessage(model, messages, sessionId) {
+  //   this.cachedParams = { model, messages, sessionId }
+  //   const { ctx } = this
+  //   try {
+  //     const openai = new OpenAI({
+  //       baseURL: `${ollamaBaseUrl}/v1`,
+  //       apiKey: 'dummy',
+  //     })
 
-      const requestParams = {
-        model: model.id,
-        messages,
-        stream: true,
-      }
-      const stream = await openai.chat.completions.create(requestParams)
-      await this.handleStream(stream, ctx, messages, sessionId, model)
-    } catch (error) {
-      ctx.logger.error('Chat service error:', error)
-      await this.handleStreamError(
-        new Error(ctx.__('chat.service_error') + error.message),
-        ctx,
+  //     const requestParams = {
+  //       model: model.id,
+  //       messages,
+  //       stream: true,
+  //     }
+  //     const stream = await openai.chat.completions.create(requestParams)
+  //     await this.handleStream(
+  //       stream,
+  //       ctx,
+  //       messages,
+  //       sessionId,
+  //       model,
+  //       messages,
+  //       sessionId,
+  //     )
+  //   } catch (error) {
+  //     ctx.logger.error('Chat service error:', error)
+  //     await this.handleStreamError(
+  //       new Error(ctx.__('chat.service_error') + error.message),
+  //       ctx,
+  //     )
+  //   }
+  // }
+  async handleStream(
+    stream,
+    ctx,
+    messages,
+    sessionId,
+    model,
+    loopArgs,
+    msgSaved,
+  ) {
+    console.log('handleStream')
+    if (!msgSaved) {
+      // 保存用户最后一条消息
+      await this.saveMsg(
+        'default-user',
+        messages[messages.length - 1].role,
+        messages[messages.length - 1].content,
+        sessionId,
       )
     }
-  }
-  async handleStream(stream, ctx, messages, sessionId, model) {
-    console.log('handleStream')
     ctx.set({
       'Content-Type': 'text/event-stream;charset=utf-8',
       'Cache-Control': 'no-cache',
@@ -45,17 +77,40 @@ class ChatService extends Service {
     let hasEnded = false
 
     try {
+      const toolCallMerger = new ToolCallMerger()
       for await (const chunk of stream) {
         // 检查响应是否已结束
         if (ctx.res.writableEnded) {
           break
         }
-        // reasoning_content,
-        // finish_reason
+        const tool_calls = toolCallMerger.handleChunk(chunk)
+        if (tool_calls) {
+          console.log('✅ tool_calls 完整结果：', tool_calls)
+          // 可以 return / 推送前端 / 执行函数调用
+          const toolCallRes = await this.handleRunToolCall(tool_calls)
+          const toolSaveRes = await this.sendAndSaveToolCall(toolCallRes, sessionId,  msgSaved)
+          // 使用更新后的消息重新发起对话
+          ctx.logger.info('工具调用完成，重新发起对话')
+          const { model, provider, messages, config } = loopArgs
+          // todo，重新查询最新消息
+          messages.push({
+            role: 'assistant',
+            content: toolSaveRes.join('\n'),
+          })
+          await ctx.service.llm.chat(
+            model,
+            provider,
+            messages,
+            sessionId,
+            config,
+            [],
+            msgSaved,
+          )
+          return
+        }
         if (!chunk.choices[0].delta.content) {
           continue
         }
-        // console.log(ctx.res.write(JSON.stringify(chunk) + '\n'))
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
           (chunk.choices[0] &&
@@ -69,16 +124,10 @@ class ChatService extends Service {
         // todo: session 会话信息
       }
 
-      // 保存用户最后一条消息
-      await this.saveMsg(
-        'default-user',
-        messages[messages.length - 1].role,
-        messages[messages.length - 1].content,
-        sessionId,
-      )
-
       // 保存助手的完整回复
-      if (assistantMessage) {
+      if (msgSaved) {
+        await this.appendMsg(msgSaved.id, assistantMessage)
+      } else {
         await this.saveMsg(
           'default-user',
           'assistant',
@@ -103,12 +152,50 @@ class ChatService extends Service {
       }
     }
   }
+
+  async handleRunToolCall(toolFunctions) {
+    const { ctx } = this
+    const res = []
+    for (const toolCall of toolFunctions) {
+      const toolName = toolCall.function.name
+      const toolArgs = toolCall.function.arguments
+      console.log('run tool:', toolName, toolArgs)
+      const resItem = await ctx.service.tools.runTools(toolName, toolArgs)
+      const messageStandWithRes = this.ctx.helper.factoryMessageContent({
+        type: 'tool_call_end',
+        id: toolCall.id,
+        name: toolCall.function.name,
+        arguments: toolCall.function.arguments,
+        result: resItem,
+      })
+      res.push(messageStandWithRes)
+    }
+    return res
+  }
+
+  async sendAndSaveToolCall(res, sessionId,  msgSaved) {
+    const { ctx } = this
+    const saveRes = []
+    for (const message of res) {
+      const messageWithDirective = this.ctx.helper.toolCallFucntionToDirective(
+        message,
+        'tool_call',
+      )
+      // 返回客户端指令流
+      ctx.res.write(`${JSON.stringify(messageWithDirective)}\n\n`)
+      const content = messageWithDirective.choices[0].delta.content
+      this.appendMsg(sessionId, 'assistant', content)
+      saveRes.push(content)
+    }
+    return saveRes
+  }
+
   async handleStreamError(error, ctx) {
     console.error('handleStreamError:', error)
 
     // 检查响应是否已结束
     console.log('ctx.res.writableEnded:', ctx.res.writableEnded)
-    
+
     if (ctx.res.writableEnded) {
       return
     }
@@ -154,6 +241,10 @@ class ChatService extends Service {
 
     // 参数验证
     if (!uid || !role || !content || !sessionId) {
+      if(!uid) console.log('uid is empty')
+      if(!role) console.log('role is empty')
+      if(!content) console.log('content is empty')
+      if(!sessionId) console.log('sessionId is empty')
       throw new Error(ctx.__('chat.incomplete_params'))
     }
 
@@ -177,6 +268,47 @@ class ChatService extends Service {
     } catch (error) {
       ctx.logger.error('保存消息失败:', error)
       throw new Error(ctx.__('chat.save_message_failed') + error.message)
+    }
+  }
+
+  async appendMsg(sessionId, role, message) {
+    const { ctx } = this
+
+    try {
+      // 验证会话是否存在
+      const session = await ctx.model.ChatSession.findByPk(sessionId)
+      if (!session) {
+        throw new Error(ctx.__('chat.session_not_found'))
+      }  
+      
+      // 查找当前会话角色的最新消息
+      const latestMessage = await ctx.model.Message.findOne({
+        where: {
+          session_id: sessionId,
+          role: role
+        },
+        order: [['created_at', 'DESC']]
+      });
+
+      // 如果找到最新消息，则追加内容
+      if (latestMessage) {
+        latestMessage.content += message;
+        latestMessage.updated_at = new Date();
+        await latestMessage.save();
+        return latestMessage;
+      } else {
+        // 如果没有找到，则创建一个新的消息
+        const newMessage = await this.saveMsg(
+          'default-user',
+          role,
+          message,
+          sessionId
+        );
+        return newMessage;
+      }
+    } catch (error) {
+      ctx.logger.error('追加消息失败:', error);
+      throw new Error(ctx.__('chat.append_message_failed') + error.message);
     }
   }
 

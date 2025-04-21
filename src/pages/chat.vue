@@ -36,7 +36,11 @@ import { useRoute } from 'vue-router'
 
 // 导入 sessionStore
 import { useSessionStore } from '@/stores/session'
+import { useMcpStore } from '@/stores/mcp'
+import { computed } from "vue"
+
 const sessionStore = useSessionStore()
+const mcpStore = useMcpStore()
 
 const route = useRoute()
 const assistantStore = useAssistantStore()
@@ -54,10 +58,16 @@ const currentAssistantMessage = ref("")
 const sidebarLeftOpen = ref(true)
 const sidebarRightOpen = ref(false)
 
-watch(() => sessionStore.currentSession, (newValue) => {
-  console.log("Active session changed:", newValue)
-  handleSessionChange(newValue)
+watch(() => sessionStore.currentSession, (newValue, oldValue) => {
+  if(newValue?.id != oldValue?.id) {
+    console.log("Active session changed:", newValue)
+    handleSessionChange(newValue) 
+  }
 }, { deep: true})
+
+const tools = computed(() => {
+  return mcpStore.getSelectedTools
+})
 
 const handleSessionChange = async (session) => {
   activeSession.value = session
@@ -129,15 +139,13 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
     // 发送消息并处理流式响应
     await llmApi.sendMessageLlm(
       model,
-      [
-        ...chatHistory.value.slice(0, -1), // 不包含空的助手消息
-      ],
+      [...chatHistory.value.slice(0, -1)],
       activeSession.value.id,
       (content: string) => {
-        // 更新最后一条消息的内容
         const lastMessage = chatHistory.value[chatHistory.value.length - 1]
         lastMessage.content += content
-      }
+      },
+      tools.value,
     )
   } catch (error) {
     console.error("Error during chat:", error)
@@ -248,6 +256,9 @@ onMounted(() => {
       // 使用助手信息初始化聊天
       initializeChat(assistant)
     }
+  }
+  if(sessionStore.currentSession) {
+    handleSessionChange(sessionStore.currentSession)
   }
 })
 </script>

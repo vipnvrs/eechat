@@ -250,6 +250,49 @@ export const ollamaApi = {
   },
 }
 
+export const mcpApi = {
+  async listAllTools() {
+    return request.get('/api/mcp/listAllTools') 
+  },
+  async restartServer() {
+    return request.get('/api/mcp/restartServer') 
+  },
+  
+  async fetchReadme(url: string): Promise<string> {
+    return request.get<string>('/api/mcp/fetch-readme', { url })
+  },
+
+  // 添加MCP服务器
+  async addMcpServer(serverData: Record<string, any>): Promise<any> {
+    return request.post('/api/mcp/add-server', serverData)
+  },
+  
+  // 更新MCP服务器
+  async updateMcpServer(serverData: Record<string, any>): Promise<any> {
+    return request.put('/api/mcp/update-server', serverData)
+  },
+  
+  // 新增：获取已安装的MCP服务器列表
+  async getInstalledServers(): Promise<any[]> {
+    return request.get('/api/mcp/installed-servers')
+  },
+  
+  // 删除MCP服务器
+  async deleteMcpServer(serverKey: string): Promise<any> {
+    return request.delete(`/api/mcp/server/${serverKey}`)
+  },
+  
+  // 启动MCP服务器
+  async startMcpServer(serverKey: string): Promise<any> {
+    return request.post(`/api/mcp/server/${serverKey}/start`)
+  },
+  
+  // 停止MCP服务器
+  async stopMcpServer(serverKey: string): Promise<any> {
+    return request.post(`/api/mcp/server/${serverKey}/stop`)
+  },
+}
+
 export const llmApi = {
   // 获取模型列表
   async getModels(provider: string) {
@@ -297,8 +340,19 @@ export const llmApi = {
     messages: Array<{ role: string; content: string }>,
     sessionId,
     onProgress?: (content: string) => void,
+    tools?: any[],
   ) {
     const provider = model.provider_id
+
+    const requestBody: any = { model, provider, messages, sessionId }
+    
+    // 只有当tools存在且长度大于0时才添加到请求体中
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools
+    } else {
+      console.log('没有tools，不添加到请求体中')
+    }
+
     try {
       const response = await fetch(API_BASE_URL + '/api/llm/chat', {
         method: 'POST',
@@ -306,7 +360,7 @@ export const llmApi = {
           'Content-Type': 'application/json',
           'Accept-Language': i18n.global.locale.value,
         },
-        body: JSON.stringify({ model, provider, messages, sessionId }),
+        body: JSON.stringify(requestBody)
       })
       handleStream(response, onProgress)
     } catch (error) {
@@ -338,7 +392,11 @@ const handleStream = async (response, onProgress) => {
           if (!line.trim()) return
           try {
             const data = JSON.parse(line)
+            if (line.includes('tool')) {
+              // debugger
+            }
             const content = data.choices[0]?.delta?.content || ''
+            console.log(content)
 
             // 处理思考标记
             if (content === '<think>') {
@@ -356,9 +414,13 @@ const handleStream = async (response, onProgress) => {
             }
 
             // 直接发送增量内容，不在这里累加
-            onProgress?.(content)
+            if (content && onProgress) {
+              onProgress(content)
+            }
           } catch (e) {
             console.error('解析错误:', e)
+            console.log('原始数据:', line)
+            console.log('原始数据类型:', typeof line)
           }
         })
       }
