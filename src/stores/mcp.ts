@@ -5,10 +5,12 @@ interface McpState {
   tools: any[]
   loading: boolean
   selectedTool: any | null
-  selectedTools: any[] // 新增：存储多选的工具
+  selectedTools: any[] // 存储多选的工具
   error: string | null
   initialized: boolean
   toolsEnabled: boolean
+  showAddNewDialog: boolean // 新增：控制弹窗显示
+  selectedMcp: any | null // 新增：当前选中的MCP
 }
 
 export const useMcpStore = defineStore('mcp', {
@@ -16,10 +18,12 @@ export const useMcpStore = defineStore('mcp', {
     tools: [],
     loading: false,
     selectedTool: null,
-    selectedTools: [], // 新增：初始化为空数组
+    selectedTools: [],
     error: null,
     initialized: false,
     toolsEnabled: true,
+    showAddNewDialog: false, // 新增：初始化为false
+    selectedMcp: null, // 新增：初始化为null
   }),
 
   actions: {
@@ -85,32 +89,17 @@ export const useMcpStore = defineStore('mcp', {
       this.initialized = false
       this.toolsEnabled = true
     },
-  },
-
-  getters: {
-    // 获取当前选中的工具列表
-    // getSelectedTools: (state) => state.selectedTools,
-    getSelectedTools: state => {
-      if (!state.toolsEnabled) {
-        return []
-      }
-      return state.selectedTools
+    
+    // 新增：打开添加新MCP的弹窗
+    openAddNewDialog(mcp = null) {
+      this.selectedMcp = mcp
+      this.showAddNewDialog = true
     },
-
-    // 检查是否有工具被选中
-    hasSelectedTools: state => state.selectedTools.length > 0,
-
-    // 获取选中工具的数量
-    selectedToolsCount: state => state.selectedTools.length,
-
-    // 检查是否有工具可用
-    hasTools: state => state.tools.length > 0,
-
-    // 获取工具数量
-    toolCount: state => state.tools.length,
-  },
-
-  persist: {
-    pick: ['selectedTools', 'toolsEnabled'],
-  },
+    
+    // 新增：关闭添加新MCP的弹窗
+    closeAddNewDialog() {
+      this.showAddNewDialog = false
+      this.selectedMcp = null
+    }
+  }
 })

@@ -5,13 +5,18 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ref, onMounted } from "vue"
-import { SquareArrowOutUpRight } from "lucide-vue-next"
+import { SquareArrowOutUpRight, PlusCircle } from "lucide-vue-next"
 import { useI18n } from "vue-i18n"
 import mcpMock from '@/api/mcpMock.json'
-import { Plus } from "lucide-vue-next"
 import { Settings, Terminal, FileText } from "lucide-vue-next"
 import Env from "@/components/mcp/Env.vue"
 import Config from "@/components/mcp/Config.vue"
+import AddNew from "@/components/mcp/AddNew.vue"
+import { Toaster } from '@/components/ui/toast'
+import { useMcpStore } from '@/stores/mcp'
+
+// 使用MCP store
+const mcpStore = useMcpStore()
 
 const { t } = useI18n()
 
@@ -82,9 +87,18 @@ const installedMcps = ref([
   }
 ])
 
+// 当前选中的MCP信息
+const selectedMcp = ref(null)
+const showAddNewDialog = ref(false)
+
 // 处理添加新应用
 const handleAddNew = () => {
-  console.log('添加新应用')
+  mcpStore.openAddNewDialog() // 使用store打开弹窗，不传MCP参数
+}
+
+// 打开AddNew对话框并传递MCP信息
+const openAddNewWithMcp = (mcp) => {
+  mcpStore.openAddNewDialog(mcp) // 使用store打开弹窗，传递MCP参数
 }
 </script>
 
@@ -117,12 +131,13 @@ const handleAddNew = () => {
           <Button variant="outline">配置文件</Button>
           <Button variant="outline">运行环境</Button>
         </div> -->
+        <AddNew></AddNew>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 添加新应用卡片 -->
         <div class="rounded-md border overflow-hidden cursor-pointer hover:border-primary" @click="handleAddNew">
           <div class="flex flex-col items-center justify-center h-[172px] text-muted-foreground">
-            <Plus class="w-8 h-8 mb-2" />
+            <PlusCircle class="w-8 h-8 mb-2" />
             <span class="text-sm">添加新应用</span>
           </div>
         </div>
@@ -147,7 +162,7 @@ const handleAddNew = () => {
                 />
                 <span class="ml-2 text-sm text-gray-500">{{ item.FromSite }}</span>
               </div>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" @click="openAddNewWithMcp(item)">
                 <SquareArrowOutUpRight class="text-gray-400"></SquareArrowOutUpRight>
               </Button>
             </div>
@@ -183,7 +198,7 @@ const handleAddNew = () => {
                     />
                     <span class="ml-2 text-sm text-gray-500">{{ item.FromSite }}</span>
                   </div>
-                  <Button @click="handleInstall(item)" variant="ghost" size="icon">
+                  <Button @click="openAddNewWithMcp(item)" variant="ghost" size="icon">
                     <SquareArrowOutUpRight class="text-gray-400"></SquareArrowOutUpRight>
                   </Button>
                 </div>
