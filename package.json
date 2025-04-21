@@ -4,7 +4,7 @@
   "main": "dist-electron/main/index.js",
   "description": "a light weight chat tool for llm.",
   "author": "eechat <oodoobvideo@gmail.com>",
-  "license": "",
+  "license": "Apache-2.0",
   "private": true,
   "keywords": [
     "electron",
