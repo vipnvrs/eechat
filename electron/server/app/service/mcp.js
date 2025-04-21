@@ -519,6 +519,293 @@ class McpService extends Service {
       this.ctx.logger.info('已清除所有工具缓存')
     }
   }
+
+  // 其他方法...
+  // 从URL获取README内容
+  async fetchReadme(url) {
+    this.ctx.logger.info('获取README内容:', url)
+    
+    try {
+      // 尝试从mockdata中匹配README
+      const mockReadme = await this.matchReadmeFromMockData(url)
+      if (mockReadme) {
+        return mockReadme
+      }
+      
+      // 如果mockdata中没有匹配，则从URL获取内容
+      const response = await this.ctx.curl(url, {
+        timeout: 10000,
+        dataType: 'text',
+      })
+      
+      if (response.status !== 200) {
+        throw new Error(`获取失败，状态码: ${response.status}`)
+      }
+      
+      return response.data
+    } catch (error) {
+      this.ctx.logger.error('获取README失败:', error)
+      throw error
+    }
+  }
+
+  // 从mockdata中匹配README
+  async matchReadmeFromMockData(url) {
+    this.ctx.logger.info('尝试匹配README:', url)
+    
+    try {
+      // 检查是否是GitHub链接
+      const githubRegex = /https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+\.md)/i
+      const rawGithubRegex = /https?:\/\/raw\.githubusercontent\.com\/([^\/]+)\/([^\/]+)\/(.+)/i
+      // 新增：检测GitHub项目链接
+      const githubProjectRegex = /https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/?$/i
+      
+      // 如果是GitHub项目链接，尝试获取项目的README.md
+      if (githubProjectRegex.test(url) && !githubRegex.test(url) && !rawGithubRegex.test(url)) {
+        const matches = url.match(githubProjectRegex)
+        if (matches && matches.length >= 3) {
+          const [_, owner, repo] = matches
+          
+          // 检查请求头中的语言设置
+          const acceptLanguage = this.ctx.get('Accept-Language') || ''
+          const isChinese = acceptLanguage.includes('zh-CN') || acceptLanguage.includes('zh')
+          
+          // 尝试获取README.md文件
+          const readmeFiles = ['README.md', 'readme.md', 'Readme.md']
+          
+          for (const readmeFile of readmeFiles) {
+            let readmeUrl
+            if (isChinese) {
+              // 使用中国镜像
+              readmeUrl = `https://raw.gitmirror.com/${owner}/${repo}/refs/heads/main/${readmeFile}`
+            } else {
+              // 使用原始GitHub链接
+              readmeUrl = `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/main/${readmeFile}`
+            }
+            
+            this.ctx.logger.info(`尝试获取GitHub项目README: ${readmeUrl}`)
+            
+            try {
+              const response = await this.ctx.curl(readmeUrl, {
+                timeout: 15000,
+                dataType: 'text',
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+              })
+              
+              if (response.status === 200) {
+                this.ctx.logger.info(`成功获取GitHub项目README: ${readmeUrl}`)
+                return response.data
+              }
+            } catch (error) {
+              this.ctx.logger.info(`获取 ${readmeUrl} 失败，尝试其他分支或文件名`)
+            }
+          }
+          
+          // 如果main分支没有找到，尝试master分支
+          for (const readmeFile of readmeFiles) {
+            let readmeUrl
+            if (isChinese) {
+              // 使用中国镜像
+              readmeUrl = `https://raw.gitmirror.com/${owner}/${repo}/refs/heads/master/${readmeFile}`
+            } else {
+              // 使用原始GitHub链接
+              readmeUrl = `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/master/${readmeFile}`
+            }
+            
+            this.ctx.logger.info(`尝试获取GitHub项目README(master分支): ${readmeUrl}`)
+            
+            try {
+              const response = await this.ctx.curl(readmeUrl, {
+                timeout: 15000,
+                dataType: 'text',
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                }
+              })
+              
+              if (response.status === 200) {
+                this.ctx.logger.info(`成功获取GitHub项目README(master分支): ${readmeUrl}`)
+                return response.data
+              }
+            } catch (error) {
+              this.ctx.logger.info(`获取 ${readmeUrl} 失败`)
+            }
+          }
+          
+          this.ctx.logger.info(`未能找到GitHub项目 ${owner}/${repo} 的README文件`)
+        }
+      }
+      
+      // 如果是GitHub链接但不是raw链接，转换为raw链接
+      if (githubRegex.test(url) && !rawGithubRegex.test(url)) {
+        const matches = url.match(githubRegex)
+        if (matches && matches.length >= 5) {
+          const [_, owner, repo, branch, path] = matches
+          
+          // 检查请求头中的语言设置
+          const acceptLanguage = this.ctx.get('Accept-Language') || ''
+          const isChinese = acceptLanguage.includes('zh-CN') || acceptLanguage.includes('zh')
+          
+          let rawUrl
+          if (isChinese) {
+            // 使用中国镜像
+            rawUrl = `https://raw.gitmirror.com/${owner}/${repo}/refs/heads/${branch}/${path}`
+            this.ctx.logger.info('使用中国镜像获取GitHub内容:', rawUrl)
+          } else {
+            // 使用原始GitHub链接
+            rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/refs/heads/${branch}/${path}`
+            this.ctx.logger.info('使用原始GitHub链接获取内容:', rawUrl)
+          }
+          
+          // 获取内容
+          const response = await this.ctx.curl(rawUrl, {
+            timeout: 15000,
+            dataType: 'text',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          })
+          
+          if (response.status === 200) {
+            return response.data
+          } else {
+            this.ctx.logger.error('获取GitHub内容失败:', {
+              url: rawUrl,
+              status: response.status,
+              statusText: response.statusText
+            })
+            return null
+          }
+        }
+      }
+      
+      // 如果已经是raw链接，直接处理
+      if (rawGithubRegex.test(url)) {
+        const matches = url.match(rawGithubRegex)
+        if (matches && matches.length >= 4) {
+          const [_, owner, repo, path] = matches
+          
+          // 检查请求头中的语言设置
+          const acceptLanguage = this.ctx.get('Accept-Language') || ''
+          const isChinese = acceptLanguage.includes('zh-CN') || acceptLanguage.includes('zh')
+          
+          let rawUrl = url
+          if (isChinese) {
+            // 使用中国镜像替换原始域名
+            rawUrl = url.replace('raw.githubusercontent.com', 'raw.gitmirror.com')
+            this.ctx.logger.info('使用中国镜像获取GitHub内容:', rawUrl)
+          }
+          
+          // 获取内容
+          const response = await this.ctx.curl(rawUrl, {
+            timeout: 15000,
+            dataType: 'text',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          })
+          
+          if (response.status === 200) {
+            return response.data
+          } else {
+            this.ctx.logger.error('获取GitHub内容失败:', {
+              url: rawUrl,
+              status: response.status,
+              statusText: response.statusText
+            })
+            return null
+          }
+        }
+      }
+      
+      // 尝试从mockdata中匹配
+      const mockDataDir = path.join(__dirname, '../mockdata/readme')
+      
+      // 确保mockdata目录存在
+      if (!fs.existsSync(mockDataDir)) {
+        fs.mkdirSync(mockDataDir, { recursive: true })
+        this.ctx.logger.info('创建mockdata目录:', mockDataDir)
+      }
+      
+      // 从URL中提取可能的文件名
+      let fileName = ''
+      
+      // 尝试从GitHub URL提取仓库名
+      if (githubRegex.test(url)) {
+        const matches = url.match(githubRegex)
+        if (matches && matches.length >= 3) {
+          fileName = `${matches[2]}.md`
+        }
+      } else {
+        // 从一般URL中提取最后一部分作为文件名
+        const urlParts = url.split('/')
+        fileName = urlParts[urlParts.length - 1]
+        
+        // 如果文件名不是.md结尾，添加.md后缀
+        if (!fileName.endsWith('.md')) {
+          fileName = `${fileName}.md`
+        }
+      }
+      
+      // 检查mockdata中是否有匹配的文件
+      if (fileName) {
+        const mockFilePath = path.join(mockDataDir, fileName)
+        if (fs.existsSync(mockFilePath)) {
+          this.ctx.logger.info('从mockdata中找到匹配的README:', mockFilePath)
+          return fs.readFileSync(mockFilePath, 'utf8')
+        }
+      }
+      
+      // 没有找到匹配的mockdata，返回null
+      return null
+    } catch (error) {
+      this.ctx.logger.error('匹配README失败:', error)
+      return null
+    }
+  }
+
+  // 添加MCP服务器
+  async addServer(serverData) {
+    this.ctx.logger.info('添加MCP服务器:', serverData)
+    
+    try {
+      // 获取当前配置
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      let config = { mcpServers: {} }
+      
+      if (fs.existsSync(configFile)) {
+        const configContent = fs.readFileSync(configFile, 'utf8')
+        config = JSON.parse(configContent)
+      }
+      
+      // 合并新的服务器配置
+      // 注意：不保存readme内容
+      for (const [key, server] of Object.entries(serverData)) {
+        // 移除readme相关字段，不存储在配置文件中
+        const { readme, readmeCN, ...serverConfig } = server
+        
+        config.mcpServers[key] = serverConfig
+      }
+      
+      // 保存配置
+      fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
+      
+      // 重新连接新添加的服务器
+      for (const [key, server] of Object.entries(serverData)) {
+        // 移除readme相关字段
+        const { readme, readmeCN, ...serverConfig } = server
+        
+        await this.connectServer(key, serverConfig)
+      }
+      
+      return { success: true, message: '服务器添加成功' }
+    } catch (error) {
+      this.ctx.logger.error('添加MCP服务器失败:', error)
+      throw error
+    }
+  }
 }
 
 module.exports = McpService

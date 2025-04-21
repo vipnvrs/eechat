@@ -66,4 +66,7 @@ module.exports = app => {
   // mcp
   router.get('/api/mcp/listAllTools', controller.mcp.listAllTools)
   router.get('/api/mcp/restartServer', controller.mcp.restartServer)
+  // MCP相关接口
+  router.get('/api/mcp/fetch-readme', controller.mcp.fetchReadme)
+  router.post('/api/mcp/add-server', controller.mcp.addServer)
 }

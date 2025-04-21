@@ -26,6 +26,7 @@ import { ref, computed, reactive, watch, onMounted } from "vue"
 import { useMcpStore } from "@/stores/mcp"
 // 导入 Markdown 渲染组件
 import MarkdownRenderer from "@/components/common/MarkdownRenderer.vue"
+import { mcpApi } from '@/api/request'
 
 const { toast } = useToast()
 const mcpStore = useMcpStore() // 使用MCP store
@@ -61,8 +62,8 @@ const fetchReadme = async () => {
 
   isLoadingReadme.value = true
   try {
-    // 调用后端API获取README内容
-    const content = await window.ipcRenderer.invoke("fetch-readme", readmeUrl.value)
+    // 调用API获取README内容
+    const content = await mcpApi.fetchReadme(readmeUrl.value)
     
     if (content) {
       readmeContent.value = content
@@ -317,9 +318,7 @@ const handleSubmit = async () => {
         args: args,
         env: env,
         enabled: formData.stdio.enabled,
-        // 如果有README内容，添加到配置中
-        readme: readmeContent.value || (mcpStore.selectedMcp?.Readme || ""),
-        readmeCN: mcpStore.selectedMcp?.ReadmeCN || "",
+        // 不再存储README内容
         name: mcpStore.selectedMcp?.Name || serverKey.value,
         chineseName: mcpStore.selectedMcp?.ChineseName || "",
       };
@@ -341,17 +340,15 @@ const handleSubmit = async () => {
         url: formData.sse.url,
         headers: headers,
         enabled: formData.sse.enabled,
-        // 如果有README内容，添加到配置中
-        readme: readmeContent.value || (mcpStore.selectedMcp?.Readme || ""),
-        readmeCN: mcpStore.selectedMcp?.ReadmeCN || "",
+        // 不再存储README内容
         name: mcpStore.selectedMcp?.Name || serverKey.value,
         chineseName: mcpStore.selectedMcp?.ChineseName || "",
       };
     }
 
-    // 调用后端API添加MCP服务器
-    await window.ipcRenderer.invoke("add-mcp-server", serverData);
-
+    // 调用API添加MCP服务器
+    const res = await mcpApi.addMcpServer(serverData);
+    console.log("添加MCP服务器响应:", res);
     toast({
       title: "添加成功",
       description: "MCP服务器添加成功",
@@ -363,7 +360,7 @@ const handleSubmit = async () => {
     readmeUrl.value = ""; // 重置URL输入框
 
     // 触发刷新事件
-    window.ipcRenderer.send("refresh-mcp-servers");
+    mcpStore.fetchTools();
   } catch (error) {
     console.error("添加MCP服务器失败:", error);
     toast({
@@ -383,19 +380,19 @@ const handleSubmit = async () => {
           <DialogTitle>添加新的MCP服务</DialogTitle>
         </DialogHeader>
         <!-- <DialogTrigger as-child></DialogTrigger> -->
-        <div class="flex md:min-h-[70vh]">
+        <div class="flex md:min-h-[70vh] h-[70dvh]">
           <!-- 左侧：MCP信息展示 -->
           <div class="border-r pr-8 p-4 w-[50%]">
             <div class="flex justify-between items-center mb-2">
-              <div class="font-bold text-lg">
+              <div class="font-bold truncate">
                 {{ mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || "新MCP服务" }}
               </div>
               <div>
                 <div class="flex items-center space-x-2">
                   <Input
                     v-model="readmeUrl"
-                    class="w-[300px]"
-                    placeholder="https://github.com/xx/README.md"
+                    class="w-[25dvw]"
+                    placeholder="https://github.com/repo/project/README.md"
                   />
                   <Button @click="fetchReadme" :disabled="isLoadingReadme">
                     <span v-if="isLoadingReadme" class="animate-spin mr-2">⟳</span>
@@ -409,7 +406,7 @@ const handleSubmit = async () => {
               :content="displayReadmeContent"
               class="text-sm mb-4 max-h-[60dvh] bg-gray-100 p-4 rounded-md overflow-y-auto"
             />
-            <div class="flex items-center mb-4" v-if="mcpStore.selectedMcp">
+            <!-- <div class="flex items-center mb-4" v-if="mcpStore.selectedMcp">
               <img
                 :src="mcpStore.selectedMcp.FromSiteIcon"
                 class="w-5 h-5 rounded-full mr-2"
@@ -418,7 +415,7 @@ const handleSubmit = async () => {
               <span class="text-sm text-gray-500">{{
                 mcpStore.selectedMcp.FromSite
               }}</span>
-            </div>
+            </div> -->
 
             <Button @click="autoFillForm" class="w-full" :disabled="!mcpStore.selectedMcp && !readmeContent.value">
               <Wand2 class="w-4 h-4 mr-2" />

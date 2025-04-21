@@ -256,6 +256,14 @@ export const mcpApi = {
   },
   async restartServer() {
     return request.get('/api/mcp/restartServer') 
+  },
+  
+  async fetchReadme(url: string): Promise<string> {
+    return request.get<string>('/api/mcp/fetch-readme', { url })
+  },
+
+  async addMcpServer(serverData: Record<string, any>): Promise<any> {
+    return request.post('/api/mcp/add-server', serverData)
   }
 }
 
