@@ -262,9 +262,35 @@ export const mcpApi = {
     return request.get<string>('/api/mcp/fetch-readme', { url })
   },
 
+  // 添加MCP服务器
   async addMcpServer(serverData: Record<string, any>): Promise<any> {
     return request.post('/api/mcp/add-server', serverData)
-  }
+  },
+  
+  // 更新MCP服务器
+  async updateMcpServer(serverData: Record<string, any>): Promise<any> {
+    return request.put('/api/mcp/update-server', serverData)
+  },
+  
+  // 新增：获取已安装的MCP服务器列表
+  async getInstalledServers(): Promise<any[]> {
+    return request.get('/api/mcp/installed-servers')
+  },
+  
+  // 删除MCP服务器
+  async deleteMcpServer(serverKey: string): Promise<any> {
+    return request.delete(`/api/mcp/server/${serverKey}`)
+  },
+  
+  // 启动MCP服务器
+  async startMcpServer(serverKey: string): Promise<any> {
+    return request.post(`/api/mcp/server/${serverKey}/start`)
+  },
+  
+  // 停止MCP服务器
+  async stopMcpServer(serverKey: string): Promise<any> {
+    return request.post(`/api/mcp/server/${serverKey}/stop`)
+  },
 }
 
 export const llmApi = {

@@ -98,7 +98,7 @@ export class Ipc {
       try {
         const filename = process.platform === 'win32' ? `${name}.exe` : name;
         const url = `http://8.130.172.245/bin/${process.platform}/${filename}`
-        
+        console.log('下载工具:', url);
         // 创建下载任务并返回任务ID
         const taskId = await downloader.downloadTool(url, filename);
         

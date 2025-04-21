@@ -1,6 +1,6 @@
 <script setup>
 import { Button } from "@/components/ui/button"
-import { Settings, Terminal, FileText, Download, AlertCircle } from "lucide-vue-next"
+import { Settings, Terminal, FileText, Download, AlertCircle, RefreshCw } from "lucide-vue-next"
 import {
   Dialog,
   DialogContent,
@@ -131,7 +131,7 @@ const downloadTool = async (tool) => {
                 @click="downloadTool(tool)"
               >
                 <Download v-if="!tool.downloading" class="w-4 h-4 mr-1" />
-                <span v-else class="animate-spin">↻</span>
+                <RefreshCw v-else class="animate-spin"></RefreshCw>
                 {{ tool.downloading ? '下载中...' : '下载' }}
               </Button>
             </div>

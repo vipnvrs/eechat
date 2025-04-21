@@ -59,6 +59,94 @@ class McpController extends Controller {
       ctx.body = ctx.helper.error(error.message)
     }
   }
+  
+  // 获取已安装的MCP服务器列表
+  async getInstalledServers() {
+    const { ctx } = this
+    
+    try {
+      const servers = await ctx.service.mcp.getInstalledServers()
+      ctx.body = ctx.helper.success(servers)
+    } catch (error) {
+      ctx.logger.error('获取已安装MCP服务器列表失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+  
+  // 删除MCP服务器
+  async deleteServer() {
+    const { ctx } = this
+    const { key } = ctx.params
+    
+    try {
+      if (!key) {
+        ctx.body = ctx.helper.error('服务器标识不能为空')
+        return
+      }
+      
+      const result = await ctx.service.mcp.deleteServer(key)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.logger.error(`删除MCP服务器 ${key} 失败:`, error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+  
+  // 启动MCP服务器
+  async startServer() {
+    const { ctx } = this
+    const { key } = ctx.params
+    
+    try {
+      if (!key) {
+        ctx.body = ctx.helper.error('服务器标识不能为空')
+        return
+      }
+      
+      const result = await ctx.service.mcp.startServer(key)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.logger.error(`启动MCP服务器 ${key} 失败:`, error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+  
+  // 停止MCP服务器
+  async stopServer() {
+    const { ctx } = this
+    const { key } = ctx.params
+    
+    try {
+      if (!key) {
+        ctx.body = ctx.helper.error('服务器标识不能为空')
+        return
+      }
+      
+      const result = await ctx.service.mcp.stopServer(key)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.logger.error(`停止MCP服务器 ${key} 失败:`, error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+  
+  // 更新MCP服务器
+  async updateServer() {
+    const { ctx } = this
+    const serverData = ctx.request.body
+    
+    try {
+      if (!serverData || Object.keys(serverData).length === 0) {
+        ctx.body = ctx.helper.error('服务器配置不能为空')
+        return
+      }
+      
+      const result = await ctx.service.mcp.updateServer(serverData)
+      ctx.body = ctx.helper.success(result)
+    } catch (error) {
+      ctx.logger.error('更新MCP服务器失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
 }
-
 module.exports = McpController;

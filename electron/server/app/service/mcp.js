@@ -19,7 +19,7 @@ const GLOBAL_CACHE = {
   initialized: false        // 添加全局初始化状态
 };
 
-class McpService extends Service {
+ class McpService extends Service {
   constructor(ctx) {
     super(ctx)
     // 使用全局缓存替代实例缓存
@@ -49,7 +49,7 @@ class McpService extends Service {
     }
   }
 
-  async connectServer(key, serverConfig) {
+  async connectServer(key, serverConfig, errorCallback) {
     try {
       this.ctx.logger.info('Init mcp client')
       
@@ -117,6 +117,7 @@ class McpService extends Service {
       this.ctx.logger.info('Init mcp client success')
       return { success: true }
     } catch (error) {
+      if(errorCallback) errorCallback(error)
       this.ctx.logger.error('Init mcp client error', error)
       return { success: false, error: error.message || '未知错误' }
     }
@@ -806,6 +807,211 @@ class McpService extends Service {
       throw error
     }
   }
+
+  // 获取已安装的MCP服务器列表
+  async getInstalledServers() {
+    try {
+      // 获取配置文件路径
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      
+      // 如果配置文件不存在，返回空数组
+      if (!fs.existsSync(configFile)) {
+        return []
+      }
+      
+      // 读取配置文件
+      const configContent = fs.readFileSync(configFile, 'utf8')
+      const config = JSON.parse(configContent)
+      
+      // 如果没有mcpServers字段，返回空数组
+      if (!config.mcpServers) {
+        return []
+      }
+      
+      // 转换配置为服务器列表
+      const servers = []
+      for (const [key, serverConfig] of Object.entries(config.mcpServers)) {
+        // 获取服务器状态
+        let status = 'unknown'
+        try {
+          if (this.clients.has(key)) {
+            status = 'running'
+          } else {
+            status = 'stopped'
+          }
+        } catch (error) {
+          this.ctx.logger.error(`获取服务器 ${key} 状态失败:`, error)
+          status = 'error'
+        }
+        
+        // 构建服务器信息对象
+        const server = {
+          key,
+          name: serverConfig.name || key,
+          chineseName: serverConfig.chineseName || serverConfig.name || key,
+          transportType: serverConfig.transportType || (serverConfig.command ? 'stdio' : 'sse'),
+          status,
+          config: serverConfig,
+        }
+        
+        servers.push(server)
+      }
+      
+      return servers
+    } catch (error) {
+      this.ctx.logger.error('获取已安装MCP服务器列表失败:', error)
+      throw error
+    }
+  }
+  // 删除MCP服务器
+  async deleteServer(key) {
+    try {
+      // 获取配置文件路径
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      
+      // 如果配置文件不存在，返回错误
+      if (!fs.existsSync(configFile)) {
+        throw new Error('配置文件不存在')
+      }
+      
+      // 读取配置文件
+      const configContent = fs.readFileSync(configFile, 'utf8')
+      const config = JSON.parse(configContent)
+      
+      // 如果没有mcpServers字段或指定的服务器不存在，返回错误
+      if (!config.mcpServers || !config.mcpServers[key]) {
+        throw new Error(`服务器 ${key} 不存在`)
+      }
+      
+      // 如果服务器正在运行，先停止它
+      if (this.clients.has(key)) {
+        await this.stopServer(key)
+      }
+      
+      // 删除服务器配置
+      delete config.mcpServers[key]
+      
+      // 保存配置
+      fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
+      
+      return { success: true, message: `服务器 ${key} 已删除` }
+    } catch (error) {
+      this.ctx.logger.error(`删除MCP服务器 ${key} 失败:`, error)
+      throw error
+    }
+  }
+  
+  // 启动MCP服务器
+  async startServer(key) {
+    try {
+      // 获取配置文件路径
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      
+      // 如果配置文件不存在，返回错误
+      if (!fs.existsSync(configFile)) {
+        throw new Error('配置文件不存在')
+      }
+      
+      // 读取配置文件
+      const configContent = fs.readFileSync(configFile, 'utf8')
+      const config = JSON.parse(configContent)
+      
+      // 如果没有mcpServers字段或指定的服务器不存在，返回错误
+      if (!config.mcpServers || !config.mcpServers[key]) {
+        throw new Error(`服务器 ${key} 不存在`)
+      }
+      
+      // 如果服务器已经在运行，返回成功
+      if (this.clients.has(key)) {
+        return { success: true, message: `服务器 ${key} 已经在运行` }
+      }
+      
+      // 启动服务器
+      await this.connectServer(key, config.mcpServers[key], err => {
+        if (err) {
+          throw new Error(`启动服务器 ${key} 失败: ${err.message}`)
+        }
+      })
+      
+      return { success: true, message: `服务器 ${key} 已启动` }
+    } catch (error) {
+      this.ctx.logger.error(`启动MCP服务器 ${key} 失败:`, error)
+      throw error
+    }
+  }
+  
+  // 停止MCP服务器
+  async stopServer(key) {
+    try {
+      // 如果服务器不在运行，返回成功
+      if (!this.clients.has(key)) {
+        return { success: true, message: `服务器 ${key} 已经停止` }
+      }
+      
+      // 获取客户端
+      const client = this.clients.get(key)
+      
+      // 关闭客户端
+      if (client) {
+        try {
+          await client.close()
+        } catch (error) {
+          this.ctx.logger.error(`关闭MCP客户端 ${key} 失败:`, error)
+        }
+      }
+      
+      // 从映射中删除客户端
+      this.clients.delete(key)
+      
+      return { success: true, message: `服务器 ${key} 已停止` }
+    } catch (error) {
+      this.ctx.logger.error(`停止MCP服务器 ${key} 失败:`, error)
+      throw error
+    }
+  }
+
+  // 更新MCP服务器
+  async updateServer(serverData) {
+    try {
+      // 获取配置文件路径
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      
+      // 如果配置文件不存在，创建一个空配置
+      let config = { mcpServers: {} }
+      if (fs.existsSync(configFile)) {
+        const configContent = fs.readFileSync(configFile, 'utf8')
+        config = JSON.parse(configContent)
+        if (!config.mcpServers) {
+          config.mcpServers = {}
+        }
+      }
+      
+      // 更新服务器配置
+      const serverKey = Object.keys(serverData)[0]
+      config.mcpServers[serverKey] = serverData[serverKey]
+      
+      // 保存配置
+      fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
+      
+      // 如果服务器已经在运行，需要重启它
+      if (this.clients.has(serverKey)) {
+        try {
+          // 先停止
+          await this.stopServer(serverKey)
+          // 再启动
+          await this.startServer(serverKey)
+        } catch (error) {
+          this.ctx.logger.error(`重启MCP服务器 ${serverKey} 失败:`, error)
+        }
+      }
+      
+      return { success: true, message: `服务器 ${serverKey} 已更新` }
+    } catch (error) {
+      this.ctx.logger.error('更新MCP服务器失败:', error)
+      throw error
+    }
+  }
 }
 
-module.exports = McpService
+module.exports = McpService;
+

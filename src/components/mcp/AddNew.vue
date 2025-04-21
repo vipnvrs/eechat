@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { PlusCircle, Server, Globe, Terminal, Wand2 } from "lucide-vue-next"
+import { PlusCircle, Server, Globe, Terminal, Wand2, RefreshCw } from "lucide-vue-next"
 import { useToast } from "@/components/ui/toast/use-toast"
 import { Toaster } from "@/components/ui/toast"
 import {
@@ -258,17 +258,92 @@ const autoFillForm = () => {
   }, 1500)
 }
 
-// 提交表单
+// 检查是否为编辑模式
+const isEditMode = computed(() => mcpStore.selectedMcp?.isEditing || false)
+// 根据编辑模式设置对话框标题
+const dialogTitle = computed(() => isEditMode.value ? '编辑 MCP 应用' : '添加新 MCP 应用')
+
+// 添加加载状态变量
+const loading = ref(false)
+
+// 监听对话框打开状态，当对话框打开时初始化表单
+watch(() => mcpStore.showAddNewDialog, (newVal) => {
+  if (newVal && mcpStore.selectedMcp) {
+    // 如果是编辑模式，填充表单数据
+    if (mcpStore.selectedMcp.isEditing) {
+      const mcp = mcpStore.selectedMcp
+      
+      // 设置服务标识
+      serverKey.value = mcp.key || ''
+      
+      // 设置传输类型
+      transportType.value = mcp.config?.transportType || 'stdio'
+      
+      if (transportType.value === 'stdio') {
+        // 填充命令
+        formData.stdio.command = mcp.config?.command || ''
+        
+        // 填充参数，将数组转换为换行分隔的字符串
+        if (mcp.config?.args && Array.isArray(mcp.config.args)) {
+          formData.stdio.args = mcp.config.args.join('\n')
+        } else {
+          formData.stdio.args = ''
+        }
+        
+        // 填充环境变量
+        if (mcp.config?.env) {
+          const envVars = []
+          for (const [key, value] of Object.entries(mcp.config.env)) {
+            envVars.push(`${key}=${value}`)
+          }
+          formData.stdio.env = envVars.join('\n')
+        } else {
+          formData.stdio.env = ''
+        }
+        
+        // 设置启用状态
+        formData.stdio.enabled = mcp.config?.enabled !== false
+      } else if (transportType.value === 'sse') {
+        // 填充URL
+        formData.sse.url = mcp.config?.url || ''
+        
+        // 填充请求头
+        if (mcp.config?.headers) {
+          const headerLines = []
+          for (const [key, value] of Object.entries(mcp.config.headers)) {
+            headerLines.push(`${key}: ${value}`)
+          }
+          formData.sse.headers = headerLines.join('\n')
+        } else {
+          formData.sse.headers = ''
+        }
+        
+        // 设置启用状态
+        formData.sse.enabled = mcp.config?.enabled !== false
+      }
+    } else {
+      // 如果是新增模式，可以预填充一些信息
+      if (mcpStore.selectedMcp.Name) {
+        serverKey.value = mcpStore.selectedMcp.Name.toLowerCase()
+      }
+    }
+  }
+})
+
+// 修改提交表单方法，区分新增和编辑操作
 const handleSubmit = async () => {
   try {
+    loading.value = true
+    
     // 验证服务标识
     if (!serverKey.value.trim()) {
       toast({
         title: "验证失败",
         description: "服务标识不能为空",
         variant: "destructive",
-      });
-      return;
+      })
+      loading.value = false
+      return
     }
     
     // 验证传输类型相关字段
@@ -277,8 +352,9 @@ const handleSubmit = async () => {
         title: "验证失败",
         description: "命令不能为空",
         variant: "destructive",
-      });
-      return;
+      })
+      loading.value = false
+      return
     }
     
     if (transportType.value === "sse" && !formData.sse.url.trim()) {
@@ -286,22 +362,23 @@ const handleSubmit = async () => {
         title: "验证失败",
         description: "URL不能为空",
         variant: "destructive",
-      });
-      return;
+      })
+      loading.value = false
+      return
     }
     
-    const serverData = {};
+    const serverData = {}
 
     // 构建服务器配置对象
     if (transportType.value === "stdio") {
       // 处理环境变量，将换行分隔的键值对转换为对象
-      let env = {};
+      let env = {}
       if (formData.stdio.env.trim()) {
-        const envLines = formData.stdio.env.split("\n").filter((line) => line.trim());
+        const envLines = formData.stdio.env.split("\n").filter((line) => line.trim())
         for (const line of envLines) {
-          const [key, value] = line.split("=").map((part) => part.trim());
+          const [key, value] = line.split("=").map((part) => part.trim())
           if (key && value !== undefined) {
-            env[key] = value;
+            env[key] = value
           }
         }
       }
@@ -310,7 +387,7 @@ const handleSubmit = async () => {
       const args = formData.stdio.args
         .split("\n")
         .map((line) => line.trim())
-        .filter((line) => line !== "");
+        .filter((line) => line !== "")
 
       serverData[serverKey.value] = {
         transportType: "stdio",
@@ -318,19 +395,19 @@ const handleSubmit = async () => {
         args: args,
         env: env,
         enabled: formData.stdio.enabled,
-        // 不再存储README内容
+        // 添加名称和中文名称
         name: mcpStore.selectedMcp?.Name || serverKey.value,
-        chineseName: mcpStore.selectedMcp?.ChineseName || "",
-      };
+        chineseName: mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || serverKey.value,
+      }
     } else {
       // 处理请求头，将换行分隔的键值对转换为对象
-      let headers = {};
+      let headers = {}
       if (formData.sse.headers.trim()) {
-        const headerLines = formData.sse.headers.split("\n").filter((line) => line.trim());
+        const headerLines = formData.sse.headers.split("\n").filter((line) => line.trim())
         for (const line of headerLines) {
-          const [key, value] = line.split(":").map((part) => part.trim());
+          const [key, value] = line.split(":").map((part) => part.trim())
           if (key && value !== undefined) {
-            headers[key] = value;
+            headers[key] = value
           }
         }
       }
@@ -340,36 +417,49 @@ const handleSubmit = async () => {
         url: formData.sse.url,
         headers: headers,
         enabled: formData.sse.enabled,
-        // 不再存储README内容
+        // 添加名称和中文名称
         name: mcpStore.selectedMcp?.Name || serverKey.value,
-        chineseName: mcpStore.selectedMcp?.ChineseName || "",
-      };
+        chineseName: mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || serverKey.value,
+      }
     }
 
-    // 调用API添加MCP服务器
-    const res = await mcpApi.addMcpServer(serverData);
-    console.log("添加MCP服务器响应:", res);
-    toast({
-      title: "添加成功",
-      description: "MCP服务器添加成功",
-    });
+    // 根据模式调用不同的API
+    let res
+    if (isEditMode.value) {
+      // 编辑模式：调用更新API
+      res = await mcpApi.updateMcpServer(serverData)
+      toast({
+        title: "更新成功",
+        description: `MCP服务 ${serverKey.value} 已更新`,
+      })
+    } else {
+      // 新增模式：调用添加API
+      res = await mcpApi.addMcpServer(serverData)
+      toast({
+        title: "添加成功",
+        description: `MCP服务 ${serverKey.value} 已添加`,
+      })
+    }
 
-    mcpStore.closeAddNewDialog();
-    resetForm();
-    readmeContent.value = ""; // 重置README内容
-    readmeUrl.value = ""; // 重置URL输入框
+    console.log(isEditMode.value ? "更新" : "添加", "MCP服务器响应:", res)
 
-    // 触发刷新事件
-    mcpStore.fetchTools();
+    // 关闭对话框并重置表单
+    mcpStore.closeAddNewDialog()
+    resetForm()
+    
+    // 刷新服务器列表
+    await mcpStore.refreshServers()
   } catch (error) {
-    console.error("添加MCP服务器失败:", error);
+    console.error(isEditMode.value ? "更新" : "添加", "MCP服务器失败:", error)
     toast({
-      title: "添加失败",
+      title: isEditMode.value ? "更新失败" : "添加失败",
       description: error.message || "未知错误",
       variant: "destructive",
-    });
+    })
+  } finally {
+    loading.value = false
   }
-};
+}
 </script>
 
 <template>
@@ -377,7 +467,7 @@ const handleSubmit = async () => {
     <Dialog v-model:open="mcpStore.showAddNewDialog">
       <DialogContent class="sm:min-w-[900px] md:min-w-[90vw]">
         <DialogHeader>
-          <DialogTitle>添加新的MCP服务</DialogTitle>
+          <DialogTitle>{{ dialogTitle }}</DialogTitle>
         </DialogHeader>
         <!-- <DialogTrigger as-child></DialogTrigger> -->
         <div class="flex md:min-h-[70vh] h-[70dvh]">
@@ -388,7 +478,7 @@ const handleSubmit = async () => {
                 {{ mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || "新MCP服务" }}
               </div>
               <div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2" v-if="!isEditMode">
                   <Input
                     v-model="readmeUrl"
                     class="w-[25dvw]"
@@ -417,9 +507,9 @@ const handleSubmit = async () => {
               }}</span>
             </div> -->
 
-            <Button @click="autoFillForm" class="w-full" :disabled="!mcpStore.selectedMcp && !readmeContent.value">
+            <Button @click="autoFillForm" class="w-full">
               <Wand2 class="w-4 h-4 mr-2" />
-              AI自动填充
+              AI自动填充 (Beta)
             </Button>
           </div>
 
@@ -555,8 +645,17 @@ Content-Type: application/json"
           <Button type="button" variant="outline" @click="mcpStore.closeAddNewDialog()">
             取消
           </Button>
-          <Button type="button" variant="secondary" class="mr-2"> 测试连接 </Button>
-          <Button type="submit" :disabled="!isValid" @click="handleSubmit"> 添加 </Button>
+          <!-- <Button type="button" variant="secondary" class="mr-2"> 测试连接 </Button> -->
+          <Button 
+            type="submit" 
+            :disabled="!isValid || loading" 
+            @click="handleSubmit"
+          > 
+            <RefreshCw v-if="loading" class="animate-spin">
+            
+            </RefreshCw>
+            {{ isEditMode ? '更新' : '添加' }} 
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
