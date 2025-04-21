@@ -37,28 +37,48 @@ module.exports = {
     ctx.res.end()
   },
 
-  toolCallStrArgsToObj(message) {
-    if(message.arguments) {
+  toolCallStrArgsToObj(message, toolCallArguments) {
+    if (message.arguments) {
       try {
-        const safeJson = message.arguments.replace(/\\/g, '\\\\')
-        message.arguments = JSON.parse(safeJson)
+        // 如果已经是对象，直接返回
+        if (typeof message.arguments === 'object') {
+          return message
+        }
+
+        // 尝试直接解析
+        message.arguments = JSON.parse(message.arguments)
         return message
       } catch (error) {
-        console.error('解析工具调用参数时出错:', error)
-        return message
+        try {
+          // 处理多个对象拼接的情况
+          const jsonStr = message.arguments
+
+          // 提取最后一个完整的 JSON 对象
+          const matches = jsonStr.match(/\{[^{]*\}/g)
+          if (matches && matches.length > 0) {
+            // 使用最后一个匹配的对象
+            message.arguments = JSON.parse(matches[matches.length - 1])
+            return message
+          }
+          throw new Error('No valid JSON object found')
+        } catch (e) {
+          console.error('解析工具调用参数时出错:', e)
+          return message
+        }
       }
     }
+    return message
   },
 
   toolCallFucntionToDirective(message, directive = 'tool_call') {
-    if(message.choices[0].delta.content) {
+    if (message.choices[0].delta.content) {
       // 如果内容是对象，将其转换为格式化的JSON字符串
-      const content = typeof message.choices[0].delta.content === 'object' 
-        ? JSON.stringify(message.choices[0].delta.content, null, 2)
-        : message.choices[0].delta.content
+      const content =
+        typeof message.choices[0].delta.content === 'object'
+          ? JSON.stringify(message.choices[0].delta.content, null, 2)
+          : message.choices[0].delta.content
 
-      const str = 
-`
+      const str = `
 :::${directive}{.${directive}}
 ${content}
 :::
@@ -76,7 +96,7 @@ ${content}
             content,
           },
         },
-      ]
+      ],
     }
-  }
+  },
 }

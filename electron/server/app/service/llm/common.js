@@ -64,7 +64,19 @@ class DeepseekService extends BaseLLMService {
       const model_id = model.id.includes(':')
         ? model.id.split(model.provider_id + ':').pop()
         : model.id
+      //       if (tools && tools.length > 0) {
+      //         sessionSettings.systemPrompt += `
+      // You must respond ONLY with a valid and well-formed JSON object.
 
+      // - Use double quotes '"' around all keys and string values.
+      // - Do NOT include any extra text, comments, markdown, explanations, or code blocks.
+      // - The JSON must be directly parsable using "JSON.parse()" in JavaScript.
+      // - Do NOT include newlines ("\n") or trailing commas.
+      // - All values must be correctly escaped according to JSON standards.
+      // - The output must start with "{" and end with "}" (or "[" and "]" if it’s an array).
+
+      // `
+      //       }
       const messagesWithSystemPrompt = sessionSettings.systemPrompt
         ? [
             { role: 'system', content: sessionSettings.systemPrompt },
@@ -103,8 +115,9 @@ class DeepseekService extends BaseLLMService {
         // presence_penalty: sessionSettings.presence_penalty,
         // frequency_penalty: sessionSettings.frequency_penalty,
       }
-      if(tools && tools.length > 0) {
-        params.tools = this.ctx.service.tools.convertMcpToolsToOpenaiTools(tools)
+      if (tools && tools.length > 0) {
+        params.tools =
+          this.ctx.service.tools.convertMcpToolsToOpenaiTools(tools)
       }
       const response = await client.chat.completions.create(params)
       // return response.choices[0].message.content

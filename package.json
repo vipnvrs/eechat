@@ -98,6 +98,7 @@
     "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.2.0",
     "radix-vue": "^1.9.13",
+    "really-relaxed-json": "^0.3.2",
     "rehype-highlight": "^7.0.2",
     "rehype-katex": "^7.0.1",
     "rehype-mermaid": "^3.0.0",

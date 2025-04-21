@@ -1,6 +1,6 @@
 <script setup>
 import { Button } from "@/components/ui/button"
-import { Settings, Terminal, FileText, Download } from "lucide-vue-next"
+import { Settings, Terminal, FileText, Download, AlertCircle } from "lucide-vue-next"
 import {
   Dialog,
   DialogContent,
@@ -100,8 +100,12 @@ const downloadTool = async (tool) => {
   <Dialog @update:open="handleDialogOpen">
     <DialogTrigger asChild>
       <Button variant="outline">
-        <Terminal class="w-4 h-4 mr-2" />
+        <Terminal class="w-4 h-4" />
         运行环境
+        <AlertCircle 
+          v-if="tools.some(t => !t.installed)" 
+          class="w-4 h-4 text-red-500" 
+        />
       </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px]">

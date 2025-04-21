@@ -26,7 +26,7 @@ export const useMcpStore = defineStore('mcp', {
     // 获取所有工具列表
     async fetchTools() {
       if (this.loading) return
-      
+
       try {
         this.loading = true
         this.error = null
@@ -44,7 +44,7 @@ export const useMcpStore = defineStore('mcp', {
     async restartServer() {
       try {
         const res = await mcpApi.restartServer()
-        console.log('MCP服务器已重启') 
+        console.log('MCP服务器已重启')
         return res
       } catch (error) {
         console.error('重启MCP服务器失败:', error)
@@ -84,31 +84,33 @@ export const useMcpStore = defineStore('mcp', {
       this.error = null
       this.initialized = false
       this.toolsEnabled = true
-    }
+    },
   },
 
   getters: {
     // 获取当前选中的工具列表
     // getSelectedTools: (state) => state.selectedTools,
-    getSelectedTools: (state) => {
-      if(!state.toolsEnabled) {
+    getSelectedTools: state => {
+      if (!state.toolsEnabled) {
         return []
       }
       return state.selectedTools
     },
-    
+
     // 检查是否有工具被选中
-    hasSelectedTools: (state) => state.selectedTools.length > 0,
-    
+    hasSelectedTools: state => state.selectedTools.length > 0,
+
     // 获取选中工具的数量
-    selectedToolsCount: (state) => state.selectedTools.length,
-    
+    selectedToolsCount: state => state.selectedTools.length,
+
     // 检查是否有工具可用
-    hasTools: (state) => state.tools.length > 0,
+    hasTools: state => state.tools.length > 0,
 
     // 获取工具数量
-    toolCount: (state) => state.tools.length
+    toolCount: state => state.tools.length,
   },
 
-  persist: true, // 持久化存储
+  persist: {
+    pick: ['selectedTools', 'toolsEnabled'],
+  },
 })

@@ -51,17 +51,19 @@ class McpService extends Service {
     try {
       this.ctx.logger.info('Init mcp client')
       
-      const { command, args } = this.buildCommand(serverConfig)
-      
+      const { command, args, env } = this.buildCommand(serverConfig)
+
       this.ctx.logger.info('构建后的命令和参数:', {
         command,
         args,
-        fullCommand: `${command} ${args.join(' ')}`
+        env,
+        fullCommand: `${command} ${args.join(' ')}`,
       })
 
       const transport = new StdioClientTransport({
         command: command,
         args: args,
+        env: env, // 添加环境变量配置
       })
 
       const client = new Client({
@@ -400,31 +402,43 @@ class McpService extends Service {
   buildCommand(serverConfig) {
     let command = serverConfig.command
     let args = [...serverConfig.args]
-    
+    // 合并环境变量
+    let env = {
+      // ...process.env, // 继承当前进程的环境变量
+      ...(serverConfig.env || {}), // 合并配置中的环境变量
+    }
+
     // 根据原始命令进行转换
     if (command === 'node' || command === 'npx') {
       // 获取 bun 可执行文件
       const bunExecutable = this.getExecutablePath('bun')
-      
+
       if (!bunExecutable.exists) {
-        throw new Error('未找到 bun 可执行文件，请在 MCP 运行环境中下载所需工具')
+        throw new Error(
+          '未找到 bun 可执行文件，请在 MCP 运行环境中下载所需工具',
+        )
       }
-      
+
       command = bunExecutable.path
-      
+
       // 如果是npx命令，调整参数
       if (serverConfig.command === 'npx') {
-        args.unshift('x')  // 添加 bun x 命令，等同于 npx
+        args.unshift('x') // 添加 bun x 命令，等同于 npx
       }
-    } 
-    else if (command === 'uv' || command === 'uvx' || command === 'pip' || command === 'python' || command === 'python3') {
+    } else if (
+      command === 'uv' ||
+      command === 'uvx' ||
+      command === 'pip' ||
+      command === 'python' ||
+      command === 'python3'
+    ) {
       // 获取 uv 可执行文件
       const uvExecutable = this.getExecutablePath('uv')
-      
+
       if (!uvExecutable.exists) {
         throw new Error('未找到 uv 可执行文件，请在 MCP 运行环境中下载所需工具')
       }
-      
+
       command = uvExecutable.path
 
       // 处理不同的命令类型
@@ -433,15 +447,19 @@ class McpService extends Service {
         args.unshift('tool', 'run')
       } else if (serverConfig.command === 'pip') {
         args.unshift('pip')
-      } else if (serverConfig.command === 'python' || serverConfig.command === 'python3') {
+      } else if (
+        serverConfig.command === 'python' ||
+        serverConfig.command === 'python3'
+      ) {
         args.unshift('python')
       }
     }
-    
+
     this.ctx.logger.info(`转换命令: ${serverConfig.command} -> ${command}`)
     this.ctx.logger.info(`转换参数: ${serverConfig.args} -> ${args}`)
-    
-    return { command, args }
+    this.ctx.logger.info(`环境变量:`, env)
+
+    return { command, args, env }
   }
 
   // 清除工具缓存

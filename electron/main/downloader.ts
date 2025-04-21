@@ -197,6 +197,7 @@ export class DownloadFactory extends EventEmitter {
           
           // 重命名临时文件为最终文件
           fs.renameSync(tempPath, fullPath);
+          fs.chmodSync(fullPath, 0o755)
           
           task.status = DownloadStatus.COMPLETED;
           task.progress = 100;

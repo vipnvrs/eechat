@@ -2,6 +2,7 @@ const Transform = require('stream').Transform
 const { Service } = require('egg')
 const OpenAI = require('openai')
 const ollamaBaseUrl = 'http://127.0.0.1:11434'
+const ToolCallMerger = require('./ToolCallMerger')
 
 class ChatService extends Service {
   accumulatedContent = ''
@@ -57,7 +58,7 @@ class ChatService extends Service {
     msgSaved,
   ) {
     console.log('handleStream')
-    if(!msgSaved) {
+    if (!msgSaved) {
       // 保存用户最后一条消息
       await this.saveMsg(
         'default-user',
@@ -76,6 +77,7 @@ class ChatService extends Service {
     let hasEnded = false
 
     try {
+      const toolCallMerger = new ToolCallMerger()
       for await (const chunk of stream) {
         // 检查响应是否已结束
         if (ctx.res.writableEnded) {
@@ -92,6 +94,12 @@ class ChatService extends Service {
         if (hasToolCall) {
           // 如果是工具调用，不要结束流
           continue
+        }
+        const result = toolCallMerger.handleChunk(chunk)
+        if (result) {
+          console.log('✅ tool_calls 完整结果：', result)
+          // 可以 return / 推送前端 / 执行函数调用
+          debugger
         }
         if (!chunk.choices[0].delta.content) {
           continue
@@ -180,24 +188,25 @@ class ChatService extends Service {
     if (chunk.choices[0]?.finish_reason === 'tool_calls') {
       isToolCall = true
       // 格式化参数
-      this.currentToolCall = this.ctx.helper.toolCallStrArgsToObj(this.currentToolCall)
-      // 转换为标准消息
-      const messageStand = this.ctx.helper.factoryMessageContent(
-        {
-          type: 'tool_call_start',
-          id: this.currentToolCall.id,
-          name: this.currentToolCall.name,
-          arguments: this.currentToolCall.arguments,
-        }
+      this.currentToolCall = this.ctx.helper.toolCallStrArgsToObj(
+        this.currentToolCall,
+        this.toolCallArguments,
       )
+      // 转换为标准消息
+      const messageStand = this.ctx.helper.factoryMessageContent({
+        type: 'tool_call_start',
+        id: this.currentToolCall.id,
+        name: this.currentToolCall.name,
+        arguments: this.currentToolCall.arguments,
+      })
       // 添加指令
       const messageWithDirective = this.ctx.helper.toolCallFucntionToDirective(
-        messageStand, 
-        'tool_call'
+        messageStand,
+        'tool_call',
       )
       // 返回客户端指令流
       ctx.res.write(`${JSON.stringify(messageWithDirective)}\n\n`)
-      
+
       const content = messageWithDirective.choices[0].delta.content
       // todo 再次工具调用会存储为新的会议，需要修复
       const msgSaved = await this.saveMsg(
@@ -212,19 +221,18 @@ class ChatService extends Service {
         this.currentToolCall.arguments,
       )
       // 发送工具调用结束消息
-      const messageStandWithRes = this.ctx.helper.factoryMessageContent(
-        {
-          type: 'tool_call_end',
-          id: this.currentToolCall.id,
-          name: this.currentToolCall.name,
-          arguments: this.currentToolCall.arguments,
-          result: res,
-        }
-      )
-      const messageWithDirectiveWithRes = this.ctx.helper.toolCallFucntionToDirective(
-        messageStandWithRes,
-        'tool_call'
-      )
+      const messageStandWithRes = this.ctx.helper.factoryMessageContent({
+        type: 'tool_call_end',
+        id: this.currentToolCall.id,
+        name: this.currentToolCall.name,
+        arguments: this.currentToolCall.arguments,
+        result: res,
+      })
+      const messageWithDirectiveWithRes =
+        this.ctx.helper.toolCallFucntionToDirective(
+          messageStandWithRes,
+          'tool_call',
+        )
       ctx.res.write(`${JSON.stringify(messageWithDirectiveWithRes)}\n\n`)
 
       await this.appendMsg(

@@ -97,7 +97,7 @@ export class Ipc {
     ipcMain.handle('download-tool', async (_, name: string) => {
       try {
         const filename = process.platform === 'win32' ? `${name}.exe` : name;
-        const url = `http://8.130.172.245/bin/${process.platform === 'win32' ? 'win' : 'linux'}/${filename}`;
+        const url = `http://8.130.172.245/bin/${process.platform}/${filename}`
         
         // 创建下载任务并返回任务ID
         const taskId = await downloader.downloadTool(url, filename);
