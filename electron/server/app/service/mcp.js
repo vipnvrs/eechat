@@ -1,5 +1,7 @@
 const { Service } = require('egg')
 const { Client } = require('@modelcontextprotocol/sdk/client/index.js')
+const { SSEClientTransport } = require('@modelcontextprotocol/sdk/client/sse.js')
+// const {StreamableHTTPClientTransport } = require('@modelcontextprotocol/sdk/client/streamableHttp.js')
 const {
   StdioClientTransport,
 } = require('@modelcontextprotocol/sdk/client/stdio.js')
@@ -51,20 +53,59 @@ class McpService extends Service {
     try {
       this.ctx.logger.info('Init mcp client')
       
-      const { command, args, env } = this.buildCommand(serverConfig)
+      // 获取传输类型，默认为 stdio
+      const transportType = serverConfig.transport || 'stdio'
+      let transport;
+      
+      if (typeof serverConfig.url != 'undefined' || transportType === 'sse') {
+        const baseUrl = new URL(serverConfig.url)
+        if (!serverConfig.url) {
+          throw new Error('SSE 传输类型需要提供 url 参数')
+        }
+        this.ctx.logger.info('使用 SSE 传输连接服务器:', {
+          url: serverConfig.url,
+          headers: serverConfig.headers || {}
+        })
+        // try {
+        //   transport = new StreamableHTTPClientTransport(
+        //     new URL(baseUrl)
+        //   )
+        // } catch (error) {
+          
+        // }
+        transport = new SSEClientTransport(baseUrl)
+      } else {
+        // 使用默认的 stdio 传输
+        const { command, args, env } = this.buildCommand(serverConfig)
 
-      this.ctx.logger.info('构建后的命令和参数:', {
-        command,
-        args,
-        env,
-        fullCommand: `${command} ${args.join(' ')}`,
-      })
+        this.ctx.logger.info('使用 stdio 传输连接服务器:', {
+          command,
+          args,
+          env,
+          fullCommand: `${command} ${args.join(' ')}`,
+        })
 
-      const transport = new StdioClientTransport({
-        command: command,
-        args: args,
-        env: env, // 添加环境变量配置
-      })
+        transport = new StdioClientTransport({
+          command: command,
+          args: args,
+          env: env, // 添加环境变量配置
+        })
+      }
+
+      // const { command, args, env } = this.buildCommand(serverConfig)
+
+      // this.ctx.logger.info('构建后的命令和参数:', {
+      //   command,
+      //   args,
+      //   env,
+      //   fullCommand: `${command} ${args.join(' ')}`,
+      // })
+
+      // const transport = new StdioClientTransport({
+      //   command: command,
+      //   args: args,
+      //   env: env, // 添加环境变量配置
+      // })
 
       const client = new Client({
         name: 'eechat',

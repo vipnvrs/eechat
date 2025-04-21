@@ -83,28 +83,34 @@ class ChatService extends Service {
         if (ctx.res.writableEnded) {
           break
         }
-        // reasoning_content,
-        // finish_reason
-        // this.handleToolCall(chunk, model, messages, sessionId)
-        const hasToolCall = await this.handleToolCall(
-          chunk,
-          sessionId,
-          loopArgs,
-        )
-        if (hasToolCall) {
-          // 如果是工具调用，不要结束流
-          continue
-        }
-        const result = toolCallMerger.handleChunk(chunk)
-        if (result) {
-          console.log('✅ tool_calls 完整结果：', result)
+        const tool_calls = toolCallMerger.handleChunk(chunk)
+        if (tool_calls) {
+          console.log('✅ tool_calls 完整结果：', tool_calls)
           // 可以 return / 推送前端 / 执行函数调用
-          debugger
+          const toolCallRes = await this.handleRunToolCall(tool_calls)
+          const toolSaveRes = await this.sendAndSaveToolCall(toolCallRes, sessionId,  msgSaved)
+          // 使用更新后的消息重新发起对话
+          ctx.logger.info('工具调用完成，重新发起对话')
+          const { model, provider, messages, config } = loopArgs
+          // todo，重新查询最新消息
+          messages.push({
+            role: 'assistant',
+            content: toolSaveRes.join('\n'),
+          })
+          await ctx.service.llm.chat(
+            model,
+            provider,
+            messages,
+            sessionId,
+            config,
+            [],
+            msgSaved,
+          )
+          return
         }
         if (!chunk.choices[0].delta.content) {
           continue
         }
-        // console.log(JSON.stringify(chunk) + '\n')
         ctx.res.write(JSON.stringify(chunk) + '\n')
         const content =
           (chunk.choices[0] &&
@@ -147,133 +153,41 @@ class ChatService extends Service {
     }
   }
 
-  async handleToolCall(chunk, sessionId, loopArgs) {
+  async handleRunToolCall(toolFunctions) {
     const { ctx } = this
-    let isToolCall = false
-    // 处理工具调用开始
-    if (chunk.choices[0]?.delta?.tool_calls?.[0]) {
-      isToolCall = true
-      const toolCall = chunk.choices[0].delta.tool_calls[0]
-      // 如果是新的工具调用
-      if (toolCall.index === 0 && toolCall.function?.name) {
-        this.currentToolCall = {
-          index: toolCall.index,
-          id: toolCall.id,
-          name: toolCall.function.name,
-          arguments: '',
-        }
-
-        // const data = JSON.stringify({
-        //   type: 'tool_call_started',
-        //   name: toolCall.function.name,
-        //   id: toolCall.id,
-        // })
-        // controller.enqueue(`data: ${data}\n\n`)
-      }
-
-      // 处理参数增量
-      if (toolCall.function?.arguments) {
-        this.toolCallArguments += toolCall.function.arguments
-        this.currentToolCall.arguments += toolCall.function.arguments
-
-        // const data = JSON.stringify({
-        //   type: 'tool_call_arguments',
-        //   id: this.currentToolCall.id,
-        //   delta: toolCall.function.arguments,
-        // })
-        // controller.enqueue(`data: ${data}\n\n`)
-      }
-    }
-    // 检查是否完成
-    if (chunk.choices[0]?.finish_reason === 'tool_calls') {
-      isToolCall = true
-      // 格式化参数
-      this.currentToolCall = this.ctx.helper.toolCallStrArgsToObj(
-        this.currentToolCall,
-        this.toolCallArguments,
-      )
-      // 转换为标准消息
-      const messageStand = this.ctx.helper.factoryMessageContent({
-        type: 'tool_call_start',
-        id: this.currentToolCall.id,
-        name: this.currentToolCall.name,
-        arguments: this.currentToolCall.arguments,
+    const res = []
+    for (const toolCall of toolFunctions) {
+      const toolName = toolCall.function.name
+      const toolArgs = toolCall.function.arguments
+      console.log('run tool:', toolName, toolArgs)
+      const resItem = await ctx.service.tools.runTools(toolName, toolArgs)
+      const messageStandWithRes = this.ctx.helper.factoryMessageContent({
+        type: 'tool_call_end',
+        id: toolCall.id,
+        name: toolCall.function.name,
+        arguments: toolCall.function.arguments,
+        result: resItem,
       })
-      // 添加指令
+      res.push(messageStandWithRes)
+    }
+    return res
+  }
+
+  async sendAndSaveToolCall(res, sessionId,  msgSaved) {
+    const { ctx } = this
+    const saveRes = []
+    for (const message of res) {
       const messageWithDirective = this.ctx.helper.toolCallFucntionToDirective(
-        messageStand,
+        message,
         'tool_call',
       )
       // 返回客户端指令流
       ctx.res.write(`${JSON.stringify(messageWithDirective)}\n\n`)
-
       const content = messageWithDirective.choices[0].delta.content
-      // todo 再次工具调用会存储为新的会议，需要修复
-      const msgSaved = await this.saveMsg(
-        'default-user',
-        'assistant',
-        content,
-        sessionId,
-      )
-      // 运行工具
-      const res = await ctx.service.tools.runTools(
-        this.currentToolCall.name,
-        this.currentToolCall.arguments,
-      )
-      // 发送工具调用结束消息
-      const messageStandWithRes = this.ctx.helper.factoryMessageContent({
-        type: 'tool_call_end',
-        id: this.currentToolCall.id,
-        name: this.currentToolCall.name,
-        arguments: this.currentToolCall.arguments,
-        result: res,
-      })
-      const messageWithDirectiveWithRes =
-        this.ctx.helper.toolCallFucntionToDirective(
-          messageStandWithRes,
-          'tool_call',
-        )
-      ctx.res.write(`${JSON.stringify(messageWithDirectiveWithRes)}\n\n`)
-
-      await this.appendMsg(
-        msgSaved.id,
-        messageWithDirectiveWithRes.choices[0].delta.content + '\n',
-      )
-      if (res) {
-        // 使用更新后的消息重新发起对话
-        ctx.logger.info('工具调用完成，重新发起对话')
-        const { model, provider, messages, sessionId, config } = loopArgs
-        messages.push({
-          role: 'assistant',
-          content: JSON.stringify(res),
-        })
-        await ctx.service.llm.chat(
-          model,
-          provider,
-          messages,
-          sessionId,
-          config,
-          [],
-          msgSaved,
-        )
-      }
-      return isToolCall
+      this.appendMsg(sessionId, 'assistant', content)
+      saveRes.push(content)
     }
-
-    // 检查是否完成
-    // if (chunk.choices[0]?.finish_reason === 'stop') {
-    //   const data = JSON.stringify({
-    //     type: 'done',
-    //     content: this.accumulatedContent,
-    //     toolCall: this.currentToolCall
-    //       ? {
-    //           name: this.currentToolCall.name,
-    //           arguments: this.currentToolCall.arguments,
-    //         }
-    //       : null,
-    //   })
-    //   // controller.enqueue(`data: ${data}\n\n`)
-    // }
+    return saveRes
   }
 
   async handleStreamError(error, ctx) {
@@ -327,6 +241,10 @@ class ChatService extends Service {
 
     // 参数验证
     if (!uid || !role || !content || !sessionId) {
+      if(!uid) console.log('uid is empty')
+      if(!role) console.log('role is empty')
+      if(!content) console.log('content is empty')
+      if(!sessionId) console.log('sessionId is empty')
       throw new Error(ctx.__('chat.incomplete_params'))
     }
 
@@ -353,20 +271,44 @@ class ChatService extends Service {
     }
   }
 
-  async appendMsg(messageId, message) {
+  async appendMsg(sessionId, role, message) {
     const { ctx } = this
+
     try {
-      const msg = await ctx.model.Message.findByPk(messageId)
-      if (!msg) {
-        throw new Error(ctx.__('chat.message_not_found'))
+      // 验证会话是否存在
+      const session = await ctx.model.ChatSession.findByPk(sessionId)
+      if (!session) {
+        throw new Error(ctx.__('chat.session_not_found'))
+      }  
+      
+      // 查找当前会话角色的最新消息
+      const latestMessage = await ctx.model.Message.findOne({
+        where: {
+          session_id: sessionId,
+          role: role
+        },
+        order: [['created_at', 'DESC']]
+      });
+
+      // 如果找到最新消息，则追加内容
+      if (latestMessage) {
+        latestMessage.content += message;
+        latestMessage.updated_at = new Date();
+        await latestMessage.save();
+        return latestMessage;
+      } else {
+        // 如果没有找到，则创建一个新的消息
+        const newMessage = await this.saveMsg(
+          'default-user',
+          role,
+          message,
+          sessionId
+        );
+        return newMessage;
       }
-      msg.content += message
-      msg.updated_at = new Date()
-      await msg.save()
-      return msg
     } catch (error) {
-      ctx.logger.error('追加消息失败:', error)
-      throw new Error(ctx.__('chat.append_message_failed') + error.message)
+      ctx.logger.error('追加消息失败:', error);
+      throw new Error(ctx.__('chat.append_message_failed') + error.message);
     }
   }
 

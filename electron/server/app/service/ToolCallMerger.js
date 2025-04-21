@@ -4,8 +4,8 @@ class ToolCallMerger {
   }
 
   handleChunk(chunk) {
-    const delta = chunk.choices?.[0]?.delta
-    const finishReason = chunk.choices?.[0]?.finish_reason
+    const delta = chunk.choices && chunk.choices[0] && chunk.choices[0].delta
+    const finishReason = chunk.choices && chunk.choices[0] && chunk.choices[0].finish_reason
 
     // 如果是 tool_calls 流段
     if (delta?.tool_calls) {
