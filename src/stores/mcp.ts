@@ -238,19 +238,19 @@ export const useMcpStore = defineStore('mcp', {
     },
     
     // 添加保存MCP服务器配置的方法
-    async saveMcpServer(serverKey: string, config: any) {
-      try {
-        await mcpApi.saveMcpServer(serverKey, config)
-        // 保存后刷新服务器列表
-        await this.fetchInstalledServers()
-        // 保存后刷新工具列表
-        await this.fetchTools()
-        return true
-      } catch (error) {
-        console.error('保存MCP服务器配置失败:', error)
-        throw error
-      }
-    },
+    // async saveMcpServer(serverKey: string, config: any) {
+    //   try {
+    //     await mcpApi.saveMcpServer(serverKey, config)
+    //     // 保存后刷新服务器列表
+    //     await this.fetchInstalledServers()
+    //     // 保存后刷新工具列表
+    //     await this.fetchTools()
+    //     return true
+    //   } catch (error) {
+    //     console.error('保存MCP服务器配置失败:', error)
+    //     throw error
+    //   }
+    // },
     
     // ... 现有代码 ...
   },

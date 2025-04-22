@@ -2,7 +2,7 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/Administrator/Desktop", "D:"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./"],
       "env": {},
       "enabled": true
     },
