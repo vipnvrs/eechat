@@ -2,9 +2,13 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./"],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/Users/Administrator/Desktop", "D:"],
       "env": {},
       "enabled": true
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
     }
   }
 }

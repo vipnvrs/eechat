@@ -88,7 +88,11 @@ class ChatService extends Service {
           console.log('✅ tool_calls 完整结果：', tool_calls)
           // 可以 return / 推送前端 / 执行函数调用
           const toolCallRes = await this.handleRunToolCall(tool_calls)
-          const toolSaveRes = await this.sendAndSaveToolCall(toolCallRes, sessionId,  msgSaved)
+          const toolSaveRes = await this.sendAndSaveToolCall(
+            toolCallRes,
+            sessionId,
+            msgSaved,
+          )
           // 使用更新后的消息重新发起对话
           ctx.logger.info('工具调用完成，重新发起对话')
           const { model, provider, messages, config } = loopArgs
@@ -173,7 +177,7 @@ class ChatService extends Service {
     return res
   }
 
-  async sendAndSaveToolCall(res, sessionId,  msgSaved) {
+  async sendAndSaveToolCall(res, sessionId, msgSaved) {
     const { ctx } = this
     const saveRes = []
     for (const message of res) {
@@ -241,10 +245,10 @@ class ChatService extends Service {
 
     // 参数验证
     if (!uid || !role || !content || !sessionId) {
-      if(!uid) console.log('uid is empty')
-      if(!role) console.log('role is empty')
-      if(!content) console.log('content is empty')
-      if(!sessionId) console.log('sessionId is empty')
+      if (!uid) console.log('uid is empty')
+      if (!role) console.log('role is empty')
+      if (!content) console.log('content is empty')
+      if (!sessionId) console.log('sessionId is empty')
       throw new Error(ctx.__('chat.incomplete_params'))
     }
 
@@ -279,36 +283,36 @@ class ChatService extends Service {
       const session = await ctx.model.ChatSession.findByPk(sessionId)
       if (!session) {
         throw new Error(ctx.__('chat.session_not_found'))
-      }  
-      
+      }
+
       // 查找当前会话角色的最新消息
       const latestMessage = await ctx.model.Message.findOne({
         where: {
           session_id: sessionId,
-          role: role
+          role: role,
         },
-        order: [['created_at', 'DESC']]
-      });
+        order: [['created_at', 'DESC']],
+      })
 
       // 如果找到最新消息，则追加内容
       if (latestMessage) {
-        latestMessage.content += message;
-        latestMessage.updated_at = new Date();
-        await latestMessage.save();
-        return latestMessage;
+        latestMessage.content += message
+        latestMessage.updated_at = new Date()
+        await latestMessage.save()
+        return latestMessage
       } else {
         // 如果没有找到，则创建一个新的消息
         const newMessage = await this.saveMsg(
           'default-user',
           role,
           message,
-          sessionId
-        );
-        return newMessage;
+          sessionId,
+        )
+        return newMessage
       }
     } catch (error) {
-      ctx.logger.error('追加消息失败:', error);
-      throw new Error(ctx.__('chat.append_message_failed') + error.message);
+      ctx.logger.error('追加消息失败:', error)
+      throw new Error(ctx.__('chat.append_message_failed') + error.message)
     }
   }
 
