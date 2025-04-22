@@ -33,7 +33,6 @@ export const useMcpStore = defineStore('mcp', {
 
   actions: {
     // 获取所有工具列表
-    // 获取所有工具列表
     async fetchTools() {
       if (this.loading) return
 
@@ -41,17 +40,8 @@ export const useMcpStore = defineStore('mcp', {
         this.loading = true
         this.error = null
         const response = await mcpApi.listAllTools()
-        this.tools = response.tools || []
+        this.tools = response || []
         this.initialized = true
-        console.log(this.selectedTools)
-        // 通过获取的最新过滤并移除本地缓存的工具
-        if (this.selectedTools.length > 0) {
-          this.selectedTools = this.selectedTools.filter(selectedTool => 
-            this.tools.some(tool => 
-              tool.name && selectedTool.name && tool.name === selectedTool.name
-            )
-          )
-        }
       } catch (error) {
         console.error('获取MCP工具列表失败:', error)
         this.error = error instanceof Error ? error.message : '获取工具列表失败'
@@ -60,13 +50,10 @@ export const useMcpStore = defineStore('mcp', {
       }
     },
 
-    // 重启服务器并刷新工具列表
     async restartServer() {
       try {
         const res = await mcpApi.restartServer()
         console.log('MCP服务器已重启')
-        // 重启后刷新工具列表
-        await this.fetchTools()
         return res
       } catch (error) {
         console.error('重启MCP服务器失败:', error)
@@ -202,8 +189,6 @@ export const useMcpStore = defineStore('mcp', {
         await mcpApi.deleteMcpServer(serverKey)
         // 删除成功后刷新列表
         await this.fetchInstalledServers()
-        // 删除后刷新工具列表
-        await this.fetchTools()
         return true
       } catch (error) {
         console.error('删除MCP服务器失败:', error)
@@ -215,8 +200,6 @@ export const useMcpStore = defineStore('mcp', {
     async startMcpServer(serverKey: string) {
       try {
         await mcpApi.startMcpServer(serverKey)
-        // 启动后刷新工具列表
-        await this.fetchTools()
         return true
       } catch (error) {
         console.error('启动MCP服务器失败:', error)
@@ -228,29 +211,12 @@ export const useMcpStore = defineStore('mcp', {
     async stopMcpServer(serverKey: string) {
       try {
         await mcpApi.stopMcpServer(serverKey)
-        // 停止后刷新工具列表
-        await this.fetchTools()
         return true
       } catch (error) {
         console.error('停止MCP服务器失败:', error)
         throw error
       }
     },
-    
-    // 添加保存MCP服务器配置的方法
-    // async saveMcpServer(serverKey: string, config: any) {
-    //   try {
-    //     await mcpApi.saveMcpServer(serverKey, config)
-    //     // 保存后刷新服务器列表
-    //     await this.fetchInstalledServers()
-    //     // 保存后刷新工具列表
-    //     await this.fetchTools()
-    //     return true
-    //   } catch (error) {
-    //     console.error('保存MCP服务器配置失败:', error)
-    //     throw error
-    //   }
-    // },
     
     // ... 现有代码 ...
   },

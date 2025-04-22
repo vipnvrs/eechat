@@ -111,3 +111,22 @@ npm run dev
 # 构建应用
 npm run build
 ```
+### 联系
+
+微信交流反馈群
+
+<img
+  style="width:200px;"
+  src="https://app.ee.chat/wechat_g.png"
+  alt="微信交流反馈群
+"
+/>
+
+联系开发者
+
+<img
+  style="width:200px;"
+  src="https://app.ee.chat/wechat_a.png"
+  alt="联系开发者
+"
+/>
