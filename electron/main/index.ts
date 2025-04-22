@@ -104,10 +104,10 @@ async function createWindow() {
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 
   // 初始化更新器
-  if (app.isPackaged) {
+  // if (app.isPackaged) {
     updater = new AppUpdater(win)
     registerUpdaterHandlers(updater)
-  }
+  // }
   // 保存返回的 llamaService 实例
   // const nodeLlamaCpp = registerLlamaHandlers()
   // console.log('Llama handlers registered successfully')
@@ -336,25 +336,14 @@ app.on('render-process-gone', (event, webContents, details) => {
 
 // 添加更详细的错误处理
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('未处理的 Promise 拒绝:');
-  console.error('- 原因:', reason);
+  log.error('未处理的 Promise 拒绝:- 原因:', reason);
   
   // 创建一个对话框显示错误
-  if (win) {
-    const { dialog } = require('electron')
-    dialog.showErrorBox(
-      '应用程序错误',
-      `发生未处理的错误:\n${reason instanceof Error ? reason.stack : String(reason)}`
-    );
-  }
-  
-  // 将错误写入文件
-  const fs = require('fs')
-  const logPath = path.join(app.getPath('userData'), 'logs/error.log');
-  fs.appendFileSync(
-    logPath,
-    `[${new Date().toISOString()}] 未处理的 Promise 拒绝:\n${reason instanceof Error ? reason.stack : String(reason)}\n\n`
-  );
-  
-  console.error(`错误已记录到: ${logPath}`);
+  // if (win) {
+  //   const { dialog } = require('electron')
+  //   dialog.showErrorBox(
+  //     '应用程序错误',
+  //     `发生未处理的错误:\n${reason instanceof Error ? reason.stack : String(reason)}`
+  //   );
+  // }
 });

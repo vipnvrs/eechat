@@ -1,0 +1,10 @@
+[
+  {
+    "name": "主服务器",
+    "url": "https://download.lza3.com/update/"
+  },
+  {
+    "name": "备用服务器A",
+    "url": "http://8.130.172.245/update/"
+  }
+]

@@ -10,16 +10,23 @@ export class AppUpdater {
     // 配置自动更新
     autoUpdater.autoDownload = false
     autoUpdater.autoInstallOnAppQuit = true
-    
     // 允许在开发环境下检查更新
     if (!app.isPackaged) {
       autoUpdater.forceDevUpdateConfig = true
     }
-
+    this.initUpdate()
     this.bindEvents()
   }
   
   private updateAvailable: boolean = false
+
+  private async initUpdate() {
+    autoUpdater.setFeedURL({
+      provider: 'generic',
+      url: 'https://download.lza3.com/update/'
+    })
+    // const url = await autoUpdater.getUpdateInfoAndProvider()
+  }
 
   // 绑定自动更新相关事件
   private bindEvents() {
@@ -149,7 +156,7 @@ export function registerUpdaterHandlers(updater: AppUpdater) {
       console.log('IPC 返回结果:', res)  // 添加日志
       return res
     } catch (error) {
-      console.error('检查更新失败:', error)
+      console.log('检查更新失败:', error)
       return { success: false, message: error.message || '检查更新失败' }
     }
   })
