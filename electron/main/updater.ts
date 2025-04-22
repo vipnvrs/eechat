@@ -21,11 +21,37 @@ export class AppUpdater {
   private updateAvailable: boolean = false
 
   private async initUpdate() {
-    autoUpdater.setFeedURL({
-      provider: 'generic',
-      url: 'https://download.lza3.com/update/'
-    })
-    // const url = await autoUpdater.getUpdateInfoAndProvider()
+    let serverList: { name: string; url: string }[] = [
+      { name: '默认服务器', url: 'http://8.130.172.245/update/' }
+    ];
+  
+    try {
+      const res = await fetch('https://app.ee.chat/servers.json');
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].url) {
+        serverList = data;
+      } else {
+        console.warn('服务器列表格式错误或为空，使用默认地址');
+      }
+    } catch (err) {
+      console.warn('远程服务器列表获取失败，使用默认地址：', err);
+    }
+  
+    for (const server of serverList) {
+      try {
+        console.log(`尝试设置更新服务器：${server.name} (${server.url})`);
+        autoUpdater.setFeedURL({
+          provider: 'generic',
+          url: server.url
+        });
+  
+        await autoUpdater.checkForUpdates(); // 主动测试是否可访问
+        console.log(`✅ 成功使用更新服务器：${server.name}, URL: ${server.url}`);
+        break;
+      } catch (e) {
+        console.warn(`❌ 无法连接更新服务器 ${server.name}, URL: ${server.url} ，尝试下一个`);
+      }
+    }
   }
 
   // 绑定自动更新相关事件

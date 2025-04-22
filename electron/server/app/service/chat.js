@@ -162,7 +162,7 @@ class ChatService extends Service {
       console.log('run tool:', toolName, toolArgs)
       const resItem = await ctx.service.tools.runTools(toolName, toolArgs)
       const messageStandWithRes = this.ctx.helper.factoryMessageContent({
-        type: 'tool_call_end',
+        type: 'mcp',
         id: toolCall.id,
         name: toolCall.function.name,
         arguments: toolCall.function.arguments,
