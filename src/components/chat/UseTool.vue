@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { Button } from "@/components/ui/button"
-import { PocketKnife, Check } from "lucide-vue-next"
+import { PocketKnife, Check, RefreshCw } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
+import { ScrollArea } from "@/components/ui/scroll-area" 
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +25,7 @@ const emit = defineEmits(['selectTool', 'selectTools'])
 // 从 store 中获取工具列表和加载状态
 const tools = computed(() => mcpStore.tools)
 const loading = computed(() => mcpStore.loading)
-
+// const loading = ref(true)
 // 选中的工具列表，直接使用 store 中的数据
 const selectedTools = computed({
   get: () => mcpStore.selectedTools,
@@ -125,7 +126,7 @@ onMounted(async () => {
         }"
       >
         <PocketKnife v-if="!loading" class="size-3.5" />
-        <span v-else class="animate-spin">⏳</span>
+        <RefreshCw v-else class="animate-spin"></RefreshCw>
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-56">
@@ -150,15 +151,18 @@ onMounted(async () => {
               </span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent class="w-48">
+            <ScrollArea class="h-[400px]">
               <div 
                 v-for="tool in groupedTools[group]" 
                 :key="tool.name"
+                :title="tool.description"
                 @click="(event) => toggleToolSelection(tool, event)"
                 class="flex items-center justify-between px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground"
               >
                 <span class="truncate">{{ formatToolName(tool) }}</span>
                 <Check v-if="isToolSelected(tool)" class="size-3.5 ml-2" />
               </div>
+            </ScrollArea>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuGroup>

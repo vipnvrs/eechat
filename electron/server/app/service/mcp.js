@@ -16,7 +16,8 @@ const GLOBAL_CACHE = {
   toolsCacheTime: new Map(),
   CACHE_TTL: 5 * 60 * 1000, // 缓存有效期：5分钟
   clients: new Map(),       // 添加全局客户端缓存
-  initialized: false        // 添加全局初始化状态
+  initialized: false,       // 添加全局初始化状态
+  cacheVersion: 1           // 添加缓存版本号，用于客户端同步
 };
 
  class McpService extends Service {
@@ -133,8 +134,8 @@ const GLOBAL_CACHE = {
       // 停止所有服务器
       await this.stopServer()
       
-      // 清除所有缓存
-      this.clearToolsCache()
+      // 清除所有缓存并获取新的缓存版本号
+      const newCacheVersion = this.clearToolsCache()
       
       // 重置初始化状态
       GLOBAL_CACHE.initialized = false
@@ -260,6 +261,7 @@ const GLOBAL_CACHE = {
 
   /**
    * 获取所有工具列表，使用缓存提高性能
+   * @returns {Object} 包含工具列表和缓存版本号的对象
    */
   async listAllTools() {
     await this.ensureInitialized()
@@ -272,7 +274,11 @@ const GLOBAL_CACHE = {
     
     this.ctx.logger.info('List tools success')
     this.ctx.logger.info('Tools names:', tools.map(tool => tool.name))
-    return tools
+    
+    return {
+      tools,
+      cacheVersion: this.getCacheVersion()
+    }
   }
 
   /**
@@ -508,6 +514,7 @@ const GLOBAL_CACHE = {
   /**
    * 清除工具缓存
    * @param {string} key 可选，指定服务器键名。不提供则清除所有缓存
+   * @returns {number} 更新后的缓存版本号
    */
   clearToolsCache(key = null) {
     if (key) {
@@ -519,6 +526,19 @@ const GLOBAL_CACHE = {
       this.toolsCacheTime.clear()
       this.ctx.logger.info('已清除所有工具缓存')
     }
+    
+    // 更新缓存版本号
+    GLOBAL_CACHE.cacheVersion++;
+    this.ctx.logger.info(`缓存版本已更新: ${GLOBAL_CACHE.cacheVersion}`)
+    return GLOBAL_CACHE.cacheVersion;
+  }
+  
+  /**
+   * 获取当前缓存版本号
+   * @returns {number} 当前缓存版本号
+   */
+  getCacheVersion() {
+    return GLOBAL_CACHE.cacheVersion;
   }
 
   // 其他方法...
@@ -801,7 +821,14 @@ const GLOBAL_CACHE = {
         await this.connectServer(key, serverConfig)
       }
       
-      return { success: true, message: '服务器添加成功' }
+      // 更新缓存版本号
+      const newCacheVersion = this.clearToolsCache();
+      
+      return { 
+        success: true, 
+        message: '服务器添加成功',
+        cacheVersion: newCacheVersion
+      }
     } catch (error) {
       this.ctx.logger.error('添加MCP服务器失败:', error)
       throw error
@@ -894,15 +921,67 @@ const GLOBAL_CACHE = {
       // 保存配置
       fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
       
-      return { success: true, message: `服务器 ${key} 已删除` }
+      // 清除该服务器的工具缓存并更新缓存版本号
+      const newCacheVersion = this.clearToolsCache(key)
+      
+      return { 
+        success: true, 
+        message: `服务器 ${key} 已删除`,
+        cacheVersion: newCacheVersion
+      }
     } catch (error) {
       this.ctx.logger.error(`删除MCP服务器 ${key} 失败:`, error)
       throw error
     }
   }
   
-  // 启动MCP服务器
+  /**
+   * 删除 MCP 服务器配置 (新方法，提供更详细的错误处理)
+   * @param {string} key 服务器键名
+   */
+  async deleteMcpServer(key) {
+    this.ctx.logger.info(`删除 MCP 服务器配置: ${key}`)
+    
+    try {
+      // 先停止服务器
+      await this.stopMcpServer(key)
+      
+      // 从配置中删除
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      if (fs.existsSync(configFile)) {
+        const configContent = fs.readFileSync(configFile, 'utf8')
+        const config = JSON.parse(configContent)
+        
+        if (config.mcpServers && config.mcpServers[key]) {
+          delete config.mcpServers[key]
+          fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
+        }
+      }
+      
+      // 清除该服务器的工具缓存
+      this.clearToolsCache(key)
+      
+      return {
+        success: true,
+        message: `服务器 ${key} 配置已删除`
+      }
+    } catch (error) {
+      this.ctx.logger.error(`删除服务器 ${key} 配置失败:`, error)
+      return {
+        success: false,
+        message: `删除失败: ${error.message || '未知错误'}`,
+        error: error.message
+      }
+    }
+  }
+  
+  /**
+   * 启动指定的 MCP 服务器
+   * @param {string} key 服务器键名
+   */
   async startServer(key) {
+    this.ctx.logger.info(`启动 MCP 服务器: ${key}`)
+    
     try {
       // 获取配置文件路径
       const configFile = path.join(paths.configPath, 'mcp.config.json')
@@ -923,20 +1002,70 @@ const GLOBAL_CACHE = {
       
       // 如果服务器已经在运行，返回成功
       if (this.clients.has(key)) {
-        return { success: true, message: `服务器 ${key} 已经在运行` }
+        return { 
+          success: true, 
+          message: `服务器 ${key} 已经在运行`,
+          cacheVersion: this.getCacheVersion()
+        }
       }
       
       // 启动服务器
-      await this.connectServer(key, config.mcpServers[key], err => {
+      const result = await this.connectServer(key, config.mcpServers[key], err => {
         if (err) {
           throw new Error(`启动服务器 ${key} 失败: ${err.message}`)
         }
       })
       
-      return { success: true, message: `服务器 ${key} 已启动` }
+      // 清除该服务器的工具缓存并更新缓存版本号
+      const newCacheVersion = this.clearToolsCache(key)
+      
+      return { 
+        success: true, 
+        message: `服务器 ${key} 已启动`,
+        cacheVersion: newCacheVersion
+      }
     } catch (error) {
       this.ctx.logger.error(`启动MCP服务器 ${key} 失败:`, error)
       throw error
+    }
+  }
+  
+  /**
+   * 启动指定的 MCP 服务器 (新方法，提供更详细的错误处理)
+   * @param {string} key 服务器键名
+   */
+  async startMcpServer(key) {
+    this.ctx.logger.info(`启动 MCP 服务器: ${key}`)
+    
+    try {
+      const config = await this.getConfig()
+      if (!config[key]) {
+        throw new Error(`找不到服务器配置: ${key}`)
+      }
+      
+      // 如果已经连接，先断开
+      if (this.clients.has(key)) {
+        await this.stopMcpServer(key)
+      }
+      
+      // 连接服务器
+      const result = await this.connectServer(key, config[key])
+      
+      // 清理该服务器的工具缓存，以便下次获取时重新加载
+      this.clearToolsCache(key)
+      
+      return {
+        success: result.success,
+        message: result.success ? `服务器 ${key} 启动成功` : `服务器 ${key} 启动失败: ${result.error}`,
+        error: result.error
+      }
+    } catch (error) {
+      this.ctx.logger.error(`启动服务器 ${key} 失败:`, error)
+      return {
+        success: false,
+        message: `启动失败: ${error.message || '未知错误'}`,
+        error: error.message
+      }
     }
   }
   
@@ -945,7 +1074,11 @@ const GLOBAL_CACHE = {
     try {
       // 如果服务器不在运行，返回成功
       if (!this.clients.has(key)) {
-        return { success: true, message: `服务器 ${key} 已经停止` }
+        return { 
+          success: true, 
+          message: `服务器 ${key} 已经停止`,
+          cacheVersion: this.getCacheVersion()
+        }
       }
       
       // 获取客户端
@@ -963,10 +1096,52 @@ const GLOBAL_CACHE = {
       // 从映射中删除客户端
       this.clients.delete(key)
       
-      return { success: true, message: `服务器 ${key} 已停止` }
+      // 清除该服务器的工具缓存并更新缓存版本号
+      const newCacheVersion = this.clearToolsCache(key)
+      
+      return { 
+        success: true, 
+        message: `服务器 ${key} 已停止`,
+        cacheVersion: newCacheVersion
+      }
     } catch (error) {
       this.ctx.logger.error(`停止MCP服务器 ${key} 失败:`, error)
       throw error
+    }
+  }
+  
+  /**
+   * 停止指定的 MCP 服务器 (新方法，提供更详细的错误处理)
+   * @param {string} key 服务器键名
+   */
+  async stopMcpServer(key) {
+    this.ctx.logger.info(`停止 MCP 服务器: ${key}`)
+    
+    try {
+      // 如果客户端存在，断开连接
+      if (this.clients.has(key)) {
+        const client = this.clients.get(key)
+        if (client && typeof client.disconnect === 'function') {
+          await client.disconnect()
+          this.ctx.logger.info(`已断开服务器 ${key} 的连接`)
+        }
+        this.clients.delete(key)
+      }
+      
+      // 清理该服务器的工具缓存
+      this.clearToolsCache(key)
+      
+      return {
+        success: true,
+        message: `服务器 ${key} 已停止`
+      }
+    } catch (error) {
+      this.ctx.logger.error(`停止服务器 ${key} 失败:`, error)
+      return {
+        success: false,
+        message: `停止失败: ${error.message || '未知错误'}`,
+        error: error.message
+      }
     }
   }
 
@@ -993,6 +1168,9 @@ const GLOBAL_CACHE = {
       // 保存配置
       fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
       
+      // 清除该服务器的工具缓存并更新缓存版本号
+      let newCacheVersion = this.clearToolsCache(serverKey)
+      
       // 如果服务器已经在运行，需要重启它
       if (this.clients.has(serverKey)) {
         try {
@@ -1000,15 +1178,73 @@ const GLOBAL_CACHE = {
           await this.stopServer(serverKey)
           // 再启动
           await this.startServer(serverKey)
+          // 由于启动和停止操作已经更新了缓存版本，获取最新的版本号
+          newCacheVersion = this.getCacheVersion()
         } catch (error) {
           this.ctx.logger.error(`重启MCP服务器 ${serverKey} 失败:`, error)
         }
       }
       
-      return { success: true, message: `服务器 ${serverKey} 已更新` }
+      return { 
+        success: true, 
+        message: `服务器 ${serverKey} 已更新`,
+        cacheVersion: newCacheVersion
+      }
     } catch (error) {
       this.ctx.logger.error('更新MCP服务器失败:', error)
       throw error
+    }
+  }
+  
+  /**
+   * 添加或更新 MCP 服务器配置 (新方法，提供更详细的错误处理)
+   * @param {string} key 服务器键名
+   * @param {object} serverConfig 服务器配置
+   */
+  async saveMcpServer(key, serverConfig) {
+    this.ctx.logger.info(`保存 MCP 服务器配置: ${key}`)
+    
+    try {
+      // 获取当前配置
+      const configFile = path.join(paths.configPath, 'mcp.config.json')
+      let config = { mcpServers: {} }
+      if (fs.existsSync(configFile)) {
+        const configContent = fs.readFileSync(configFile, 'utf8')
+        config = JSON.parse(configContent)
+        if (!config.mcpServers) {
+          config.mcpServers = {}
+        }
+      }
+      
+      // 如果服务器已存在且正在运行，先停止
+      if (this.clients.has(key)) {
+        await this.stopMcpServer(key)
+      }
+      
+      // 更新配置
+      config.mcpServers[key] = serverConfig
+      fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8')
+      
+      // 尝试连接新配置的服务器
+      const result = await this.connectServer(key, serverConfig)
+      
+      // 清除该服务器的工具缓存
+      this.clearToolsCache(key)
+      
+      return {
+        success: result.success,
+        message: result.success 
+          ? `服务器 ${key} 配置已保存并成功连接` 
+          : `服务器 ${key} 配置已保存，但连接失败: ${result.error}`,
+        error: result.error
+      }
+    } catch (error) {
+      this.ctx.logger.error(`保存服务器 ${key} 配置失败:`, error)
+      return {
+        success: false,
+        message: `保存失败: ${error.message || '未知错误'}`,
+        error: error.message
+      }
     }
   }
 }
