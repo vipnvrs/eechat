@@ -84,7 +84,7 @@ export class AppUpdater {
 
     // 下载进度
     autoUpdater.on('download-progress', (progressObj) => {
-      console.log('下载进度:', progressObj)
+      // console.log('下载进度:', progressObj)
       if (this.mainWindow) {
         this.mainWindow.webContents.send('download-progress', progressObj)
       }

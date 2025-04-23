@@ -37,15 +37,16 @@ module.exports = appInfo => {
   }
 
   // 日志
-  // config.logger = {
-  //   dir: path.join(appInfo.baseDir, 'logs'),
-  //   level: 'DEBUG',
-  //   consoleLevel: 'DEBUG',
-  //   encoding: 'utf8',
-  //   when: 'D',
-  //   keepFileExt: true,
-  //   maxFiles: 10,
-  // }
+  config.logger = {
+    dir: path.join(paths.logsPath, 'eechat-server'),
+    allowDebugAtProd: true,
+    level: 'DEBUG',
+    consoleLevel: 'DEBUG',
+    encoding: 'utf8',
+    when: 'D',
+    keepFileExt: true,
+    maxFiles: 10,
+  }
 
   // 添加数据库配置
   config.sequelize = {

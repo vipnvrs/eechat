@@ -7,8 +7,10 @@ const log = require('electron-log')
 
 // 配置日志
 log.transports.file.resolvePathFn = variables =>
-  path.join(app.getPath('home'), 'logs', 'eechat-app', variables.fileName)
+  path.join(app.getPath('userData'), 'logs', 'eechat-app', variables.fileName)
 log.transports.file.level = 'debug'
+
+Object.assign(console, log.functions)
 
 // 创建应用范围的日志实例
 export const AppLog = log.scope('APP')
