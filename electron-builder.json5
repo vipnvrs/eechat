@@ -12,9 +12,9 @@
     "dist"
   ],
   "mac": {
-    "hardenedRuntime": true,
-    "entitlements": "build/entitlements.mac.plist",
-    "entitlementsInherit": "build/entitlements.mac.plist",
+    // "hardenedRuntime": true,
+    // "entitlements": "build/entitlements.mac.plist",
+    // "entitlementsInherit": "build/entitlements.mac.plist",
     "icon": "icon/icons/mac/AppIcon.icns",
     "notarize": {
       "teamId": "ee.chat"
