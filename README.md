@@ -1,3 +1,6 @@
+<div align="center" style="margin-bottom:40px">
+<h2> 🎉 MCP feature is ready to rock!🚀</h2>
+</div>
 <div align="center">
   <img src="./icon/icon.png" alt="EE Chat Application Screenshot" width="60" />
   <h1><a href="https://ee.chat">eechat</a> </h1>
@@ -13,25 +16,56 @@
     <a href="#contribute">Contribute</a> •
     <a href="#license">License</a>
   </p>
-  
 </div>
 
-  <img src="./resources/math.png" alt="EE Chat Application Screenshot" width="800" />
+<img src="./resources/math.png" alt="EE Chat Application Screenshot" width="800" />
 
 ## Core Advantages
 
 eechat is an AI chat application focused on local deployment, providing users with a secure, private, and efficient AI conversation experience.
 
+### 🎉 MCP Support
+
+MCP (Model Context Protocol) is a brand-new core extension capability of eechat, designed specifically for AI assistant scenarios. It greatly enhances the playability and professionalism of local AI. With MCP, you can easily integrate, manage, and run various AI tools and services with just one click, making your AI assistant infinitely expandable.
+
+#### MCP Main Interface
+<img src="./resources/mcp_main.png" alt="MCP Main Interface" width="900" />
+
+Through the MCP management interface, you can easily view, install, start, stop, and remove various AI tools without command-line operations, significantly lowering the entry barrier.
+
+#### MCP Visual Configuration
+<img src="./resources/mcp_add.png" alt="MCP Visual Configuration" width="900" />
+
+Provides a form-based visual way to add new MCP applications, supporting automatic README reading or AI-powered configuration filling. Even beginners can quickly integrate new tools.
+
+#### MCP File Configuration
+<img src="./resources/mcp_config.png" alt="MCP File Configuration" width="900" />
+
+Built-in professional JSON configuration file editor, supporting formatting, reset, and quick navigation. Perfect for advanced users to batch manage and deeply customize. Fully compatible with Claude Desktop, Cursor, and Cline configurations.
+
+#### Integrated Runtime Environment
+<img src="./resources/mcp_bin.png" alt="MCP Runtime Environment" width="900" />
+
+Built-in automatic detection and one-click download for runtimes like bun and uv. No manual dependency setup required, ensuring Node.js/Python tools are ready to use out of the box.
+
+#### Plugin Ecosystem & Hot-Swapping
+MCP tools can be added, removed, or upgraded at any time, supporting multi-instance parallel running. Build your own exclusive AI toolbox.
+
+#### Tool Invocation in Chat
+<img src="./resources/mcp_chat.png" alt="MCP Tool Invocation in Chat" width="900" />
+
+All MCP tools can be called directly in the chat window, enabling seamless collaboration between AI and tools.
+
 ### 🔒 Data Security & Privacy Protection
 
 - **Fully Local Storage**: All conversation data is stored locally, eliminating privacy leak risks
 
- <img src="./resources/localmodel_dark.png" alt="EE Chat Application Screenshot" width="800" />
+<img src="./resources/localmodel_dark.png" alt="EE Chat Application Screenshot" width="800" />
 
 - **Offline Capability**: No continuous internet connection required after initial setup
 - **API Customization**: Connect to your own AI model API or third-party services, maintaining full data flow control
 
- <img style="" src="./resources/apimodel_light.png" alt="EE Chat Application Screenshot" width="800" />
+<img src="./resources/apimodel_light.png" alt="EE Chat Application Screenshot" width="800" />
 
 ### 💬 Superior Conversation Experience
 
@@ -83,7 +117,7 @@ eechat is designed for local deployment, ensuring your data security and optimal
 - Linux (Ubuntu 18.04+, Debian 10+)
 - Minimum 4GB RAM
 - 500MB available disk space
-- GPU with CUDA support (optional) 8GB+ (win)
+- GPU with CUDA support (optional) 8GB+ (Windows)
 
 ### Installation Methods
 
@@ -105,5 +139,4 @@ npm install
 npm run dev
 
 # Build application
-npm run build
-```
+npm run build```
