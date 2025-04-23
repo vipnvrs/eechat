@@ -39,6 +39,11 @@ export const useSessionStore = defineStore('session', {
     async createChat() {
       try {
         const res = await chatApi.createChat()
+        // 检查 res 是否为 null 或 undefined
+        if (!res) {
+          throw new Error('创建会话失败：服务器返回空数据')
+        }
+        
         const newSession = res
         // 确保在更新数组前移除可能存在的重复会话
         this.sessions = this.sessions.filter(s => s.id !== newSession.id)
@@ -50,9 +55,29 @@ export const useSessionStore = defineStore('session', {
         throw error
       }
     },
+    // async createChat() {
+    //   try {
+    //     const res = await chatApi.createChat()
+    //     const newSession = res
+    //     // 确保在更新数组前移除可能存在的重复会话
+    //     this.sessions = this.sessions.filter(s => s.id !== newSession.id)
+    //     this.sessions.unshift(newSession)
+    //     this.setActiveSession(newSession)
+    //     return newSession
+    //   } catch (error) {
+    //     console.error('Failed to create chat:', error)
+    //     throw error
+    //   }
+    // },
 
     // 修改 setActiveSession 方法
     setActiveSession(session: ChatSession) {
+      // 检查 session 是否为 null 或 undefined
+      if (!session || typeof session.id === 'undefined') {
+        console.error('尝试设置无效的会话对象')
+        return
+      }
+      
       // 确保会话存在于列表中
       const existingSession = this.sessions.find(s => s.id === session.id)
       if (!existingSession) {
