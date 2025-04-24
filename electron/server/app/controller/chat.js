@@ -1,11 +1,12 @@
 const { Controller } = require('egg')
 
 class ChatController extends Controller {
-  async sendMessage() {
+  async sendMessageLocal() {
     const { ctx } = this
     const { model, messages, sessionId } = ctx.request.body
     try {
-      const result = await ctx.service.chat.sendMessage(
+      // const { model, provider, messages, config } = loopArgs
+      const result = await ctx.service.chat.sendMessageLocal(
         model,
         messages,
         sessionId,

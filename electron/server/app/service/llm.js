@@ -18,7 +18,6 @@ class LLMService extends BaseLLMService {
     let service
     service = this.providers[provider]
     if (!service) {
-      console.log(`使用openai通道`)
       service = this.providers['common']
     }
     return service
@@ -28,7 +27,6 @@ class LLMService extends BaseLLMService {
     let service
     service = this.providers[provider]
     if (!service) {
-      console.log(`使用openai通道`)
       service = this.providers['common']
     }
     return service.testConnection(config, model)

@@ -16,38 +16,37 @@ class ChatService extends Service {
    * @param {string} sessionId - 会话ID
    * @reurns {Promise<string>} - 返回聊天结果
    */
-  // async sendMessage(model, messages, sessionId) {
-  //   this.cachedParams = { model, messages, sessionId }
-  //   const { ctx } = this
-  //   try {
-  //     const openai = new OpenAI({
-  //       baseURL: `${ollamaBaseUrl}/v1`,
-  //       apiKey: 'dummy',
-  //     })
+  async sendMessageLocal(model, messages, sessionId) {
+    this.cachedParams = { model, messages, sessionId }
+    const { ctx } = this
+    try {
+      const openai = new OpenAI({
+        baseURL: `${ollamaBaseUrl}/v1`,
+        apiKey: 'dummy',
+      })
 
-  //     const requestParams = {
-  //       model: model.id,
-  //       messages,
-  //       stream: true,
-  //     }
-  //     const stream = await openai.chat.completions.create(requestParams)
-  //     await this.handleStream(
-  //       stream,
-  //       ctx,
-  //       messages,
-  //       sessionId,
-  //       model,
-  //       messages,
-  //       sessionId,
-  //     )
-  //   } catch (error) {
-  //     ctx.logger.error('Chat service error:', error)
-  //     await this.handleStreamError(
-  //       new Error(ctx.__('chat.service_error') + error.message),
-  //       ctx,
-  //     )
-  //   }
-  // }
+      const requestParams = {
+        model: model.id,
+        messages,
+        stream: true,
+      }
+      const stream = await openai.chat.completions.create(requestParams)
+      await this.handleStream(
+        stream,
+        ctx,
+        messages,
+        sessionId,
+        model,
+      )
+    } catch (error) {
+      ctx.logger.error('Chat service error:', error)
+      await this.handleStreamError(
+        new Error(ctx.__('chat.service_error') + error.message),
+        ctx,
+      )
+    }
+  }
+  
   async handleStream(
     stream,
     ctx,

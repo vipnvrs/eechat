@@ -40,7 +40,7 @@ class McpService extends Service {
       GLOBAL_CACHE.initialized = true
       this.initialized = true
     } else {
-      this.ctx.logger.info('MCP服务已初始化，跳过初始化过程')
+      // this.ctx.logger.info('MCP服务已初始化，跳过初始化过程')
     }
   }
 
@@ -54,7 +54,7 @@ class McpService extends Service {
 
   async connectServer(key, serverConfig, errorCallback) {
     try {
-      this.ctx.logger.info('Init mcp client')
+      // this.ctx.logger.info('Init mcp client')
 
       // 获取传输类型，默认为 stdio
       const transportType = serverConfig.transport || 'stdio'
@@ -65,28 +65,21 @@ class McpService extends Service {
         if (!serverConfig.url) {
           throw new Error('SSE 传输类型需要提供 url 参数')
         }
-        this.ctx.logger.info('使用 SSE 传输连接服务器:', {
-          url: serverConfig.url,
-          headers: serverConfig.headers || {},
-        })
-        // try {
-        //   transport = new StreamableHTTPClientTransport(
-        //     new URL(baseUrl)
-        //   )
-        // } catch (error) {
-
-        // }
+        // this.ctx.logger.info('使用 SSE 传输连接服务器:', {
+        //   url: serverConfig.url,
+        //   headers: serverConfig.headers || {},
+        // })
         transport = new SSEClientTransport(baseUrl)
       } else {
         // 使用默认的 stdio 传输
         const { command, args, env } = this.buildCommand(serverConfig)
 
-        this.ctx.logger.info('使用 stdio 传输连接服务器:', {
-          command,
-          args,
-          env,
-          fullCommand: `${command} ${args.join(' ')}`,
-        })
+        // this.ctx.logger.info('使用 stdio 传输连接服务器:', {
+        //   command,
+        //   args,
+        //   env,
+        //   fullCommand: `${command} ${args.join(' ')}`,
+        // })
 
         transport = new StdioClientTransport({
           command: command,
@@ -117,7 +110,7 @@ class McpService extends Service {
 
       await client.connect(transport)
       this.clients.set(key, client)
-      this.ctx.logger.info('Init mcp client success')
+      // this.ctx.logger.info('Init mcp client success')
       return { success: true }
     } catch (error) {
       if (errorCallback) errorCallback(error)
@@ -240,27 +233,27 @@ class McpService extends Service {
    */
   isToolsCacheValid(key) {
     if (!this.toolsCache.has(key) || !this.toolsCacheTime.has(key)) {
-      this.ctx.logger.info(`缓存检查: ${key} 缓存不存在`, {
-        hasCacheKey: this.toolsCache.has(key),
-        hasTimeKey: this.toolsCacheTime.has(key),
-        cacheSize: this.toolsCache.size,
-        allKeys: Array.from(this.toolsCache.keys()),
-      })
+      // this.ctx.logger.info(`缓存检查: ${key} 缓存不存在`, {
+      //   hasCacheKey: this.toolsCache.has(key),
+      //   hasTimeKey: this.toolsCacheTime.has(key),
+      //   cacheSize: this.toolsCache.size,
+      //   allKeys: Array.from(this.toolsCache.keys()),
+      // })
       return false
     }
 
     const cacheTime = this.toolsCacheTime.get(key)
     const isValid = Date.now() - cacheTime < this.CACHE_TTL
 
-    this.ctx.logger.info(
-      `缓存检查: ${key} 缓存${isValid ? '有效' : '已过期'}`,
-      {
-        cacheTime,
-        currentTime: Date.now(),
-        diff: Date.now() - cacheTime,
-        ttl: this.CACHE_TTL,
-      },
-    )
+    // this.ctx.logger.info(
+    //   `缓存检查: ${key} 缓存${isValid ? '有效' : '已过期'}`,
+    //   {
+    //     cacheTime,
+    //     currentTime: Date.now(),
+    //     diff: Date.now() - cacheTime,
+    //     ttl: this.CACHE_TTL,
+    //   },
+    // )
 
     return isValid
   }
@@ -278,7 +271,7 @@ class McpService extends Service {
       tools.push(...serverTools.tools)
     }
 
-    this.ctx.logger.info('List tools success')
+    // this.ctx.logger.info('List tools success')
     this.ctx.logger.info(
       'Tools names:',
       tools.map(tool => tool.name),
@@ -298,10 +291,10 @@ class McpService extends Service {
 
     // 如果缓存有效，直接返回缓存数据
     if (this.isToolsCacheValid(key)) {
-      this.ctx.logger.info(`使用缓存的工具列表: ${key}`, {
-        cacheSize: this.toolsCache.size,
-        allKeys: Array.from(this.toolsCache.keys()),
-      })
+      // this.ctx.logger.info(`使用缓存的工具列表: ${key}`, {
+      //   cacheSize: this.toolsCache.size,
+      //   allKeys: Array.from(this.toolsCache.keys()),
+      // })
       return this.toolsCache.get(key)
     }
 
@@ -311,7 +304,7 @@ class McpService extends Service {
     }
 
     try {
-      this.ctx.logger.info(`从服务器获取工具列表: ${key}`)
+      // this.ctx.logger.info(`从服务器获取工具列表: ${key}`)
       const tools = await client.listTools()
 
       // 处理工具名称
@@ -329,12 +322,12 @@ class McpService extends Service {
       this.toolsCache.set(key, tools)
       this.toolsCacheTime.set(key, Date.now())
 
-      this.ctx.logger.info('Get tools success', {
-        cacheUpdated: this.toolsCache.has(key),
-        toolsCount: tools.tools.length,
-        cacheSize: this.toolsCache.size,
-        allKeys: Array.from(this.toolsCache.keys()),
-      })
+      // this.ctx.logger.info('Get tools success', {
+      //   cacheUpdated: this.toolsCache.has(key),
+      //   toolsCount: tools.tools.length,
+      //   cacheSize: this.toolsCache.size,
+      //   allKeys: Array.from(this.toolsCache.keys()),
+      // })
 
       return tools
     } catch (error) {
@@ -364,7 +357,7 @@ class McpService extends Service {
         arguments: args,
       })
 
-      this.ctx.logger.info(`工具 ${toolName} 调用成功:`, result)
+      // this.ctx.logger.info(`工具 ${toolName} 调用成功:`, result)
       return result
     } catch (error) {
       this.ctx.logger.error(`工具 ${toolName} 调用失败:`, error)
@@ -399,7 +392,7 @@ class McpService extends Service {
         __dirname,
         './mcp.config.default.json',
       )
-      this.ctx.logger.info('[MCP]Config file path:', configFile)
+      // this.ctx.logger.info('[MCP]Config file path:', configFile)
 
       // 确保配置目录存在
       if (!fs.existsSync(paths.configPath)) {
@@ -420,7 +413,7 @@ class McpService extends Service {
       const configJSON = JSON.parse(config)
       const servers = configJSON.mcpServers
 
-      this.ctx.logger.info('[MCP]Get config success:', servers)
+      // this.ctx.logger.info('[MCP]Get config success:', servers)
       return servers
     } catch (error) {
       this.ctx.logger.error('[MCP]Get config error:', error)
@@ -447,10 +440,10 @@ class McpService extends Service {
     // 检查文件是否存在
     const exists = fs.existsSync(executablePath)
 
-    this.ctx.logger.info(`检查工具 ${toolName} 路径:`, {
-      path: executablePath,
-      exists: exists,
-    })
+    // this.ctx.logger.info(`检查工具 ${toolName} 路径:`, {
+    //   path: executablePath,
+    //   exists: exists,
+    // })
 
     return {
       path: executablePath,
@@ -517,9 +510,9 @@ class McpService extends Service {
       }
     }
 
-    this.ctx.logger.info(`转换命令: ${serverConfig.command} -> ${command}`)
-    this.ctx.logger.info(`转换参数: ${serverConfig.args} -> ${args}`)
-    this.ctx.logger.info(`环境变量:`, env)
+    // this.ctx.logger.info(`转换命令: ${serverConfig.command} -> ${command}`)
+    // this.ctx.logger.info(`转换参数: ${serverConfig.args} -> ${args}`)
+    // this.ctx.logger.info(`环境变量:`, env)
 
     return { command, args, env }
   }
