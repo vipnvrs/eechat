@@ -37,6 +37,8 @@ import type {
 } from "@/types/llm"
 import { Loader2, Check, EyeClosed, Eye } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
+import { useEnvStore } from "@/stores/env"
+const envStore = useEnvStore()
 
 // 定义props接收providerId
 const props = defineProps({
@@ -245,7 +247,7 @@ const toggleShowApiKey = () => {
     <!-- 左侧 Sidebar -->
     <div class="w-40 border-r pr-2">
       <div class="font-bold mb-4 ml-6">{{ t('settings.apiModel.modelProvider') }}</div>
-      <ScrollArea class="h-[calc(100vh-8rem)]">
+      <ScrollArea class="h-[calc(100vh-8rem)]" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
         <div class="space-y-2">
           <div
             v-for="(value, provider) in providers"
@@ -366,7 +368,7 @@ const toggleShowApiKey = () => {
         <!-- 模型列表 -->
         <div class="flex-1 pt-6 min-h-0 overflow-hidden">
           <Label>{{ t('settings.apiModel.availableModels') }}</Label>
-          <ScrollArea class="h-full w-full rounded-md pb-8">
+          <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
             <!-- {{ models['DeepSeek Chat'] }} -->
             <div v-for="(group, key) in models" :key="key" class="space-y-4">
               <!-- 组标题 -->

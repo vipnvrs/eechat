@@ -57,6 +57,8 @@ import router from '@/router'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 import { useSessionStore } from '@/stores/session'
+import { useEnvStore } from "@/stores/env"
+const envStore = useEnvStore()
 
 const sessionStore = useSessionStore()
 // 设置语言为中文
@@ -213,7 +215,7 @@ const groupedSessions = computed(() => {
       <!-- <SidebarInput placeholder="输入要搜索的内容..." /> -->
     </SidebarHeader>
     <SidebarContent>
-      <ScrollArea class="h-full w-full">
+      <ScrollArea class="w-full h-fulll" :class="envStore.isWeb ? 'h-[calc(100dvh-64px-30px)]' : 'h-[calc(100dvh-64px)]'">
         <SidebarGroup class="px-0">
           <template v-for="(sessions, groupName) in groupedSessions" :key="groupName">
             <SidebarGroupLabel class="pl-4 mt-2 text-xs text-gray-400">{{
