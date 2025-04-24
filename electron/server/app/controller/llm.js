@@ -50,6 +50,16 @@ class LLMController extends Controller {
     }
   }
 
+  async providersAndModels() {
+    const { ctx } = this
+    try {
+      const providers = await ctx.service.llm.providersAndModels()
+      ctx.body = ctx.helper.success(providers)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error)
+    }
+  }
+
   // 获取指定提供商的配置信息
   async getConfigProvider() {
     const { ctx } = this

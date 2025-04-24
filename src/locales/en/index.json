@@ -167,7 +167,7 @@
       "localModel": "Local Model"
     },
     "apiModel": {
-      "modelProvider": "Model Provider",
+      "modelProvider": "Provider",
       "connectionSuccess": "Connection Successful",
       "connectionSuccessDesc": "Successfully connected to API",
       "connectionFailed": "Connection Failed",

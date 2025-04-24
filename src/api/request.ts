@@ -298,6 +298,10 @@ export const llmApi = {
   async getModels(provider: string) {
     return request.get(`/api/llm/models/${provider}`)
   },
+  
+  async getProvidersAndModels() {
+    return request.get(`/api/llm/providersAndModels`)
+  },
 
   // 测试连接
   async testConnection(provider: string, config: any, model) {

@@ -34,6 +34,7 @@ module.exports = app => {
   router.post('/api/llm/test/:provider', controller.llm.testConnection)
   router.get('/api/llm/models/:provider', controller.llm.listModels)
   router.get('/api/llm/providers', controller.llm.listProviders)
+  router.get('/api/llm/providersAndModels', controller.llm.providersAndModels)
 
   // LLM 模型配置
   router.get(

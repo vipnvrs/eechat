@@ -80,6 +80,100 @@ class LLMService extends BaseLLMService {
     return super.saveConfig(provider, config)
   }
 
+  async providersAndModels() {
+    const { ctx } = this
+    try {
+      const defaultDataMap = new Map()
+      const providers = await ctx.model.LlmProvider.findAll({
+        order: [
+          ['state', 'DESC'],
+          ['sort', 'ASC'],
+        ],
+      })
+      if(providers.length === 0) {
+        throw new Error('No provider found')
+      }
+      for (const provider of providers) {
+        let models = []
+        // 已配置的模型
+        const c_models = await ctx.model.LlmConfigModel.findAll({
+          where: {
+            provider_id: provider.id,
+          },
+          order: [
+            ['state', 'DESC'],
+          ],
+        })
+        if(c_models.length === 0) {
+          // 未配置使用自带的模型列表
+          const d_models = await this.listModels(provider.id)
+          d_models.forEach(model => {
+            model.from = 'common'
+          })
+          models = d_models
+        } else {
+          c_models.forEach(config => {
+            config.dataValues.id = config.dataValues.model_id
+            config.dataValues.from = 'config'
+          })
+          models = c_models
+        }
+        provider.dataValues.models = models
+        defaultDataMap.set(provider.id, provider.dataValues)
+      }
+
+      // 合并配置
+      const providersConfig = await ctx.model.LlmConfigProvider.findAll({
+        where: { uid: 'default-user' },
+      })
+
+      for (const c_provider of providersConfig) {
+        const c_provider_id  = c_provider.provider_id
+        const provider = defaultDataMap.get(c_provider_id)
+        if(provider) {
+          provider.state = c_provider.state
+          provider.api_key = c_provider.api_key
+          provider.base_url = c_provider.base_url
+          provider.type = 'api'
+          provider.description = ''
+          defaultDataMap.set(c_provider_id, provider)
+        } else {
+          // 自定义的供应商及模型
+          const customModelsConfig = await ctx.model.LlmConfigModel.findAll({
+            where: {
+              uid: 'default-user',
+              provider_id: c_provider_id,
+            },
+          })
+          customModelsConfig.forEach(config => {
+            config.from = 'config'
+          })
+          defaultDataMap.set(c_provider_id, {
+            id: c_provider.provider_id,
+            name: c_provider.name || c_provider.provider_id,
+            type: 'api',
+            description: '',
+            api_url: c_provider.base_url,
+            official_url: "",
+            api_key_url: "",
+            docs_url: "",
+            models_url: "",
+            state: c_provider.state,
+            sort: 0,
+            created_at: c_provider.created_at,
+            updated_at: c_provider.updated_at,
+            deleted_at: c_provider.deleted_at,
+            models: customModelsConfig
+          })
+        }
+      }
+      return Object.fromEntries(defaultDataMap)
+    } catch (error) {
+      console.error(ctx.__('provider.get_failed'), error)
+      throw new Error(ctx.__('provider.get_failed') + error.message)
+    }
+  }
+
   async listProviders() {
     const { ctx } = this
     try {

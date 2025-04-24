@@ -35,7 +35,7 @@ import type {
   APIConfig,
   ProviderConfig,
 } from "@/types/llm"
-import { Loader2, Check, EyeClosed, Eye } from "lucide-vue-next"
+import { Loader2, Check, EyeClosed, Eye, Plus } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
 import { useEnvStore } from "@/stores/env"
 const envStore = useEnvStore()
@@ -245,9 +245,12 @@ const toggleShowApiKey = () => {
   <Toaster />
   <div class="flex h-full">
     <!-- 左侧 Sidebar -->
-    <div class="w-40 border-r pr-2">
-      <div class="font-bold mb-4 ml-6">{{ t('settings.apiModel.modelProvider') }}</div>
-      <ScrollArea class="h-[calc(100vh-8rem)]" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
+    <div class="w-[180px] border-r">
+      <div class="flex justify-between items-center mb-4 pr-4">
+        <div class="font-bold ml-2">{{ t('settings.apiModel.modelProvider') }}</div>
+        <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
+      </div>
+      <ScrollArea class="h-[calc(100vh-8rem)] pr-4" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
         <div class="space-y-2">
           <div
             v-for="(value, provider) in providers"
@@ -367,7 +370,10 @@ const toggleShowApiKey = () => {
 
         <!-- 模型列表 -->
         <div class="flex-1 pt-6 min-h-0 overflow-hidden">
-          <Label>{{ t('settings.apiModel.availableModels') }}</Label>
+          <div class="flex items-center space-x-2">
+            <Label>{{ t('settings.apiModel.availableModels') }}</Label>
+            <Button size="sm" variant="outline"><Plus></Plus>新增模型</Button>
+          </div>
           <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
             <!-- {{ models['DeepSeek Chat'] }} -->
             <div v-for="(group, key) in models" :key="key" class="space-y-4">

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { LLMModel, ModelProvider } from '@/types/llm'
+import { llmApi, ollamaApi } from "@/api/request"
 
 export const LOCAL_PROVIDER_ID = 'local'
 
@@ -10,6 +11,39 @@ export const useModelStore = defineStore('model', () => {
   const currentModel = ref<LLMModel | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+
+  const fetchProvidersAndModels = async () => {
+    try {
+      isLoading.value = true
+      initLocalProvider()
+      const res = await llmApi.getProvidersAndModels()
+      Object.keys(res).forEach((providerId) => {
+        setProvider(providerId, res[providerId])
+      })
+      // 获取本地模型配置
+      const localModels = await ollamaApi.listModel()
+      const modelsData = localModels.data.models
+      if (modelsData?.length) {
+        // 转换本地模型格式
+        const formattedModels = modelsData.map((model) => ({
+          id: model.name,
+          name: model.name,
+          provider_id: "local",
+          group_name: "Local",
+          state: true, // 本地模型默认启用
+          type: "local",
+          capabilities: ["chat", "completion"],
+          from: "local",
+        }))
+        updateLocalModels(formattedModels)
+      }
+    } catch (error) {
+      console.log(error)
+      error = (error as Error).message
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   // Getters
   const availableModels = computed(() => {
@@ -116,6 +150,7 @@ export const useModelStore = defineStore('model', () => {
     updateModelState,
     setCurrentModel,
     clearProviders,
+    fetchProvidersAndModels,
 
     // 新增导出
     initLocalProvider,

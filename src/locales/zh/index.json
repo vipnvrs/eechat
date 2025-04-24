@@ -168,7 +168,7 @@
       "localModel": "本地模型"
     },
     "apiModel": {
-      "modelProvider": "模型提供商",
+      "modelProvider": "提供商",
       "connectionSuccess": "连接成功",
       "connectionSuccessDesc": "已成功连接到 API",
       "connectionFailed": "连接失败",
