@@ -5,6 +5,10 @@
   "description": "a light weight chat tool for llm.",
   "author": "eechat <oodoobvideo@gmail.com>",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lucassssss/eechat.git"
+  },
   "private": true,
   "keywords": [
     "electron",
@@ -26,7 +30,8 @@
     "package": "vue-tsc --noEmit && vite build && electron-builder",
     "build:mac": "vue-tsc --noEmit && vite build && electron-builder --publish always --mac",
     "build:pord": "vite build --mode production && electron-builder",
-    "publish": "node scripts/publish.mjs",
+    "r:server": "node scripts/release-server.mjs",
+    "r:github": "node scripts/release-github.mjs",
     "preview": "vite preview",
     "release": "node scripts/release.js",
     "i18n:extract": "vue-i18n-extract report --vueFiles \"src/**/*.?(js|vue)\" --languageFiles \"src/locales/zh/index.json\"",
