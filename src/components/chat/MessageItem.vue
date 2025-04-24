@@ -155,6 +155,8 @@ const processedFormalContent = computed(() => {
 :root[class~="dark"] .msg-item a::after {
   filter: invert(1);
 }
+</style>
+<style scoped>
 /* 添加代码块样式控制 */
 :deep(pre) {
   max-width: 100%;
