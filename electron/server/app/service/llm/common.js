@@ -110,10 +110,10 @@ class DeepseekService extends BaseLLMService {
         messages: messagesWithSystemPrompt,
         stream: true,
         // max_tokens: 2048,
-        // temperature: sessionSettings.temperature,
-        // top_p: sessionSettings.top_p,
-        // presence_penalty: sessionSettings.presence_penalty,
-        // frequency_penalty: sessionSettings.frequency_penalty,
+        temperature: sessionSettings.temperature,
+        top_p: sessionSettings.top_p,
+        presence_penalty: sessionSettings.presence_penalty,
+        frequency_penalty: sessionSettings.frequency_penalty,
       }
       if (tools && tools.length > 0) {
         params.tools =
