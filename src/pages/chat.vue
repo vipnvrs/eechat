@@ -38,6 +38,8 @@ import { useRoute } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 import { useMcpStore } from '@/stores/mcp'
 import { computed } from "vue"
+import { useEnvStore } from "@/stores/env"
+const envStore = useEnvStore()
 
 const sessionStore = useSessionStore()
 const mcpStore = useMcpStore()
@@ -272,7 +274,7 @@ onMounted(() => {
     >
       <SidebarLeft />
     </SidebarProvider>
-    <div class="w-full h-[100vh] max-h-[100vh] flex flex-col grow">
+    <div class="w-full h-[calc(100dvh-30px)] max-h-[calc(100dvh-30px)] flex flex-col grow" :class="envStore.isWeb ? 'h-[100dvh] max-h-[100dvh]' : ''">
       <header
         class="sticky top-0 flex shrink-0 items-center gap-2 border-b bg-background p-4 justify-between h-[64px] py-0 max-sm:h-[40px]"
       >
@@ -353,7 +355,7 @@ onMounted(() => {
         @click="scrollToBottom(true)"
         variant="outline"
         size="icon"
-        class="fixed bottom-[120px] right-6 z-10 drop-shadow-xl"
+        class="fixed bottom-[140px] right-6 z-10 drop-shadow-xl"
       >
         <ArrowDownToLine class="h-4 w-4" />
         <span class="sr-only">{{ t("chat.scrollToBottom") }}</span>
@@ -370,7 +372,7 @@ onMounted(() => {
         <ScrollBar />
       </ScrollArea>
       <div
-        class="sticky bottom-0 h-[120px] content-center shrink-0 items-center gap-2 border-b bg-background"
+        class="sticky bottom-0 h-[120px] max-h-[120px] content-center shrink-0 items-center gap-2 border-b bg-background"
       >
         <ChatInput
           :loading="loading"

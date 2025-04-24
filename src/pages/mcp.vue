@@ -311,12 +311,9 @@ const toggleServerStatus = async (mcp) => {
                 <div class="text-sm line-clamp-3 text-zinc-500">{{ item.AbstractCN || item.Abstract }}</div>
                 <div class="flex justify-between items-center mt-4">
                   <div class="flex items-center">
-                    <img 
-                      :src="item.FromSiteIcon" 
-                      class="w-4 h-4 rounded-full"
-                      alt="icon"
-                    />
-                    <span class="ml-2 text-sm text-gray-500">{{ item.FromSite }}</span>
+                    <Badge variant="outline">
+                      <span class="">{{ item.FromSite }}</span>
+                    </Badge>
                   </div>
                   <Button 
                     @click="openAddNewWithMcp(item)" 

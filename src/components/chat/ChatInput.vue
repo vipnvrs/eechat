@@ -78,11 +78,11 @@ const handleRecord = () => {
     <form @submit.prevent="handleSendMsg">
       <Textarea
         v-model="msg"
-        class="h-[120px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0 border-l-0"
+        class="h-[120px] min-h-[120px] max-h-[120px] rounded-none focus-visible:ring-offset-0 focus-visible:ring-0 border-l-0 outline-none appearance-none resize-none"
         :placeholder="t('chat.inputPlaceholder')"
         @keydown="handleKeyDown"
       ></Textarea>
-      <div class="ml-auto gap-1.5 absolute bottom-12 right-4 flex items-center space-x-1">
+      <div class="ml-auto gap-1.5 absolute bottom-4 right-4 flex items-center space-x-1">
         <UseTool class="relative"></UseTool>
         <Button
           @click="handleRecord"
