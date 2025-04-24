@@ -11,8 +11,8 @@ import rehypeRaw from "rehype-raw"
 import rehypeStringify from "rehype-stringify"
 import remarkRehype from "remark-rehype"
 import rehypeHighlight from "rehype-highlight"
-import remarkDirective from 'remark-directive'
-import remarkPlugin from './remarkPlugin'
+import remarkDirective from "remark-directive"
+import remarkPlugin from "./remarkPlugin"
 import "highlight.js/styles/atom-one-dark.css"
 import { unified } from "unified"
 
@@ -27,25 +27,29 @@ const thinkContent = ref("")
 const formalContent = ref("")
 
 // 监听消息变化，处理思考过程和正式内容
-watch(() => props.message, (newMessage) => {
-  if (newMessage.includes("<think>") && !newMessage.includes("</think>")) {
-    // 开始思考状态
-    isThinking.value = true
-    thinkContent.value = newMessage.replace("<think>", "")
-    formalContent.value = ""
-  } else if (newMessage.includes("<think>") && newMessage.includes("</think>")) {
-    // 思考已结束，提取思考内容和正式内容
-    isThinking.value = false
-    const thinkMatch = newMessage.match(/<think>([\s\S]*?)<\/think>/);
-    thinkContent.value = thinkMatch ? thinkMatch[1] : "";
-    formalContent.value = newMessage.replace(/<think>[\s\S]*?<\/think>/, "");
-  } else {
-    // 没有思考内容，只有正式内容
-    isThinking.value = false
-    thinkContent.value = ""
-    formalContent.value = newMessage
-  }
-}, { immediate: true })
+watch(
+  () => props.message,
+  (newMessage) => {
+    if (newMessage.includes("<think>") && !newMessage.includes("</think>")) {
+      // 开始思考状态
+      isThinking.value = true
+      thinkContent.value = newMessage.replace("<think>", "")
+      formalContent.value = ""
+    } else if (newMessage.includes("<think>") && newMessage.includes("</think>")) {
+      // 思考已结束，提取思考内容和正式内容
+      isThinking.value = false
+      const thinkMatch = newMessage.match(/<think>([\s\S]*?)<\/think>/)
+      thinkContent.value = thinkMatch ? thinkMatch[1] : ""
+      formalContent.value = newMessage.replace(/<think>[\s\S]*?<\/think>/, "")
+    } else {
+      // 没有思考内容，只有正式内容
+      isThinking.value = false
+      thinkContent.value = ""
+      formalContent.value = newMessage
+    }
+  },
+  { immediate: true }
+)
 
 // 使用 remark 处理 Markdown
 const processor = unified()
@@ -66,25 +70,25 @@ const sanitizedContent = computed(() => processor.processSync(props.message).toS
 
 // 处理思考内容的 Markdown
 const processedThinkContent = computed(() => {
-  if (!thinkContent.value) return "";
-  return processor.processSync(thinkContent.value).toString();
+  if (!thinkContent.value) return ""
+  return processor.processSync(thinkContent.value).toString()
 })
 
 // 处理正式内容的 Markdown
 const processedFormalContent = computed(() => {
-  if (!formalContent.value) return "";
-  return processor.processSync(formalContent.value).toString();
+  if (!formalContent.value) return ""
+  return processor.processSync(formalContent.value).toString()
 })
 </script>
 
 <template>
-  <div class="last:min-h-[calc(100dvh-300px)]">
+  <div class="last:min-h-[calc(100dvh-300px)] msg-item">
     <div
       v-if="message == ''"
       class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
     >
       <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
-      <span class="ml-2 text-[14px]">{{ t('chat.thinking') }}</span>
+      <span class="ml-2 text-[14px]">{{ t("chat.thinking") }}</span>
     </div>
     <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
       <div class="flex flex-col max-w-[80%]">
@@ -101,13 +105,17 @@ const processedFormalContent = computed(() => {
             <div class="think" v-html="processedThinkContent"></div>
             <div class="thinking-indicator">
               <LoaderCircle class="animate-spin w-4 h-4 inline-block mr-1"></LoaderCircle>
-              <span>{{ t('chat.thinking') }}</span>
+              <span>{{ t("chat.thinking") }}</span>
             </div>
           </div>
-          
+
           <!-- 思考已完成，显示思考内容和正式内容 -->
           <template v-else>
-            <div v-if="thinkContent" class="think mb-3" v-html="processedThinkContent"></div>
+            <div
+              v-if="thinkContent"
+              class="think mb-3"
+              v-html="processedThinkContent"
+            ></div>
             <div v-html="processedFormalContent || sanitizedContent"></div>
           </template>
         </div>
@@ -116,7 +124,37 @@ const processedFormalContent = computed(() => {
   </div>
 </template>
 
-<style scoped>
+<style>
+.msg-item a {
+  text-decoration: underline;
+  position: relative;
+  padding-right: 1.5em;
+}
+
+.msg-item a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1em;
+  height: 1em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='lucide lucide-link-icon lucide-link'%3E%3Cpath d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/%3E%3Cpath d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.7;
+}
+
+/* 添加悬停效果 */
+.msg-item a:hover::after {
+  opacity: 1;
+}
+
+/* 暗色模式支持 */
+:root[class~="dark"] .msg-item a::after {
+  filter: invert(1);
+}
 /* 添加代码块样式控制 */
 :deep(pre) {
   max-width: 100%;

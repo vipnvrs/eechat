@@ -7,7 +7,7 @@
       "url": "https://json.schemastore.org/electron-builder"
     }
   ],
-  "vue3snippets.enable-compile-vue-file-on-did-save-code": true,
+  "vue3snippets.enable-compile-vue-file-on-did-save-code": false,
   "i18n-ally.localesPaths": ["src/locales"],
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",

@@ -102,7 +102,13 @@ async function createWindow() {
     return { action: 'deny' }
   })
   // win.webContents.on('will-navigate', (event, url) => { }) #344
-
+  win.webContents.on('will-navigate', (event, url) => {
+    // 阻止应用内导航
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      event.preventDefault()
+      shell.openExternal(url)
+    }
+  })
   // 初始化更新器
   // if (app.isPackaged) {
     updater = new AppUpdater(win)
