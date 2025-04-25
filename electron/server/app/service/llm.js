@@ -119,6 +119,8 @@ class LLMService extends BaseLLMService {
           models = c_models
         }
         provider.dataValues.models = models
+        provider.dataValues.type = 'api'
+        provider.dataValues.from = 'common'
         defaultDataMap.set(provider.id, provider.dataValues)
       }
 
@@ -135,6 +137,7 @@ class LLMService extends BaseLLMService {
           provider.api_key = c_provider.api_key
           provider.base_url = c_provider.base_url
           provider.type = 'api'
+          provider.from = 'config'
           provider.description = ''
           defaultDataMap.set(c_provider_id, provider)
         } else {
@@ -152,6 +155,7 @@ class LLMService extends BaseLLMService {
             id: c_provider.provider_id,
             name: c_provider.name || c_provider.provider_id,
             type: 'api',
+            from: 'config',
             description: '',
             api_url: c_provider.base_url,
             official_url: "",
@@ -159,7 +163,7 @@ class LLMService extends BaseLLMService {
             docs_url: "",
             models_url: "",
             state: c_provider.state,
-            sort: 0,
+            sort: -1,
             created_at: c_provider.created_at,
             updated_at: c_provider.updated_at,
             deleted_at: c_provider.deleted_at,

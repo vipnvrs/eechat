@@ -2,6 +2,7 @@
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { LLMModel } from '@/types/llm'
+import { ProviderConfig } from '@/types/provider'
 import i18n from '@/i18n'
 
 export const API_BASE_URL =
@@ -297,6 +298,10 @@ export const llmApi = {
   // 获取模型列表
   async getModels(provider: string) {
     return request.get(`/api/llm/models/${provider}`)
+  },
+
+  async addProvider(form: ProviderConfig) {
+    return request.post(`/api/provider/add`, form)
   },
   
   async getProvidersAndModels() {

@@ -54,15 +54,21 @@ export interface ProviderConfig {
 }
 
 export interface ModelProvider {
-  id: string
-  name: string
-  type: 'api' | 'local'
-  state: boolean
+  id: string,
+  name: string,
+  icon: string,
+  type: 'api' | 'local',
+  from?: 'config' | 'common',
+  description: string,
+  api_url?: string,
+  official_url?: string,
+  api_key_url?: string,
+  docs_url?: string,
+  models_url?: string,
+  state: boolean,
+  sort?: number,
+  created_at?: string,
+  updated_at?: string,
+  deleted_at?: string | null,
   models: LLMModel[]
-  config?: {
-    apiKey?: string
-    baseUrl?: string
-  }
-  description?: string
-  icon?: string
 }

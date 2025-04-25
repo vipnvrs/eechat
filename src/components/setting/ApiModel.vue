@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, defineProps, watch } from "vue"
+import { ref, reactive, onMounted, defineProps, watch, computed  } from "vue"
 import { useI18n } from "vue-i18n"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -35,6 +44,7 @@ import type {
   APIConfig,
   ProviderConfig,
 } from "@/types/llm"
+import { ProviderConfig as ProviderConfigNew } from '@/types/provider'
 import { Loader2, Check, EyeClosed, Eye, Plus } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
 import { useEnvStore } from "@/stores/env"
@@ -62,7 +72,25 @@ const modelStore = useModelStore()
 // 添加当前选中的提供商
 const currentProvider = ref("deepseek")
 
-const providers = ref<Record<string, LLMProvider>>({})
+// const providers = ref<Record<string, LLMProvider>>({})
+const providers = computed(() => {
+  return Object.fromEntries(
+    [...modelStore.providers]
+    .filter(([key, value]) => {
+      return value.type == 'api'
+    })
+    .sort(([keyA, valueA], [keyB, valueB]) => {
+        // 首先按照 sort 字段升序排序
+      if ((valueA.sort || 0) !== (valueB.sort || 0)) {
+        return (valueA.sort || 0) - (valueB.sort || 0);
+      }
+      // 然后按照 updated_at 字段倒序排序（新的在前）
+      const aTime = valueA.updated_at ? new Date(valueA.updated_at).getTime() : 0;
+      const bTime = valueB.updated_at ? new Date(valueB.updated_at).getTime() : 0;
+      return bTime - aTime;
+    })
+  )
+})
 
 // API 模型配置状态
 const apiConfig = reactive<APIConfig>({
@@ -108,14 +136,12 @@ async function testConnection(provider: string) {
 // 获取提供商列表
 const defaultProvider = "deepseek"
 async function getProviders(refresh) {
-  const res = await llmApi.getProviders()
-  providers.value = res
-
-  // 如果有传入的providerId，则优先使用它
-  if (props.providerId && res[props.providerId]) {
-    handleProviderChange(props.providerId, res[props.providerId])
+  await modelStore.fetchProvidersAndModels()
+  const providersAndModels = modelStore.providers
+  if (props.providerId && providersAndModels[props.providerId]) {
+    handleProviderChange(props.providerId, providersAndModels[props.providerId])
   } else if (refresh) {
-    handleProviderChange(defaultProvider, res[defaultProvider])
+    handleProviderChange(defaultProvider, providersAndModels[defaultProvider])
   }
 }
 
@@ -239,6 +265,53 @@ const isShowApiKey = ref(false)
 const toggleShowApiKey = () => {
   isShowApiKey.value = !isShowApiKey.value
 }
+
+// 添加自定义供应商
+const newProviderForm = reactive<ProviderConfigNew>({
+  provider_id: '',
+  api_key: '',
+  base_url: '',
+  state: true,
+})
+const showAddProviderDialog = ref(false)
+const addProvider = async () => {
+  if (!newProviderForm.provider_id || !newProviderForm.api_key) {
+    toast({
+      title: "请填写必要信息",
+      description: "供应商ID和API Key不能为空",
+      variant: "destructive",
+    })
+    return
+  }
+  
+  try {
+    saveLoading.value = true
+    const res = await llmApi.addProvider({
+      ...newProviderForm
+    })
+    toast({
+      title: "添加成功",
+      description: `供应商 ${newProviderForm.provider_id} 已添加`,
+    })
+    showAddProviderDialog.value = false
+    resetNewProviderForm()
+    modelStore.fetchProvidersAndModels()
+  } catch (error: any) {
+    toast({
+      title: "添加失败",
+      description: error.message,
+      variant: "destructive",
+    })
+  } finally {
+    saveLoading.value = false
+  }
+}
+const resetNewProviderForm = () => {
+  newProviderForm.provider_id = ''
+  newProviderForm.api_key = ''
+  newProviderForm.base_url = ''
+  newProviderForm.state = true
+}
 </script>
 
 <template>
@@ -248,14 +321,72 @@ const toggleShowApiKey = () => {
     <div class="w-[180px] border-r">
       <div class="flex justify-between items-center mb-4 pr-4">
         <div class="font-bold ml-2">{{ t('settings.apiModel.modelProvider') }}</div>
-        <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
+        <!-- <Button size="sm" variant="outline"><Plus></Plus>新增</Button> -->
+        <Dialog v-model:open="showAddProviderDialog">
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
+          </DialogTrigger>
+          <DialogContent class="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>添加新供应商</DialogTitle>
+              <DialogDescription>
+                添加自定义的 LLM 供应商，填写必要的配置信息。
+              </DialogDescription>
+            </DialogHeader>
+            <div class="grid gap-4 space-y-4">
+              <div class="grid grid-cols-4 items-center gap-4 ">
+                <Label class="text-right" for="provider-id">供应商 ID</Label>
+                <Input
+                  id="provider-id"
+                  v-model="newProviderForm.provider_id"
+                  placeholder="例如: openai, anthropic"
+                  class="col-span-3"
+                />
+              </div>
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label class="text-right" for="api-key">API Key</Label>
+                <Input
+                  id="api-key"
+                  v-model="newProviderForm.api_key"
+                  type="password"
+                  placeholder="sk-..."
+                  class="col-span-3"
+                />
+              </div>
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label class="text-right" for="base-url">API URL</Label>
+                <Input
+                  id="base-url"
+                  v-model="newProviderForm.base_url"
+                  placeholder="https://api.example.com"
+                  class="col-span-3"
+                />
+              </div>
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Label class="text-right" for="state">启用状态</Label>
+                <div class="col-span-3 flex items-center">
+                  <Switch id="state" v-model="newProviderForm.state" />
+                  <span class="ml-2">{{ newProviderForm.state ? '启用' : '禁用' }}</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" @click="showAddProviderDialog = false">取消</Button>
+              <Button :disabled="saveLoading" @click="addProvider">
+                <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+                {{ saveLoading ? '添加中...' : '添加' }}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       <ScrollArea class="h-[calc(100vh-8rem)] pr-4" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
         <div class="space-y-2">
+        <!-- {{providers}} -->
           <div
             v-for="(value, provider) in providers"
             :key="provider"
-            @click="handleProviderChange(provider, value)"
+            @click="handleProviderChange(String(provider), value)"
             class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
             :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }"
           >
@@ -266,7 +397,7 @@ const toggleShowApiKey = () => {
               ></div>
             </div>
             <div class="flex-1 flex items-center space-x-2">
-              <Icon :name="provider" :size="24" />
+              <Icon :name="provider as string" :size="24" />
               <span>{{ provider }}</span>
             </div>
           </div>
