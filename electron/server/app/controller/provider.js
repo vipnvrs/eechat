@@ -12,12 +12,27 @@ class ProviderController extends Controller {
       ctx.body = ctx.helper.error(error)
     }
   }
-  async getProviders() {
+
+  async deleteProvider() {
     const { ctx } = this
     const uid = ctx.request.query.uid || 'default-user'
+    const { provider } = ctx.params
     try {
-      const providers = await ctx.service.provider.getProviders(uid)
-      ctx.body = ctx.helper.success(providers)
+      const configs = await ctx.service.provider.deleteProvider(uid, provider)
+      ctx.body = ctx.helper.success(configs)
+    } catch (error) {
+      ctx.body = ctx.helper.error(error)
+    }
+  }
+
+  async addModel() {
+    const { ctx } = this
+    const uid = ctx.request.query.uid || 'default-user'
+    const { id, provider_id, state, name, group_name, _, } = ctx.request.body
+    const model_id = `${provider_id}:${id}`
+    try {
+      const configs = await ctx.service.provider.addModel(uid, provider_id, model_id, state, name, group_name, _,)
+      ctx.body = ctx.helper.success(configs) 
     } catch (error) {
       ctx.body = ctx.helper.error(error)
     }

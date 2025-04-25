@@ -45,6 +45,20 @@ export const useModelStore = defineStore('model', () => {
     }
   }
 
+  const deleteProvider = async (providerId: string) => {
+    try {
+      isLoading.value = true
+      await llmApi.deleteProvider(providerId)
+      providers.value.delete(providerId)
+      return true
+    } catch (error) {
+      console.log(error)
+      error = (error as Error).message
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // Getters
   const availableModels = computed(() => {
     const models: LLMModel[] = []
@@ -151,6 +165,7 @@ export const useModelStore = defineStore('model', () => {
     setCurrentModel,
     clearProviders,
     fetchProvidersAndModels,
+    deleteProvider,
 
     // 新增导出
     initLocalProvider,

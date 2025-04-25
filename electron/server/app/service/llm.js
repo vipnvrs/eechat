@@ -149,7 +149,8 @@ class LLMService extends BaseLLMService {
             },
           })
           customModelsConfig.forEach(config => {
-            config.from = 'config'
+            config.dataValues.from = 'config'
+            config.dataValues.id = config.model_id
           })
           defaultDataMap.set(c_provider_id, {
             id: c_provider.provider_id,

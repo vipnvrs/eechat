@@ -35,8 +35,9 @@ module.exports = app => {
   router.get('/api/llm/models/:provider', controller.llm.listModels)
   router.get('/api/llm/providers', controller.llm.listProviders)
   router.get('/api/llm/providersAndModels', controller.llm.providersAndModels)
-  router.post('/api/provider/add', controller.provider.addProvider)
-  router.get('/api/providers', controller.provider.getProviders)
+  router.post('/api/provider/addProvider', controller.provider.addProvider)
+  router.delete('/api/provider/:provider', controller.provider.deleteProvider)
+  router.post('/api/provider/addModel', controller.provider.addModel)
 
   // LLM 模型配置
   router.get(

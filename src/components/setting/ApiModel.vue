@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useModelStore } from "@/stores/model"
+import AddCustomModel from "@/components/setting/AddCustomModel.vue"
 
 import {
   Select,
@@ -33,6 +34,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/toast/use-toast"
 import { Toaster } from "@/components/ui/toast"
 import Icon from "@/components/Icon.vue"
@@ -43,9 +50,10 @@ import type {
   LLMModelArray,
   APIConfig,
   ProviderConfig,
+Model,
 } from "@/types/llm"
 import { ProviderConfig as ProviderConfigNew } from '@/types/provider'
-import { Loader2, Check, EyeClosed, Eye, Plus } from "lucide-vue-next"
+import { Loader2, Check, EyeClosed, Eye, Plus, Trash2, EllipsisVertical } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
 import { useEnvStore } from "@/stores/env"
 const envStore = useEnvStore()
@@ -93,12 +101,24 @@ const providers = computed(() => {
 })
 
 // API 模型配置状态
+const currentModel = computed(() => {
+  return modelStore.providers.get(currentProvider.value)
+})
+
 const apiConfig = reactive<APIConfig>({
-  apiKey: "sk-5f86865628c54c4f954090aae9395d3a",
-  baseUrl: "",
+  apiKey: currentModel.value?.api_key || "",
+  baseUrl: currentModel.value?.api_url + '/v1' || "",
   config: {},
   state: false,
   info: {},
+})
+watch(() => currentProvider.value, async (newVal) => {
+  if (newVal) {
+    apiConfig.apiKey = currentModel.value?.api_key || ""
+    apiConfig.baseUrl = currentModel.value?.api_url + '/v1' || ""
+    apiConfig.state = currentModel.value?.state || false
+    apiConfig.info = {}
+  }
 })
 
 // 测试连接
@@ -149,6 +169,7 @@ async function getProviders(refresh) {
 watch(
   () => props.providerId,
   (newVal) => {
+    debugger
     if (newVal && providers.value && providers.value[newVal]) {
       handleProviderChange(newVal, providers.value[newVal])
     }
@@ -164,41 +185,66 @@ const handleProviderChange = async (provider: string, value) => {
   currentProvider.value = provider
   getModels()
   // 查询配置
-  const res = await getConfigProvider()
-  if (res) {
-    apiConfig.apiKey = res.api_key
-    apiConfig.baseUrl = res.base_url
-    apiConfig.state = res.state ? true : false
-  } else {
-    apiConfig.apiKey = ""
-    apiConfig.baseUrl = value.api.url
-    apiConfig.state = value.state
-  }
-  apiConfig.info = value
-  console.log(apiConfig)
+  // const res = await getConfigProvider()
+  // if (res) {
+  //   apiConfig.apiKey = res.api_key
+  //   apiConfig.baseUrl = res.base_url
+  //   apiConfig.state = res.state ? true : false
+  // } else {
+  //   apiConfig.apiKey = ""
+  //   apiConfig.baseUrl = value.api.url
+  //   apiConfig.state = value.state
+  // }
+  // apiConfig.info = value
+  // console.log(apiConfig)
 }
 
-const modelsArray = ref<LLMModel[]>([])
-const models = ref({})
+// const modelsArray = ref<LLMModel[]>([])
+const modelsArray = computed(() => {
+  const modelsList = modelStore.providers.get(currentProvider.value)?.models || [];
+  return modelsList
+})
+// const models = ref({})
 
-const getModels = async () => {
-  const provider = currentProvider.value
-  const res = await llmApi.getModels(provider)
-  const data = {}
-  modelsArray.value = res
-  currentCheckModel.value = res[0]?.id
-  currentCheckModelObject.value = res[0]
-  res.forEach((item) => {
-    if (!data[item.group_name]) {
-      data[item.group_name] = []
+// 新增，使用全局数据
+const models = computed(() => {
+  const modelsList = modelStore.providers.get(currentProvider.value)?.models || [];
+  const groupedModels = {};
+  modelsList.forEach((item) => {
+    if (!groupedModels[item.group_name]) {
+      groupedModels[item.group_name] = [];
     }
-    if (typeof item.apiKey == "undefined") item.apiKey = ""
-    data[item.group_name].push(item)
-  })
-  console.log(data)
-  models.value = data
-}
+    // if (typeof item.apiKey == "undefined") item.apiKey = "";
+    groupedModels[item.group_name].push(item);
+  });
+  
+  return groupedModels;
+})
+
 const currentCheckModel = ref("")
+const getModels = async () => {
+  await modelStore.fetchProvidersAndModels()
+  const models_cache = modelStore.providers.get(currentProvider.value)
+  const models = models_cache?.models || []
+  
+  if(models.length > 0) {
+    currentCheckModel.value = models[0]?.id as string
+    currentCheckModelObject.value = models[0]
+  }
+  // const data = {}
+  // modelsArray.value = res
+  // currentCheckModel.value = res[0]?.id
+  // currentCheckModelObject.value = res[0]
+  // res.forEach((item) => {
+  //   if (!data[item.group_name]) {
+  //     data[item.group_name] = []
+  //   }
+  //   if (typeof item.apiKey == "undefined") item.apiKey = ""
+  //   data[item.group_name].push(item)
+  // })
+  // console.log(data)
+  // models.value = data
+}
 
 // 模型配置
 const getConfigProvider = async () => {
@@ -221,7 +267,6 @@ const saveConfigProviderState = async (state: boolean) => {
   })
   const res = await llmApi.saveConfigProviderState(currentProvider.value, config)
   modelStore.updateProviderState(currentProvider.value, state)
-  console.log(modelStore)
 
   getProviders(false)
 }
@@ -255,7 +300,7 @@ const _flattenModels = (models: Record<string, LLMModel[]>): LLMModel[] => {
   return result
 }
 
-const currentCheckModelObject = ref<LLMModel | undefined>({} as LLMModel)
+const currentCheckModelObject = ref<Model>()
 const handleCurrentCheckModelUpdate = (modelId: string) => {
   const selectedModel = modelsArray.value.find((model) => model.id === modelId)
   currentCheckModelObject.value = selectedModel
@@ -275,10 +320,10 @@ const newProviderForm = reactive<ProviderConfigNew>({
 })
 const showAddProviderDialog = ref(false)
 const addProvider = async () => {
-  if (!newProviderForm.provider_id || !newProviderForm.api_key) {
+  if (!newProviderForm.provider_id) {
     toast({
       title: "请填写必要信息",
-      description: "供应商ID和API Key不能为空",
+      description: "供应商不能为空，如 openai",
       variant: "destructive",
     })
     return
@@ -289,6 +334,7 @@ const addProvider = async () => {
     const res = await llmApi.addProvider({
       ...newProviderForm
     })
+    currentProvider.value = newProviderForm.provider_id
     toast({
       title: "添加成功",
       description: `供应商 ${newProviderForm.provider_id} 已添加`,
@@ -311,6 +357,35 @@ const resetNewProviderForm = () => {
   newProviderForm.api_key = ''
   newProviderForm.base_url = ''
   newProviderForm.state = true
+}
+
+// 删除供应商相关
+const showDeleteConfirm = ref(false)
+const deleteProvider = async () => {
+  try {
+    saveLoading.value = true
+    await modelStore.deleteProvider(currentProvider.value)
+    toast({
+      title: "删除成功",
+      description: `供应商 ${currentProvider.value} 已删除`,
+    })
+    showDeleteConfirm.value = false
+    // 重新获取供应商列表
+    await modelStore.fetchProvidersAndModels()
+    // 如果有其他供应商，选择第一个
+    const providerKeys = Object.keys(providers.value)
+    if (providerKeys.length > 0) {
+      handleProviderChange(providerKeys[0], providers.value[providerKeys[0]])
+    }
+  } catch (error: any) {
+    toast({
+      title: "删除失败",
+      description: error.message,
+      variant: "destructive",
+    })
+  } finally {
+    saveLoading.value = false
+  }
 }
 </script>
 
@@ -419,7 +494,7 @@ const resetNewProviderForm = () => {
               <Tooltip>
                 <TooltipTrigger>
                   <Switch
-                    v-model="apiConfig.state"
+                    v-model="providers[currentProvider].state"
                     @update:model-value="saveConfigProviderState"
                   />
                 </TooltipTrigger>
@@ -428,6 +503,19 @@ const resetNewProviderForm = () => {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <EllipsisVertical class="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem @click="showDeleteConfirm = true">
+                  <Trash2 class="mr-2 h-4 w-4 text-red-500" />
+                  <span>删除供应商</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <!-- <Button :disabled="testLoading" @click="testConnection(currentProvider)">
               <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
               <CheckCircle2 v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
@@ -479,7 +567,7 @@ const resetNewProviderForm = () => {
                   <SelectValue :placeholder="t('settings.apiModel.selectModelToTest')" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="item in modelsArray" :value="item.id" :key="item.id">
+                  <SelectItem v-for="item in modelsArray" :value="item.id as string" :key="item.id">
                     {{ item.name }}
                   </SelectItem>
                 </SelectContent>
@@ -503,14 +591,16 @@ const resetNewProviderForm = () => {
         <div class="flex-1 pt-6 min-h-0 overflow-hidden">
           <div class="flex items-center space-x-2">
             <Label>{{ t('settings.apiModel.availableModels') }}</Label>
-            <Button size="sm" variant="outline"><Plus></Plus>新增模型</Button>
+            <!-- <Button size="sm" variant="outline">
+              <Plus></Plus>新增模型
+            </Button> -->
+            <AddCustomModel @refresh="getModels()" :provider_id="currentProvider"></AddCustomModel>
           </div>
           <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
-            <!-- {{ models['DeepSeek Chat'] }} -->
             <div v-for="(group, key) in models" :key="key" class="space-y-4">
               <!-- 组标题 -->
               <div class="flex items-center space-x-2 pt-6">
-                <div class="font-semibold font-bold">{{ key }}</div>
+                <div class="font-bold">{{ key }}</div>
                 <!-- <span class="text-sm text-gray-500">{{ group.description }}</span> -->
               </div>
 
@@ -578,6 +668,24 @@ const resetNewProviderForm = () => {
       </div>
     </div>
   </div>
+  <!-- 删除确认对话框 -->
+  <Dialog v-model:open="showDeleteConfirm">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>确认删除</DialogTitle>
+        <DialogDescription>
+          您确定要删除供应商 "{{ currentProvider }}" 吗？此操作无法撤销，相关的所有模型配置也将被删除。
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button variant="outline" @click="showDeleteConfirm = false">取消</Button>
+        <Button variant="destructive" :disabled="saveLoading" @click="deleteProvider">
+          <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+          {{ saveLoading ? '删除中...' : '确认删除' }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style scoped>

@@ -31,5 +31,76 @@ module.exports = class ProviderService extends Service {
     }
   }
 
-  
+  async deleteProvider(uid, provider_id) {
+    const { ctx } = this
+    try {
+      const providerConfig = await ctx.model.LlmConfigProvider.findOne({
+        where: {
+          uid,
+          provider_id,
+        }
+      })
+      if (providerConfig) {
+        await providerConfig.destroy({force: true})
+      }
+      const modelConfigs = await ctx.model.LlmConfigModel.findAll({
+        where: {
+          uid,
+          provider_id,
+        }
+      })
+      if (modelConfigs && modelConfigs.length > 0) {
+        for (const config of modelConfigs) {
+          await config.destroy({force: true})
+        }
+      }
+      const providerDefault = await ctx.model.LlmProvider.findOne({
+        where: {
+          id: provider_id,
+        }
+      })
+      if (providerDefault) {
+        await providerDefault.destroy()
+      }
+      const modelsDefault = await ctx.model.LlmModel.findAll({
+        where: {
+          provider_id,
+        }
+      })
+      if (modelsDefault && modelsDefault.length > 0) {
+        for (const config of modelsDefault) {
+          await config.destroy();
+        }
+      }
+      return true
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async addModel(uid, provider_id, model_id, state, name, group_name, _) {
+    const { ctx } = this
+    try {
+      const exsist = await ctx.model.LlmConfigModel.findOne({
+        where: {
+          provider_id,
+          model_id,
+        }
+      })
+      if (exsist) {
+        throw new Error('model already exists')
+      }
+      const newModel = ctx.model.LlmConfigModel.create({
+        uid,
+        provider_id,
+        model_id,
+        state,
+        name,
+        group_name,
+      })
+      return newModel
+    } catch (error) {
+      throw error
+    }
+  } 
 }

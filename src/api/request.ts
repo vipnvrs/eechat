@@ -1,7 +1,7 @@
 // import { LLMConfig } from '@/types/llm'
 import axios from 'axios'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
-import { LLMModel } from '@/types/llm'
+import { LLMModel, Model } from '@/types/llm'
 import { ProviderConfig } from '@/types/provider'
 import i18n from '@/i18n'
 
@@ -301,7 +301,13 @@ export const llmApi = {
   },
 
   async addProvider(form: ProviderConfig) {
-    return request.post(`/api/provider/add`, form)
+    return request.post(`/api/provider/addProvider`, form)
+  },
+  async deleteProvider(provider_id: string) {
+    return request.delete(`/api/provider/${provider_id}`)
+  },
+  async addModel(form: Model) {
+    return request.post(`/api/provider/addModel`, form)
   },
   
   async getProvidersAndModels() {
