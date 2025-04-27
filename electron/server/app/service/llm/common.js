@@ -29,6 +29,20 @@ class DeepseekService extends BaseLLMService {
         messages: [{ role: 'user', content: 'test' }],
         max_tokens: 1,
       })
+      if(!response.choices || response.choices.length == 0) {
+        if(response.error) {
+          if(response.error.metadata && response.error.metadata.raw) {
+            try {
+              const json = JSON.parse(response.error.metadata.raw)
+              throw new Error(json.error)
+            } catch (error) {
+              
+            }
+            throw new Error(response.error.metadata.raw)
+          }
+          throw new Error(response.error)
+        }
+      }
       return response.choices.length > 0
     } catch (error) {
       if (error.status == 401) {

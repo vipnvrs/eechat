@@ -64,25 +64,24 @@ const formData = reactive<Model>({
   capabilities: ['llm']
 })
 
-watch(() => formData.id, (newId) => {
-  if (newId && newId.length > 0 && formData.name.toLocaleLowerCase() != newId.toLocaleLowerCase() ) {
-    const firstChar = newId.charAt(0).toUpperCase();
-    const restChars = newId.substring(1);
-    formData.name = firstChar + restChars;
-    console.log('ID:', newId, '首字母:', firstChar, '剩余部分:', restChars, '结果:', formData.name);
-  }
-})
-
 watch(() => props.editModel, (model) => {
   if (model) {
-    formData.id = model.id || ""
     formData.provider_id = model.provider_id || props.provider_id
     formData.state = model.state !== undefined ? model.state : true
     formData.name = model.name || ""
     formData.group_name = model.group_name || "自定义分组"
     formData.capabilities = model.capabilities || ['llm']
+    formData.id = model.id || ""
   }
 }, { immediate: true })
+
+watch(() => formData.id, (newId) => {
+  if (newId && newId.length > 0 && formData.name.toLocaleLowerCase() != newId.toLocaleLowerCase() && !isEditMode.value) {
+    const firstChar = newId.charAt(0).toUpperCase();
+    const restChars = newId.substring(1);
+    formData.name = firstChar + restChars;
+  }
+})
 
 // 重置表单
 const resetForm = () => {

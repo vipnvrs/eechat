@@ -9,6 +9,9 @@ module.exports = {
   },
 
   error(message = 'error', code = -1) {
+    if(message instanceof Error) {
+      message = message.message
+    }
     return {
       code,
       data: null,

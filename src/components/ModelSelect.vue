@@ -26,7 +26,20 @@ const groupedModels = computed(() => {
   const providersArray = Array.from(modelStore.providers.values())
   const groups: Record<string, any> = {}
 
-  providersArray.forEach((provider) => {
+  // 首先对提供商数组进行排序
+  const sortedProviders = [...providersArray].sort((a, b) => {
+    // 本地模型始终排在最前面
+    // debugger
+    if (a.type === 'local') return -2
+    if (b.type === 'local') return 1
+    
+    // 其他按照更新时间倒序排列
+    const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0
+    const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0
+    return bTime - aTime // 倒序排列，最新的在前面
+  })
+
+  sortedProviders.forEach((provider) => {
     if (provider.state) {
       // 使用provider.id作为key，确保一致性
       groups[provider.id] = {

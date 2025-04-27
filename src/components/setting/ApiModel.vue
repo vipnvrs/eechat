@@ -107,19 +107,19 @@ const currentModel = computed(() => {
 
 const apiConfig = reactive<APIConfig>({
   apiKey: currentModel.value?.api_key || "",
-  baseUrl: currentModel.value?.api_url + '/v1' || "",
+  baseUrl: currentModel.value?.api_url || "",
   config: {},
   state: false,
   info: {},
 })
-watch(() => currentProvider.value, async (newVal) => {
+watch(() => [currentProvider.value, currentModel], async (newVal) => {
   if (newVal) {
     apiConfig.apiKey = currentModel.value?.api_key || ""
-    apiConfig.baseUrl = currentModel.value?.api_url + '/v1' || ""
+    apiConfig.baseUrl = currentModel.value?.api_url || ""
     apiConfig.state = currentModel.value?.state || false
     apiConfig.info = {}
   }
-})
+}, { immediate: true, deep: true  })
 
 // 测试连接
 async function testConnection(provider: string) {
@@ -210,17 +210,34 @@ const modelsArray = computed(() => {
 const models = computed(() => {
   const modelsList = modelStore.providers.get(currentProvider.value)?.models || [];
   const groupedModels = {};
-  modelsList.forEach((item) => {
+  
+  // 先对模型列表进行排序
+  const sortedModels = [...modelsList].sort((a, b) => {
+    // 1. 本地模型优先级最高
+    if ( modelStore.providers.get(a.provider_id)?.type === 'local' &&  modelStore.providers.get(b.provider_id)?.type !== 'local') return -1;
+    if ( modelStore.providers.get(a.provider_id)?.type !== 'local' &&  modelStore.providers.get(b.provider_id)?.type === 'local') return 1;
+    
+    // 2. 按照 sort 字段升序排序
+    if ((a.sort || 0) !== (b.sort || 0)) {
+      return (a.sort || 0) - (b.sort || 0);
+    }
+    
+    // 3. 按照 created_at 字段倒序排序（新的在前）
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime; // 倒序排列，最新的在前面
+  });
+  
+  // 然后按组名分组
+  sortedModels.forEach((item) => {
     if (!groupedModels[item.group_name]) {
       groupedModels[item.group_name] = [];
     }
-    // if (typeof item.apiKey == "undefined") item.apiKey = "";
     groupedModels[item.group_name].push(item);
   });
   
   return groupedModels;
 })
-
 const currentCheckModel = ref("")
 const getModels = async () => {
   await modelStore.fetchProvidersAndModels()
@@ -740,7 +757,8 @@ const deleteModel = async () => {
         <DialogHeader>
           <DialogTitle>{{ t('common.confirmDelete', '确认删除') }}</DialogTitle>
           <DialogDescription>
-            {{ t('settings.apiModel.confirmDeleteModelDesc', '确定要删除模型 {model} 吗？此操作不可撤销。', { model: modelToDelete?.name }) }}
+            <!-- {{ t('settings.apiModel.confirmDeleteModelDesc', '确定要删除模型 {model} 吗？此操作不可撤销。', { model: modelToDelete?.name }) }} -->
+            {{ t('settings.apiModel.confirmDeleteModelDesc', '确定要删除模型吗？此操作不可撤销。') }}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

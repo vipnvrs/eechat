@@ -159,6 +159,7 @@ class LLMService extends BaseLLMService {
             from: 'config',
             description: '',
             api_url: c_provider.base_url,
+            api_key: c_provider.api_key,
             official_url: "",
             api_key_url: "",
             docs_url: "",
