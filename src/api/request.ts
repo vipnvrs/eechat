@@ -309,6 +309,12 @@ export const llmApi = {
   async addModel(form: Model) {
     return request.post(`/api/provider/addModel`, form)
   },
+  async updateModel(form: Model) {
+    return request.post(`/api/provider/updateModel`, form)
+  },
+  async deleteModel(modelId: string) {
+    return request.delete(`/api/provider/deleteModel/${modelId}`)
+  },
   
   async getProvidersAndModels() {
     return request.get(`/api/llm/providersAndModels`)

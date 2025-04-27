@@ -38,6 +38,8 @@ module.exports = app => {
   router.post('/api/provider/addProvider', controller.provider.addProvider)
   router.delete('/api/provider/:provider', controller.provider.deleteProvider)
   router.post('/api/provider/addModel', controller.provider.addModel)
+  router.post('/api/provider/updateModel', controller.provider.updateModel)
+  router.delete('/api/provider/deleteModel/:id', controller.provider.deleteModel)
 
   // LLM 模型配置
   router.get(

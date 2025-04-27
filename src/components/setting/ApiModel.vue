@@ -387,305 +387,372 @@ const deleteProvider = async () => {
     saveLoading.value = false
   }
 }
+
+const currentEditModel = ref(null)
+
+// 编辑模型方法
+const editModel = (model) => {
+  currentEditModel.value = model
+}
+
+// 刷新模型列表
+const refreshModels = async () => {
+  // 重置编辑模型
+  currentEditModel.value = null
+  // 刷新模型列表的逻辑
+  // ... existing code ...
+}
+
+// 删除模型相关
+const showDeleteModelConfirm = ref(false)
+const modelToDelete = ref(null)
+
+const confirmDeleteModel = (model) => {
+  modelToDelete.value = model
+  showDeleteModelConfirm.value = true
+}
+
+const deleteModel = async () => {
+  try {
+    saveLoading.value = true
+    if (!modelToDelete.value) return
+    // @ts-ignore
+    await llmApi.deleteModel(modelToDelete.value.id)
+    
+    toast({
+      title: t('common.delete') + t('common.success', '成功'),
+      description: t('settings.apiModel.deleteModelSuccess', '模型已成功删除'),
+    })
+    
+    // 刷新模型列表
+    await getModels()
+    showDeleteModelConfirm.value = false
+    modelToDelete.value = null
+  } catch (error: any) {
+    toast({
+      title: t('common.delete') + t('common.failed', '失败'),
+      description: error.message,
+      variant: "destructive",
+    })
+  } finally {
+    saveLoading.value = false
+  }
+}
 </script>
 
 <template>
-  <Toaster />
-  <div class="flex h-full">
-    <!-- 左侧 Sidebar -->
-    <div class="w-[180px] border-r">
-      <div class="flex justify-between items-center mb-4 pr-4">
-        <div class="font-bold ml-2">{{ t('settings.apiModel.modelProvider') }}</div>
-        <!-- <Button size="sm" variant="outline"><Plus></Plus>新增</Button> -->
-        <Dialog v-model:open="showAddProviderDialog">
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
-          </DialogTrigger>
-          <DialogContent class="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>添加新供应商</DialogTitle>
-              <DialogDescription>
-                添加自定义的 LLM 供应商，填写必要的配置信息。
-              </DialogDescription>
-            </DialogHeader>
-            <div class="grid gap-4 space-y-4">
-              <div class="grid grid-cols-4 items-center gap-4 ">
-                <Label class="text-right" for="provider-id">供应商 ID</Label>
-                <Input
-                  id="provider-id"
-                  v-model="newProviderForm.provider_id"
-                  placeholder="例如: openai, anthropic"
-                  class="col-span-3"
-                />
-              </div>
-              <div class="grid grid-cols-4 items-center gap-4">
-                <Label class="text-right" for="api-key">API Key</Label>
-                <Input
-                  id="api-key"
-                  v-model="newProviderForm.api_key"
-                  type="password"
-                  placeholder="sk-..."
-                  class="col-span-3"
-                />
-              </div>
-              <div class="grid grid-cols-4 items-center gap-4">
-                <Label class="text-right" for="base-url">API URL</Label>
-                <Input
-                  id="base-url"
-                  v-model="newProviderForm.base_url"
-                  placeholder="https://api.example.com"
-                  class="col-span-3"
-                />
-              </div>
-              <div class="grid grid-cols-4 items-center gap-4">
-                <Label class="text-right" for="state">启用状态</Label>
-                <div class="col-span-3 flex items-center">
-                  <Switch id="state" v-model="newProviderForm.state" />
-                  <span class="ml-2">{{ newProviderForm.state ? '启用' : '禁用' }}</span>
+  <div class="h-full">
+    <Toaster />
+    <div class="flex h-full">
+      <!-- 左侧 Sidebar -->
+      <div class="w-[180px] border-r">
+        <div class="flex justify-between items-center mb-4 pr-4">
+          <div class="font-bold ml-2">{{ t('settings.apiModel.modelProvider') }}</div>
+          <Dialog v-model:open="showAddProviderDialog">
+            <DialogTrigger asChild>
+              <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
+            </DialogTrigger>
+            <DialogContent class="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>添加新供应商</DialogTitle>
+                <DialogDescription>
+                  添加自定义的 LLM 供应商，填写必要的配置信息。
+                </DialogDescription>
+              </DialogHeader>
+              <div class="grid gap-4 space-y-4">
+                <div class="grid grid-cols-4 items-center gap-4 ">
+                  <Label class="text-right" for="provider-id">供应商 ID</Label>
+                  <Input
+                    id="provider-id"
+                    v-model="newProviderForm.provider_id"
+                    placeholder="例如: openai, anthropic"
+                    class="col-span-3"
+                  />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                  <Label class="text-right" for="api-key">API Key</Label>
+                  <Input
+                    id="api-key"
+                    v-model="newProviderForm.api_key"
+                    type="password"
+                    placeholder="sk-..."
+                    class="col-span-3"
+                  />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                  <Label class="text-right" for="base-url">API URL</Label>
+                  <Input
+                    id="base-url"
+                    v-model="newProviderForm.base_url"
+                    placeholder="https://api.example.com"
+                    class="col-span-3"
+                  />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                  <Label class="text-right" for="state">启用状态</Label>
+                  <div class="col-span-3 flex items-center">
+                    <Switch id="state" v-model="newProviderForm.state" />
+                    <span class="ml-2">{{ newProviderForm.state ? '启用' : '禁用' }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" @click="showAddProviderDialog = false">取消</Button>
-              <Button :disabled="saveLoading" @click="addProvider">
-                <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
-                {{ saveLoading ? '添加中...' : '添加' }}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-      <ScrollArea class="h-[calc(100vh-8rem)] pr-4" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
-        <div class="space-y-2">
-        <!-- {{providers}} -->
-          <div
-            v-for="(value, provider) in providers"
-            :key="provider"
-            @click="handleProviderChange(String(provider), value)"
-            class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
-            :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }"
-          >
-            <div>
-              <div
-                class="w-1.5 h-1.5 rounded-full"
-                :class="(value as any).state ? 'bg-green-400' : ''"
-              ></div>
-            </div>
-            <div class="flex-1 flex items-center space-x-2">
-              <Icon :name="provider as string" :size="24" />
-              <span>{{ provider }}</span>
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
-
-    <!-- 右侧配置区域 -->
-    <div class="flex-1 flex flex-col h-full">
-      <div v-if="currentProvider" class="flex flex-col h-full p-4 pt-0">
-        <!-- 头部 -->
-        <div class="flex justify-between items-center mb-4 border-b pb-4">
-          <div class="font-bold flex items-center space-x-2">
-            <Icon :name="currentProvider" :size="24" />
-            <span>{{ currentProvider }}</span>
-          </div>
-          <div class="flex space-x-2 items-center">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Switch
-                    v-model="providers[currentProvider].state"
-                    @update:model-value="saveConfigProviderState"
-                  />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{{ t('settings.apiModel.enableProvider') }}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <EllipsisVertical class="h-4 w-4" />
+              <DialogFooter>
+                <Button variant="outline" @click="showAddProviderDialog = false">取消</Button>
+                <Button :disabled="saveLoading" @click="addProvider">
+                  <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+                  {{ saveLoading ? '添加中...' : '添加' }}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem @click="showDeleteConfirm = true">
-                  <Trash2 class="mr-2 h-4 w-4 text-red-500" />
-                  <span>删除供应商</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <!-- <Button :disabled="testLoading" @click="testConnection(currentProvider)">
-              <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
-              <CheckCircle2 v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
-              {{ testLoading ? '测试中...' : '测试连接' }}
-            </Button> -->
-            <!-- <Button :disabled="saveLoading" @click="saveConfig(currentProvider)">
-              <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
-              {{ saveLoading ? '保存中...' : '保存配置' }}
-            </Button> -->
-          </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
-
-        <!-- 配置表单 -->
-        <div class="space-y-4">
-          <Label>{{ t('settings.apiModel.modelConfig') }}</Label>
-          <div class="grid gap-2">
-            <Label class="font-bold">API Key</Label>
-            <div class="flex items-center space-x-2">
-              <Input
-                v-model="apiConfig.apiKey"
-                :type="isShowApiKey? 'text' : 'password'"
-                :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
-              />
-              <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 
-                <EyeClosed v-if="isShowApiKey" />
-                <Eye v-else/>
-              </Button>
-            </div>
-          </div>
-
-          <div class="grid gap-2">
-            <Label class="font-bold">API URL</Label>
-            <Input
-              v-model="apiConfig.baseUrl"
-              :placeholder="`https://api.${currentProvider}.com${
-                currentProvider === 'openai' ? '/v1' : ''
-              }`"
-            />
-          </div>
-          <div class="grid gap-2">
-            <Label>{{ t('settings.apiModel.connectivityCheck') }}</Label>
-            <div class="flex items-center space-x-2">
-              <Select
-                class="w-full flex-1"
-                v-model="currentCheckModel"
-                @update:modelValue="handleCurrentCheckModelUpdate"
-              >
-                <SelectTrigger class="w-full flex-1">
-                  <SelectValue :placeholder="t('settings.apiModel.selectModelToTest')" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem v-for="item in modelsArray" :value="item.id as string" :key="item.id">
-                    {{ item.name }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
-                @click="testConnection(currentProvider)"
-              >
-                <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
-                <Check
-                  v-else-if="testPassed[currentProvider]"
-                  class="mr-1 h-4 w-4 text-green-500"
-                />
-                {{ testLoading ? t('settings.apiModel.testing') : t('settings.apiModel.testConnection') }}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 模型列表 -->
-        <div class="flex-1 pt-6 min-h-0 overflow-hidden">
-          <div class="flex items-center space-x-2">
-            <Label>{{ t('settings.apiModel.availableModels') }}</Label>
-            <!-- <Button size="sm" variant="outline">
-              <Plus></Plus>新增模型
-            </Button> -->
-            <AddCustomModel @refresh="getModels()" :provider_id="currentProvider"></AddCustomModel>
-          </div>
-          <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
-            <div v-for="(group, key) in models" :key="key" class="space-y-4">
-              <!-- 组标题 -->
-              <div class="flex items-center space-x-2 pt-6">
-                <div class="font-bold">{{ key }}</div>
-                <!-- <span class="text-sm text-gray-500">{{ group.description }}</span> -->
-              </div>
-
-              <!-- 组内模型 -->
-              <div class="flex flex-col mt-0 border rounded-md">
+        <ScrollArea class="h-[calc(100vh-8rem)] pr-4" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
+          <div class="space-y-2">
+            <div
+              v-for="(value, provider) in providers"
+              :key="provider"
+              @click="handleProviderChange(String(provider), value)"
+              class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
+              :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }"
+            >
+              <div>
                 <div
-                  v-for="model in group"
-                  :key="
-                    //@ts-ignore
-                    model.name
-                  "
-                  class="flex flex-col space-y-2 p-4 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  class="w-1.5 h-1.5 rounded-full"
+                  :class="(value as any).state ? 'bg-green-400' : ''">
+                </div>
+              </div>
+              <div class="flex-1 flex items-center space-x-2">
+                <Icon :name="String(provider)" :size="24" />
+                <span>{{ provider }}</span>
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+
+      <!-- 右侧配置区域 -->
+      <div class="flex-1 flex flex-col h-full">
+        <div v-if="currentProvider" class="flex flex-col h-full p-4 pt-0">
+          <!-- 头部 -->
+          <div class="flex justify-between items-center mb-4 border-b pb-4">
+            <div class="font-bold flex items-center space-x-2">
+              <Icon :name="currentProvider" :size="24" />
+              <span>{{ currentProvider }}</span>
+            </div>
+            <div class="flex space-x-2 items-center">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Switch
+                      v-model="providers[currentProvider].state"
+                      @update:model-value="saveConfigProviderState"
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{{ t('settings.apiModel.enableProvider') }}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <EllipsisVertical class="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem @click="showDeleteConfirm = true">
+                    <Trash2 class="mr-2 h-4 w-4 text-red-500" />
+                    <span>删除供应商</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <!-- <Button :disabled="testLoading" @click="testConnection(currentProvider)">
+                <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
+                <CheckCircle2 v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
+                {{ testLoading ? '测试中...' : '测试连接' }}
+              </Button> -->
+              <!-- <Button :disabled="saveLoading" @click="saveConfig(currentProvider)">
+                <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+                {{ saveLoading ? '保存中...' : '保存配置' }}
+              </Button> -->
+            </div>
+          </div>
+
+          <!-- 配置表单 -->
+          <div class="space-y-4">
+            <Label class="text-zinc-500">{{ t('settings.apiModel.modelConfig') }}</Label>
+            <div class="grid gap-2">
+              <Label class="font-bold">API Key</Label>
+              <div class="flex items-center space-x-2">
+                <Input
+                  v-model="apiConfig.apiKey"
+                  :type="isShowApiKey? 'text' : 'password'"
+                  :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
+                />
+                <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 
+                  <EyeClosed v-if="isShowApiKey" />
+                  <Eye v-else/>
+                </Button>
+              </div>
+            </div>
+
+            <div class="grid gap-2">
+              <Label class="font-bold">API URL</Label>
+              <Input
+                v-model="apiConfig.baseUrl"
+                :placeholder="`https://api.${currentProvider}.com${
+                  currentProvider === 'openai' ? '/v1' : ''
+                }`"
+              />
+            </div>
+            <div class="grid gap-2">
+              <Label class="text-zinc-500">{{ t('settings.apiModel.connectivityCheck') }}</Label>
+              <div class="flex items-center space-x-2">
+                <Select
+                  class="w-full flex-1"
+                  v-model="currentCheckModel"
+                  @update:modelValue="handleCurrentCheckModelUpdate"
                 >
-                  <div class="flex items-center space-x-2 justify-between">
-                    <div class="flex items-center space-x-2">
-                      <Icon
-                        :name="
-                          //@ts-ignore
-                          model.provider_id
-                        "
-                        :size="24"
-                      />
-                      <div class="font-medium">
-                        {{
-                          //@ts-ignore
-                          model.name
-                        }}
+                  <SelectTrigger class="w-full flex-1">
+                    <SelectValue :placeholder="t('settings.apiModel.selectModelToTest')" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem v-for="item in modelsArray" :value="String(item.id)" :key="item.id">
+                      {{ item.name }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button
+                  :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
+                  @click="testConnection(currentProvider)"
+                >
+                  <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
+                  <Check
+                    v-else-if="testPassed[currentProvider]"
+                    class="mr-1 h-4 w-4 text-green-500"
+                  />
+                  {{ testLoading ? t('settings.apiModel.testing') : t('settings.apiModel.testConnection') }}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模型列表 -->
+          <div class="flex-1 pt-6 min-h-0 overflow-hidden">
+            <div class="flex items-center space-x-2">
+              <Label class="text-zinc-500">{{ t('settings.apiModel.availableModels') }}</Label>
+              <AddCustomModel @refresh="getModels()" :provider_id="currentProvider" :edit-model="null" ></AddCustomModel>
+            </div>
+            <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
+              <div v-for="(group, key) in models" :key="key" class="space-y-1">
+                <!-- 组标题 -->
+                <div class="flex items-center space-x-2 pt-6">
+                  <div class="text-zinc-500 text-xs">{{ key }}</div>
+                </div>
+
+                <!-- 组内模型 -->
+                <div class="flex flex-col mt-0 border rounded-md">
+                  <div
+                    v-for="model in group"
+                    :key="
+                      //@ts-ignore
+                      model.name
+                    "
+                    class="flex flex-col space-y-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 group/item border-b"
+                  >
+                    <div class="flex items-center space-x-2 justify-between">
+                      <div class="flex items-center space-x-2">
+                        <Icon
+                          :name="
+                            //@ts-ignore
+                            model.provider_id
+                          "
+                          :size="24"
+                        />
+                        <div class="font-medium">
+                          {{
+                            //@ts-ignore
+                            model.name
+                          }}
+                        </div>
+                      </div>
+                      <div class="flex space-x-2 items-center">
+                        <AddCustomModel class="group/edit invisible group-hover/item:visible" @refresh="getModels()" :provider_id="currentProvider" :editButton="true" :edit-model="model" ></AddCustomModel>
+                        <Button @click="confirmDeleteModel(model)" class="group/edit invisible group-hover/item:visible" size="icon" variant="ghost"> <Trash2 class="text-zinc-500"/> </Button>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Switch
+                                v-model="
+                                  //@ts-ignore
+                                  model.state
+                                "
+                                @update:model-value="
+                                  //@ts-ignore
+                                  saveConfigModelState($event, models, model)
+                                "
+                              >
+                              </Switch>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{{ t('settings.apiModel.enableModel') }}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Switch
-                            v-model="
-                              //@ts-ignore
-                              model.state
-                            "
-                            @update:model-value="
-                              //@ts-ignore
-                              saveConfigModelState($event, models, model)
-                            "
-                          >
-                          </Switch>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{{ t('settings.apiModel.enableModel') }}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <!-- <div class="flex space-x-2">
+                    <template v-if="model.capabilities">
+                      <Badge variant="secondary" v-for="capability in model.capabilities" :key="capability">
+                        {{ capability }}
+                      </Badge>
+                    </template>
+                  </div> -->
                   </div>
-                  <!-- <div class="flex space-x-2">
-                  <Badge variant="secondary" v-for="capability in model.capabilities" :key="capability">
-                    {{ capability }}
-                  </Badge>
-                </div>
-                <div class="text-sm text-gray-500">
-                  {{ model.description }}
-                </div> -->
                 </div>
               </div>
-            </div>
-            <!-- </div> -->
-          </ScrollArea>
+            </ScrollArea>
+          </div>
         </div>
       </div>
     </div>
+    <!-- 删除确认对话框 -->
+    <Dialog v-model:open="showDeleteConfirm">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>确认删除</DialogTitle>
+          <DialogDescription>
+            您确定要删除供应商 "{{ currentProvider }}" 吗？此操作无法撤销，相关的所有模型配置也将被删除。
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" @click="showDeleteConfirm = false">取消</Button>
+          <Button variant="destructive" :disabled="saveLoading" @click="deleteProvider">
+            <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+            {{ saveLoading ? '删除中...' : '确认删除' }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    <!-- 删除模型确认对话框 -->
+    <Dialog v-model:open="showDeleteModelConfirm">
+      <DialogContent class="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{{ t('common.confirmDelete', '确认删除') }}</DialogTitle>
+          <DialogDescription>
+            {{ t('settings.apiModel.confirmDeleteModelDesc', '确定要删除模型 {model} 吗？此操作不可撤销。', { model: modelToDelete?.name }) }}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" @click="showDeleteModelConfirm = false">{{ t('common.cancel', '取消') }}</Button>
+          <Button variant="destructive" :disabled="saveLoading" @click="deleteModel">
+            <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
+            {{ t('common.delete', '删除') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
-  <!-- 删除确认对话框 -->
-  <Dialog v-model:open="showDeleteConfirm">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>确认删除</DialogTitle>
-        <DialogDescription>
-          您确定要删除供应商 "{{ currentProvider }}" 吗？此操作无法撤销，相关的所有模型配置也将被删除。
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter>
-        <Button variant="outline" @click="showDeleteConfirm = false">取消</Button>
-        <Button variant="destructive" :disabled="saveLoading" @click="deleteProvider">
-          <Loader2 v-if="saveLoading" class="mr-2 h-4 w-4 animate-spin" />
-          {{ saveLoading ? '删除中...' : '确认删除' }}
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
 </template>
 
 <style scoped>

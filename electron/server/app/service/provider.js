@@ -102,5 +102,46 @@ module.exports = class ProviderService extends Service {
     } catch (error) {
       throw error
     }
-  } 
+  }
+
+  async updateModel(uid, provider_id, model_id, state, name, group_name, _) {
+    const { ctx } = this
+    try {
+      const modelConfig = await ctx.model.LlmConfigModel.findOne({
+        where: {
+          uid,
+          provider_id,
+          model_id,
+        }
+      })
+      if (modelConfig) {
+        modelConfig.model_id = model_id
+        modelConfig.state = state
+        modelConfig.name = name
+        modelConfig.group_name = group_name
+        await modelConfig.save()
+        return modelConfig
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async deleteModel(uid, model_id) {
+    const { ctx } = this
+    try {
+      const modelConfig = await ctx.model.LlmConfigModel.findOne({
+        where: {
+          uid,
+          model_id,
+        }
+      })
+      if (modelConfig) {
+        await modelConfig.destroy({force: true})
+        return true
+      }
+    } catch (error) {
+      throw error
+    }
+  }
 }
