@@ -1,7 +1,7 @@
 // @see https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "ee.chat",
+  "appId": "ee.chat.na",
   "asar": true,
   "productName": "eechat",
   "directories": {
@@ -12,12 +12,12 @@
     "dist"
   ],
   "mac": {
-    // "hardenedRuntime": true,
-    // "entitlements": "build/entitlements.mac.plist",
-    // "entitlementsInherit": "build/entitlements.mac.plist",
+    "hardenedRuntime": true,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist",
     "icon": "icon/icons/mac/AppIcon.icns",
     "notarize": {
-      "teamId": "ee.chat"
+      "teamId": "SA27W9XX89"
     },
     "target": [
       {
@@ -34,7 +34,8 @@
       }
     ],
     "artifactName": "${productName}-mac-${arch}-${version}-Installer.${ext}",
-    "identity": null
+    // "identity": null
+    "identity": "Aijun Wang (SA27W9XX89)" 
   },
   "win": {
     "icon": "icon/icons/win/icon.ico",
