@@ -18,6 +18,7 @@ import { unified } from "unified"
 
 const props = defineProps<{
   message: string
+  messageReasoning: string
   role: string
 }>()
 const { t } = useI18n()
@@ -25,6 +26,7 @@ const renderedHTML = ref("")
 const isThinking = ref(false)
 const thinkContent = ref("")
 const formalContent = ref("")
+const reasoningContent = ref("")
 
 // 监听消息变化，处理思考过程和正式内容
 watch(
@@ -51,6 +53,10 @@ watch(
   { immediate: true }
 )
 
+watch(() => props.messageReasoning, (val) => {
+  reasoningContent.value = val
+}, { immediate: true, deep: true })
+
 // 使用 remark 处理 Markdown
 const processor = unified()
   .use(remarkParse) // 解析 Markdown
@@ -74,6 +80,12 @@ const processedThinkContent = computed(() => {
   return processor.processSync(thinkContent.value).toString()
 })
 
+// 处理 Reasoning 内容的 Markdown
+const processedReasoningContent = computed(() => {
+  if (!reasoningContent.value) return ""
+  return processor.processSync(reasoningContent.value).toString()
+})
+
 // 处理正式内容的 Markdown
 const processedFormalContent = computed(() => {
   if (!formalContent.value) return ""
@@ -83,14 +95,14 @@ const processedFormalContent = computed(() => {
 
 <template>
   <div class="last:min-h-[calc(100dvh-300px)] msg-item">
-    <div
-      v-if="message == ''"
+    <!-- <div
+      v-if="message == 'eechat:thinking'"
       class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
     >
       <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
       <span class="ml-2 text-[14px]">{{ t("chat.thinking") }}</span>
-    </div>
-    <div v-else class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
+    </div> -->
+    <div class="flex pb-4" :class="role === 'user' ? 'flex-row-reverse' : ''">
       <div class="flex flex-col max-w-[80%]">
         <div
           class="rounded-lg px-4 py-2 list-disc text-[14px] whitespace-wrap msg-item"
@@ -100,6 +112,19 @@ const processedFormalContent = computed(() => {
               : 'bg-gray-100 dark:bg-primary-foreground dark:text-white'
           "
         >
+
+          <div v-if="reasoningContent && processedReasoningContent" class="thinking-container pb-4 mb-4 border-b text-sm leading-8">
+            <div class="think" v-html="processedReasoningContent"></div>
+          </div>
+
+          <div
+            v-if="message == ''"
+            class="flex items-center "
+          >
+            <LoaderCircle class="animate-spin w-4 h-4"></LoaderCircle>
+            <span class="ml-2 text-[14px]">{{ t("chat.thinking") }}</span>
+          </div>
+
           <!-- 思考中状态 -->
           <div v-if="isThinking" class="thinking-container">
             <div class="think" v-html="processedThinkContent"></div>

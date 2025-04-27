@@ -111,6 +111,13 @@ class ChatService extends Service {
           )
           return
         }
+        if(chunk.choices[0].delta.reasoning) {
+          chunk.choices[0].delta.reasoning_content = chunk.choices[0].delta.reasoning
+        }
+        if(chunk.choices[0].delta.reasoning_content) {
+          ctx.res.write(JSON.stringify(chunk) + '\n')
+          continue
+        }
         if (!chunk.choices[0].delta.content) {
           continue
         }

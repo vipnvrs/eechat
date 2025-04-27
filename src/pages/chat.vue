@@ -50,6 +50,7 @@ const assistantStore = useAssistantStore()
 interface Message {
   role: "system" | "user" | "assistant"
   content: string
+  reasoning_content?: string
 }
 const { t } = useI18n()
 const chatStore = useChatStore()
@@ -137,6 +138,7 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
     chatHistory.value.push({
       role: "assistant",
       content: "",
+      reasoning_content: "",
     })
     // 发送消息并处理流式响应
     await llmApi.sendMessageLlm(
@@ -146,6 +148,14 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
       (content: string) => {
         const lastMessage = chatHistory.value[chatHistory.value.length - 1]
         lastMessage.content += content
+      },
+      (reasoning_content) => {
+        // 思考过程
+        const lastMessage = chatHistory.value[chatHistory.value.length - 1]
+        if(typeof lastMessage.reasoning_content == 'undefined') {
+          lastMessage.reasoning_content = ""
+        }
+        lastMessage.reasoning_content += reasoning_content
       },
       tools.value,
     )

@@ -156,6 +156,7 @@ export const chatApi = {
     messages: Array<{ role: string; content: string }>,
     sessionId,
     onProgress?: (content: string) => void,
+    onProgressReasoning?: (reasoning_content: string) => void,
   ) {
     try {
       const currentLang = i18n.global.locale.value
@@ -167,7 +168,7 @@ export const chatApi = {
         },
         body: JSON.stringify({ model, messages, sessionId }),
       })
-      handleStream(response, onProgress)
+      handleStream(response, onProgress, onProgressReasoning)
     } catch (error) {
       console.error('Chat error:', error)
       throw error
@@ -361,6 +362,7 @@ export const llmApi = {
     messages: Array<{ role: string; content: string }>,
     sessionId,
     onProgress?: (content: string) => void,
+    onProgressReasoning?: (reasoning_content: string) => void,
     tools?: any[],
   ) {
     const provider = model.provider_id
@@ -383,7 +385,7 @@ export const llmApi = {
         },
         body: JSON.stringify(requestBody)
       })
-      handleStream(response, onProgress)
+      handleStream(response, onProgress, onProgressReasoning)
     } catch (error) {
       console.error('Chat error:', error)
       throw error
@@ -391,7 +393,7 @@ export const llmApi = {
   },
 }
 
-const handleStream = async (response, onProgress) => {
+const handleStream = async (response, onProgress, onProgressReasoning) => {
   const reader = response.body?.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
@@ -416,6 +418,8 @@ const handleStream = async (response, onProgress) => {
             if (line.includes('tool')) {
               // debugger
             }
+            // console.log('data:', data);
+            const reasoning_content = data.choices[0]?.delta?.reasoning_content || ''
             const content = data.choices[0]?.delta?.content || ''
 
             // 处理思考标记
@@ -436,6 +440,9 @@ const handleStream = async (response, onProgress) => {
             // 直接发送增量内容，不在这里累加
             if (content && onProgress) {
               onProgress(content)
+            }
+            if(reasoning_content && onProgressReasoning) {
+              onProgressReasoning(reasoning_content)
             }
           } catch (e) {
             console.error('解析错误:', e)
