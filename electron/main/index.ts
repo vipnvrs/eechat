@@ -174,7 +174,6 @@ app.whenReady().then(async () => {
     const playground = new Playground(win)
   } catch (error) {
     console.error('Failed to start EggJS server:', error)
-    app.quit()
   }
 })
 

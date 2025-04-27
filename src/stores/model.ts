@@ -64,6 +64,7 @@ export const useModelStore = defineStore('model', () => {
     const models: LLMModel[] = []
     providers.value.forEach(provider => {
       if (provider.state) {
+        // @ts-ignore
         models.push(...provider.models.filter(model => model.state))
       }
     })
@@ -128,6 +129,7 @@ export const useModelStore = defineStore('model', () => {
   function updateLocalModels(models: LLMModel[]) {
     const provider = providers.value.get(LOCAL_PROVIDER_ID)
     if (provider) {
+      // @ts-ignore
       provider.models = models.map(model => ({
         ...model,
         state: true, // 确保本地模型默认启用
@@ -142,6 +144,7 @@ export const useModelStore = defineStore('model', () => {
     providersArray.forEach(provider => {
       // 只显示启用的提供商和模型
       if (provider.state) {
+        // @ts-ignore
         groups[provider.name] = provider.models.filter(model => model.state)
       }
     })

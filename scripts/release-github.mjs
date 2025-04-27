@@ -132,23 +132,46 @@ const createRelease = async () => {
     }
     
     execSync(`git tag ${tagName}`);
-    execSync(`git push origin ${tagName} --force`);
+    execSync(`git push github ${tagName} --force`);
     
     // 准备 release 参数
     const releaseNotes = generateReleaseNotes();
     
+    // 检查 release 是否已存在
+    let releaseExists = false;
+    try {
+      const result = execSync(`gh release view ${tagName} --json name`, { stdio: 'pipe' });
+      releaseExists = result.toString().trim().length > 0;
+    } catch (e) {
+      // release 不存在，忽略错误
+    }
+    
     // 构建命令
-    let command = `gh release create ${tagName}`;
-    
-    // 添加名称
-    command += ` --title "${appName} v${version}"`;
-    
-    // 添加说明
-    command += ` --notes "${releaseNotes.replace(/"/g, '\\"')}"`;
-    
-    // 添加草稿和预发布选项
-    if (isDraft) command += ' --draft';
-    if (isPreRelease) command += ' --prerelease';
+    let command = '';
+    if (releaseExists) {
+      console.log(`📝 发现已存在的 release: ${tagName}，将进行更新`);
+      command = `gh release upload ${tagName}`;
+      
+      // 删除现有资源文件（可选）
+      try {
+        execSync(`gh release delete-asset ${tagName} --pattern "*" --yes`, { stdio: 'ignore' });
+        console.log('🗑️  已删除现有资源文件');
+      } catch (e) {
+        console.warn('⚠️ 删除现有资源文件失败，将直接添加新文件');
+      }
+    } else {
+      command = `gh release create ${tagName}`;
+      
+      // 添加名称
+      command += ` --title "${appName} v${version}"`;
+      
+      // 添加说明
+      command += ` --notes "${releaseNotes.replace(/"/g, '\\"')}"`;
+      
+      // 添加草稿和预发布选项
+      if (isDraft) command += ' --draft';
+      if (isPreRelease) command += ' --prerelease';
+    }
     
     // 添加资源文件
     assets.forEach(file => {
