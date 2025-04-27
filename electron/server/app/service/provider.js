@@ -78,7 +78,7 @@ module.exports = class ProviderService extends Service {
     }
   }
 
-  async addModel(uid, provider_id, model_id, state, name, group_name, _) {
+  async addModel(uid, provider_id, model_id, state, name, group_name, capabilities, _) {
     const { ctx } = this
     try {
       const exsist = await ctx.model.LlmConfigModel.findOne({
@@ -97,6 +97,7 @@ module.exports = class ProviderService extends Service {
         state,
         name,
         group_name,
+        parameters: JSON.stringify({capabilities}),
       })
       return newModel
     } catch (error) {
@@ -104,7 +105,7 @@ module.exports = class ProviderService extends Service {
     }
   }
 
-  async updateModel(uid, provider_id, model_id, state, name, group_name, _) {
+  async updateModel(uid, provider_id, model_id, state, name, group_name, capabilities, _) {
     const { ctx } = this
     try {
       const modelConfig = await ctx.model.LlmConfigModel.findOne({
@@ -119,6 +120,7 @@ module.exports = class ProviderService extends Service {
         modelConfig.state = state
         modelConfig.name = name
         modelConfig.group_name = group_name
+        modelConfig.parameters = JSON.stringify({capabilities})
         await modelConfig.save()
         return modelConfig
       }

@@ -109,12 +109,22 @@ class LLMService extends BaseLLMService {
           const d_models = await this.listModels(provider.id)
           d_models.forEach(model => {
             model.from = 'common'
+            model.capabilities = model.capabilities || ['llm']
           })
           models = d_models
         } else {
           c_models.forEach(config => {
+            let parameters = {}
+            let capabilities = ['llm']
+            try {
+              parameters = JSON.parse(config.parameters)
+              capabilities = parameters.capabilities || ['llm']
+            } catch (error) {
+              
+            }
             config.dataValues.id = config.dataValues.model_id
             config.dataValues.from = 'config'
+            config.dataValues.capabilities = capabilities
           })
           models = c_models
         }
@@ -149,8 +159,17 @@ class LLMService extends BaseLLMService {
             },
           })
           customModelsConfig.forEach(config => {
+            let parameters = {}
+            let capabilities = ['llm']
+            try {
+              parameters = JSON.parse(config.parameters)
+              capabilities = parameters.capabilities || ['llm']
+            } catch (error) {
+              
+            }
             config.dataValues.from = 'config'
             config.dataValues.id = config.model_id
+            config.dataValues.capabilities = capabilities
           })
           defaultDataMap.set(c_provider_id, {
             id: c_provider.provider_id,

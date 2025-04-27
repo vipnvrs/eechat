@@ -718,13 +718,13 @@ const deleteModel = async () => {
                         </TooltipProvider>
                       </div>
                     </div>
-                    <!-- <div class="flex space-x-2">
-                    <template v-if="model.capabilities">
-                      <Badge variant="secondary" v-for="capability in model.capabilities" :key="capability">
-                        {{ capability }}
-                      </Badge>
-                    </template>
-                  </div> -->
+                    <div class="flex space-x-2">
+                      <template v-if="(model as any).capabilities">
+                        <Badge variant="outline" v-for="capability in (model as any).capabilities" :key="capability">
+                          {{ capability }}
+                        </Badge>
+                      </template>
+                    </div>
                   </div>
                 </div>
               </div>
