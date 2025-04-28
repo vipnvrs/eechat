@@ -109,15 +109,17 @@ const openPromptEditor = () => {
         </div>
         <!-- </FormField> -->
         <div class="grid gap-2">
-          <Label class="flex justify-between items-center">
-            <span> 
-              <span>{{ t('chat.settings.systemPrompt') }}</span>
-              <Badge variant="outline">{{ t('chat.settings.rolePrompt') }}</Badge>
-            </span>
-            <Button variant="ghost" size="icon" @click="openPromptEditor">
-              <SquarePen></SquarePen>
+          <div class="flex justify-between items-center">
+            <Label>
+              <span class="space-x-1">
+                <span>{{ t('chat.settings.systemPrompt') }}</span>
+                <Badge variant="outline">{{ t('chat.settings.rolePrompt') }}</Badge>
+              </span>
+            </Label>
+            <Button size="sm" variant="outline" @click="openPromptEditor" type="button">
+              <SquarePen></SquarePen> <span class="text-xs">窗口编辑</span>
             </Button>
-          </Label>
+          </div>
           <Textarea
             type="text"
             placeholder=""
