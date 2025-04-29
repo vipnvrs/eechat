@@ -9,6 +9,7 @@ import { LLMProvider, ModelProvider } from "@/types/llm"
 import { useRouter } from "vue-router"
 import { useColorMode } from '@vueuse/core'
 import { Analytics } from '@vercel/analytics/vue'
+import GlobalSpeechIndicator from '@/components/speech/GlobalSpeechIndicator.vue'
 const mode = useColorMode()
 
 const modelStore = useModelStore()
@@ -90,7 +91,10 @@ console.log(`isweb:`, envStore.isWeb)
 </script>
 
 <template>
-  <div class="h-full w-full overflow-hidden"><Layout></Layout></div>
+  <div class="h-full w-full overflow-hidden">
+    <Layout></Layout>
+    <GlobalSpeechIndicator />
+  </div>
   <Analytics mode="production" />
 </template>
 

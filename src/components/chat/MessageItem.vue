@@ -2,6 +2,7 @@
 import { ref, defineProps, computed, nextTick, onBeforeUnmount, watch } from "vue"
 import { useI18n } from "vue-i18n"
 import { LoaderCircle } from "lucide-vue-next"
+import MessageAction from "./MessageAction.vue"
 import remarkParse from "remark-parse"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
@@ -94,7 +95,7 @@ const processedFormalContent = computed(() => {
 </script>
 
 <template>
-  <div class="last:min-h-[calc(100dvh-300px)] msg-item">
+  <div class="last:min-h-[calc(100dvh-300px)] msg-item relative group/item">
     <!-- <div
       v-if="message == 'eechat:thinking'"
       class="bg-gray-100 dark:bg-primary-foreground dark:text-white rounded-lg p-2 flex items-center w-[110px] justify-center"
@@ -146,6 +147,7 @@ const processedFormalContent = computed(() => {
         </div>
       </div>
     </div>
+    <div class="invisible group-hover/item:visible"><MessageAction :message="message" :role="role"></MessageAction></div>
   </div>
 </template>
 
