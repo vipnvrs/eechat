@@ -32,11 +32,19 @@ class ChunkerService extends Service {
     const chunks = []
     let startIndex = 0
 
+    // 确保 chunkOverlap 不大于 chunkSize
+    const overlap = Math.min(chunkOverlap, chunkSize - 1)
+
     while (startIndex < text.length) {
       const endIndex = Math.min(startIndex + chunkSize, text.length)
       chunks.push(text.substring(startIndex, endIndex))
-      startIndex = endIndex - chunkOverlap
-      if (startIndex >= text.length) break
+
+      // 确保 startIndex 始终向前移动
+      const stride = chunkSize - overlap
+      startIndex += Math.max(1, stride) // 至少移动1个字符
+
+      // 如果已经处理到文本末尾，直接退出
+      if (endIndex >= text.length) break
     }
 
     return chunks

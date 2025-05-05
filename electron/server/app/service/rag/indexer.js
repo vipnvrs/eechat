@@ -1,6 +1,11 @@
 const { Service } = require('egg')
-
+const MilvusService = require('./milvus')
 class IndexerService extends Service {
+  constructor(ctx) {
+    super(ctx)
+    this.milvus = new MilvusService(ctx)
+  }
+
   /**
    * 索引文档
    * @param {Object} document 文档对象
@@ -14,7 +19,7 @@ class IndexerService extends Service {
 
     try {
       // 获取Milvus服务
-      const milvusService = this.ctx.service.rag.milvus
+      const milvusService = this.milvus
       const config = await this.ctx.service.rag.getConfig()
 
       // 确保Milvus已初始化

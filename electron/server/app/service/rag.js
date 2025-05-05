@@ -1,8 +1,14 @@
 const { Service } = require('egg')
 const fs = require('fs')
 const path = require('path')
+const ManagerService = require('./rag/manager')
 
 class RagService extends Service {
+  constructor(ctx) {
+    super(ctx)
+    // this.ctx = ctx
+    this.manager = new ManagerService(ctx)
+  }
   /**
    * 获取配置
    */
@@ -50,10 +56,7 @@ class RagService extends Service {
    */
   async processDocument(document, options = {}) {
     // 委托给RAG管理器处理
-    return await this.ctx.service.rag.manager.processDocumentRag(
-      document,
-      options,
-    )
+    return await this.manager.processDocumentRag(document, options)
   }
 
   /**

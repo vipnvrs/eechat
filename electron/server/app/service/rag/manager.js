@@ -1,10 +1,22 @@
 const { Service } = require('egg')
-const fs = require('fs').promises
+const fs = require('fs')
 const path = require('path')
+const MilvusService = require('./milvus')
+const ChunkerService = require('./chunker')
+const EmbedderService = require('./embedder')
+const IndexerService = require('./indexer')
+const RerankerService = require('./reranker')
+const ExtractorService = require('./extractor')
 
 class ManagerService extends Service {
   constructor(ctx) {
     super(ctx)
+    this.milvus = new MilvusService(ctx)
+    this.extractor = new ExtractorService(ctx)
+    this.chunker = new ChunkerService(ctx)
+    this.embedder = new EmbedderService(ctx)
+    this.indexer = new IndexerService(ctx)
+    this.reranker = new RerankerService(ctx)
     this.initialized = false
   }
 
@@ -17,7 +29,7 @@ class ManagerService extends Service {
       const config = await this.getConfig()
 
       // 初始化Milvus服务
-      await this.ctx.service.rag.milvus.ensureInitialized(config)
+      await this.milvus.ensureInitialized(config)
 
       this.initialized = true
     }
@@ -41,18 +53,18 @@ class ManagerService extends Service {
       // 确保配置目录存在
       const configDir = path.dirname(configFile)
       if (!fs.existsSync(configDir)) {
-        await fs.mkdir(configDir, { recursive: true })
+        fs.mkdirSync(configDir, { recursive: true })
       }
 
       // 如果配置文件不存在，复制默认配置
       if (!fs.existsSync(configFile)) {
         this.ctx.logger.info('RAG配置文件不存在，创建默认配置')
-        const defaultConfig = await fs.readFile(defaultConfigFile, 'utf8')
-        await fs.writeFile(configFile, defaultConfig, 'utf8')
+        const defaultConfig = fs.readFileSync(defaultConfigFile, 'utf8')
+        fs.writeFileSync(configFile, defaultConfig, 'utf8')
       }
 
       // 读取配置文件
-      const config = await fs.readFile(configFile, 'utf8')
+      const config = fs.readFileSync(configFile, 'utf8')
       const configJSON = JSON.parse(config)
 
       return configJSON
@@ -73,11 +85,10 @@ class ManagerService extends Service {
 
     try {
       // 1. 文本提取
-      const extractorService = this.ctx.service.rag.extractor
-      const extractedText = await extractorService.extractText(document)
+      const extractedText = await this.extractor.extractText(document)
 
       // 2. 文本分块
-      const chunkerService = this.ctx.service.rag.chunker
+      const chunkerService = this.chunker
       const textChunks = await chunkerService.chunkText(extractedText, {
         chunkSize: options.chunkSize,
         chunkOverlap: options.chunkOverlap,
@@ -85,13 +96,13 @@ class ManagerService extends Service {
       })
 
       // 3. 向量嵌入
-      const embedderService = this.ctx.service.rag.embedder
+      const embedderService = this.embedder
       const embeddings = await embedderService.embedTexts(textChunks, {
         model: options.embeddingModel,
       })
 
       // 4. 索引存储
-      const indexerService = this.ctx.service.rag.indexer
+      const indexerService = this.indexer
       const indexResult = await indexerService.indexDocument(
         document,
         textChunks,
@@ -126,11 +137,11 @@ class ManagerService extends Service {
       const collection = options.collection || 'documents'
 
       // 1. 向量嵌入
-      const embedderService = this.ctx.service.rag.embedder
+      const embedderService = this.embedder
       const queryEmbedding = (await embedderService.embedTexts([query]))[0]
 
       // 2. 向量检索
-      const indexerService = this.ctx.service.rag.indexer
+      const indexerService = this.indexer
       let searchResult = await indexerService.search(queryEmbedding, {
         collection,
         topK: options.topK || 10,
@@ -143,7 +154,7 @@ class ManagerService extends Service {
         searchResult.matches &&
         searchResult.matches.length > 0
       ) {
-        const rerankerService = this.ctx.service.rag.reranker
+        const rerankerService = this.reranker
         searchResult.matches = await rerankerService.rerank(
           query,
           searchResult.matches,
