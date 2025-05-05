@@ -39,7 +39,10 @@ module.exports = app => {
   router.delete('/api/provider/:provider', controller.provider.deleteProvider)
   router.post('/api/provider/addModel', controller.provider.addModel)
   router.post('/api/provider/updateModel', controller.provider.updateModel)
-  router.delete('/api/provider/deleteModel/:id', controller.provider.deleteModel)
+  router.delete(
+    '/api/provider/deleteModel/:id',
+    controller.provider.deleteModel,
+  )
 
   // LLM 模型配置
   router.get(
@@ -78,9 +81,17 @@ module.exports = app => {
   router.put('/api/mcp/update-server', controller.mcp.updateServer) // 新增更新接口
   // 新增：获取已安装的MCP服务器列表
   router.get('/api/mcp/installed-servers', controller.mcp.getInstalledServers)
-  
+
   // MCP服务器管理
   router.delete('/api/mcp/server/:key', controller.mcp.deleteServer)
   router.post('/api/mcp/server/:key/start', controller.mcp.startServer)
   router.post('/api/mcp/server/:key/stop', controller.mcp.stopServer)
+
+  // RAG 相关接口
+  router.get('/api/rag/config', controller.rag.getConfig)
+  router.post('/api/rag/config', controller.rag.saveConfig)
+  router.post('/api/rag/document', controller.rag.processDocument)
+  router.post('/api/rag/query', controller.rag.query)
+  router.get('/api/rag/status', controller.rag.getStatus)
+  router.post('/api/rag/restart', controller.rag.restartService)
 }
