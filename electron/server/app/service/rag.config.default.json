@@ -7,7 +7,7 @@
   },
   "embedding": {
     "model": "nomic-embed-text",
-    "dimension": 768
+    "dimension": 1024
   },
   "chunking": {
     "defaultSize": 1000,
