@@ -1,0 +1,26 @@
+{
+  "milvus": {
+    "host": "localhost",
+    "port": 19530,
+    "username": "",
+    "password": ""
+  },
+  "embedding": {
+    "model": "nomic-embed-text",
+    "dimension": 384
+  },
+  "chunking": {
+    "defaultSize": 1000,
+    "defaultOverlap": 200
+  },
+  "collections": {
+    "default": {
+      "name": "documents",
+      "description": "默认文档集合"
+    }
+  },
+  "rerank": {
+    "enabled": true,
+    "model": "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  }
+}
