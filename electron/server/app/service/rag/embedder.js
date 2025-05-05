@@ -1,4 +1,5 @@
 const { Service } = require('egg')
+const http = require('http')
 
 class EmbedderService extends Service {
   /**
@@ -40,17 +41,91 @@ class EmbedderService extends Service {
 
   /**
    * 嵌入一批文本
+   * @param {Array<string>} texts 文本数组
+   * @param {string} model 模型名称
+   * @returns {Promise<Array<Array<number>>>} 嵌入向量数组
    */
   async embedBatch(texts, model) {
-    // TODO: 实现实际的嵌入逻辑
-    // 这里应该调用嵌入模型API
-
-    // 模拟嵌入结果
-    return texts.map(() => {
-      // 生成384维的随机向量作为示例
-      return Array(384)
-        .fill(0)
-        .map(() => Math.random() * 2 - 1)
+    const embeddings = []
+    
+    // 为每个文本生成嵌入向量
+    for (const text of texts) {
+      try {
+        const embedding = await this.callOllamaEmbedding(text, model)
+        embeddings.push(embedding)
+      } catch (error) {
+        this.ctx.logger.error(`获取文本嵌入向量失败: ${text.substring(0, 50)}...`, error)
+        throw error
+      }
+    }
+    
+    return embeddings
+  }
+  
+  /**
+   * 调用Ollama API获取嵌入向量
+   * @param {string} text 文本
+   * @param {string} model 模型名称
+   * @returns {Promise<Array<number>>} 嵌入向量
+   */
+  async callOllamaEmbedding(text, model) {
+    return new Promise((resolve, reject) => {
+      // 准备请求数据
+      const data = JSON.stringify({
+        model: model,
+        prompt: text
+      })
+      
+      // 请求选项
+      const options = {
+        hostname: 'localhost',
+        port: 11434,
+        path: '/api/embeddings',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(data)
+        }
+      }
+      
+      // 发送请求
+      const req = http.request(options, (res) => {
+        let responseData = ''
+        
+        // 接收数据
+        res.on('data', (chunk) => {
+          responseData += chunk
+        })
+        
+        // 请求完成
+        res.on('end', () => {
+          try {
+            // 解析响应
+            const response = JSON.parse(responseData)
+            
+            if (response.embedding) {
+              this.ctx.logger.debug('获取嵌入向量成功:', text)
+              resolve(response.embedding)
+            } else {
+              this.ctx.logger.error('Ollama API返回无效响应:', response)
+              reject(new Error('无效的嵌入向量响应'))
+            }
+          } catch (error) {
+            this.ctx.logger.error('解析Ollama API响应失败:', error)
+            reject(error)
+          }
+        })
+      })
+      
+      // 错误处理
+      req.on('error', (error) => {
+        this.ctx.logger.error('调用Ollama API失败:', error)
+        reject(error)
+      })
+      
+      // 发送数据
+      req.write(data)
+      req.end()
     })
   }
 }

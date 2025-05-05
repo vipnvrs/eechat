@@ -1,7 +1,7 @@
 const { Service } = require('egg')
 const fs = require('fs')
 const path = require('path')
-const MilvusService = require('./milvus')
+const LanceDbService = require('./lancedb')
 const ChunkerService = require('./chunker')
 const EmbedderService = require('./embedder')
 const IndexerService = require('./indexer')
@@ -11,7 +11,7 @@ const ExtractorService = require('./extractor')
 class ManagerService extends Service {
   constructor(ctx) {
     super(ctx)
-    this.milvus = new MilvusService(ctx)
+    this.lancedb = new LanceDbService(ctx)
     this.extractor = new ExtractorService(ctx)
     this.chunker = new ChunkerService(ctx)
     this.embedder = new EmbedderService(ctx)
@@ -28,8 +28,8 @@ class ManagerService extends Service {
       this.ctx.logger.info('RAG服务首次初始化')
       const config = await this.getConfig()
 
-      // 初始化Milvus服务
-      await this.milvus.ensureInitialized(config)
+      // 初始化LanceDB服务
+      await this.lancedb.ensureInitialized(config)
 
       this.initialized = true
     }
@@ -169,13 +169,13 @@ class ManagerService extends Service {
       const context = this.buildContext(searchResult.matches, options)
 
       // 5. 生成回答
-      const answer = await this.generateAnswer(query, context, options)
+      // const answer = await this.generateAnswer(query, context, options)
 
       return {
         query,
         mode,
         context,
-        answer,
+        // answer,
         matches: searchResult.matches,
       }
     } catch (error) {
