@@ -100,11 +100,11 @@ const downloadTool = async (tool) => {
   <Dialog @update:open="handleDialogOpen">
     <DialogTrigger asChild>
       <Button variant="outline">
-        <Terminal class="w-4 h-4" />
+        <Terminal />
         运行环境
         <AlertCircle 
           v-if="tools.some(t => !t.installed)" 
-          class="w-4 h-4 text-red-500" 
+          class=" text-red-500" 
         />
       </Button>
     </DialogTrigger>

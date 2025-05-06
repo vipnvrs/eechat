@@ -62,10 +62,20 @@
     }
   },
   "rag": {
-    "title": "RAG",
+    "title": "知识库",
     "sidebar": {
-      "title": "RAG",
-      "uploadFile": "新知识库"
+      "title": "知识库",
+      "create": "新知识库"
+    },
+    "document": {
+      "name": "文档名称",
+      "dataCount": "数据条数",
+      "status": "状态",
+      "statusReady": "就绪",
+      "statusIndexing": "处理中",
+      "enabled": "启用",
+      "createdAt": "创建时间",
+      "actions": "操作"
     }
   },
   "discover": {

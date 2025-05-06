@@ -53,7 +53,7 @@ const data = {
       isActive: false,
     },
     {
-      title: t('chat.mcp.title'),
+      title: t('rag.title'),
       url: '/rag',
       icon: BookOpen,
       isActive: false,
@@ -66,13 +66,13 @@ const data = {
     },
     {
       title: t('chat.discover.title'),
-      url: 'discover',
+      url: '/discover',
       icon: Compass,
       isActive: false,
     },
     {
       title: t('chat.settings.title'),
-      url: 'setting',
+      url: '/setting',
       icon: SlidersHorizontal,
       isActive: false,
     },

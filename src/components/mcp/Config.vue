@@ -169,7 +169,7 @@ onMounted(async () => {
   <Dialog @update:open="handleDialogOpen">
     <DialogTrigger asChild>
       <Button>
-        <Settings class="w-4 h-4 mr-2" />
+        <Settings />
         配置文件
       </Button>
     </DialogTrigger>

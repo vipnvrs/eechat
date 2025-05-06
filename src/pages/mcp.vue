@@ -198,7 +198,7 @@ const toggleServerStatus = async (mcp) => {
         <Config></Config>
         <Env></Env>
         <Button variant="outline">
-          <FileText class="w-4 h-4 mr-2" />
+          <FileText/>
           帮助文档
         </Button>
       </div>
