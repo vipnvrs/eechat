@@ -61,6 +61,13 @@
       "title": "MCP"
     }
   },
+  "rag": {
+    "title": "RAG",
+    "sidebar": {
+      "title": "RAG",
+      "uploadFile": "新知识库"
+    }
+  },
   "discover": {
     "title": "发现",
     "searchPlaceholder": "输入要搜索的内容...",
