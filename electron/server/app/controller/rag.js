@@ -96,6 +96,124 @@ class RagController extends Controller {
       ctx.body = ctx.helper.error(error.message)
     }
   }
+
+  // 创建知识库
+  async createBase() {
+    const { ctx } = this
+    const data = ctx.request.body
+    const uid = ctx.request.query.uid || 'default-user'
+    
+    try {
+      const result = await ctx.service.ragCrud.ragBase.create(data, uid)
+      if (result.success) {
+        ctx.body = ctx.helper.success(result.data)
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('创建知识库失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 获取知识库列表
+  async listBase() {
+    const { ctx } = this
+    const query = ctx.query
+    const uid = ctx.request.query.uid || 'default-user'
+    const { is_default, page = 1, pageSize = 20 } = query
+
+    try {
+      const result = await ctx.service.ragCrud.ragBase.list(uid, is_default, page, pageSize)
+      if (result.success) {
+        ctx.body = ctx.helper.success({
+          list: result.data,
+          total: result.total,
+          page: result.page,
+          pageSize: result.pageSize,
+        })
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('获取知识库列表失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 获取知识库详情
+  async getBase() {
+    const { ctx } = this
+    const { id } = ctx.params
+
+    try {
+      const result = await ctx.service.ragCrud.ragBase.get(id)
+      if (result.success) {
+        ctx.body = ctx.helper.success(result.data)
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('获取知识库详情失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 更新知识库
+  async updateBase() {
+    const { ctx } = this
+    const { id } = ctx.params
+    const data = ctx.request.body
+
+    try {
+      const result = await ctx.service.ragCrud.ragBase.update(id, data)
+      if (result.success) {
+        ctx.body = ctx.helper.success(result.data)
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('更新知识库失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 删除知识库
+  async deleteBase() {
+    const { ctx } = this
+    const { id } = ctx.params
+
+    try {
+      const result = await ctx.service.ragCrud.ragBase.delete(id)
+      if (result.success) {
+        ctx.body = ctx.helper.success(result.message)
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('删除知识库失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 设置默认知识库
+  async setDefaultBase() {
+    const { ctx } = this
+    const { id } = ctx.params
+    const uid = ctx.request.query.uid || 'default-user'
+
+    try {
+      const result = await ctx.service.ragCrud.ragBase.setDefault(id, uid)
+      if (result.success) {
+        ctx.body = ctx.helper.success(result.message)
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('设置默认知识库失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
 }
 
 module.exports = RagController

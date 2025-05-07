@@ -1,8 +1,8 @@
 module.exports = app => {
   const { INTEGER, STRING, DATE, TEXT, FLOAT } = app.Sequelize
 
-  const KnowledgeChunk = app.model.define(
-    'knowledge_chunk',
+  const RagChunk = app.model.define(
+    'rag_chunk',
     {
       id: {
         type: INTEGER,
@@ -15,7 +15,7 @@ module.exports = app => {
         allowNull: false,
         comment: '所属文档ID',
       },
-      knowledge_base_id: {
+      rag_base_id: {
         type: INTEGER,
         allowNull: false,
         comment: '所属知识库ID',
@@ -34,6 +34,34 @@ module.exports = app => {
         type: STRING(100),
         allowNull: true,
         comment: 'LanceDB中的向量ID',
+      },
+      embedding_model: {
+        type: STRING(50),
+        allowNull: true,
+        defaultValue: 'nomic-embed-text',
+        comment: '使用的嵌入模型',
+      },
+      embedding_dimension: {
+        type: INTEGER,
+        allowNull: true,
+        defaultValue: 1024,
+        comment: '嵌入向量维度',
+      },
+      collection_name: {
+        type: STRING(100),
+        allowNull: true,
+        defaultValue: 'documents',
+        comment: '向量集合名称',
+      },
+      similarity_score: {
+        type: FLOAT,
+        allowNull: true,
+        comment: '最近一次查询的相似度分数',
+      },
+      rerank_score: {
+        type: FLOAT,
+        allowNull: true,
+        comment: '重排序分数',
       },
       metadata: {
         type: TEXT,
@@ -54,7 +82,7 @@ module.exports = app => {
       },
     },
     {
-      tableName: 'knowledge_chunk',
+      tableName: 'rag_chunk',
       paranoid: true,
       timestamps: true,
       underscored: true,
@@ -62,16 +90,16 @@ module.exports = app => {
   )
 
   // 定义关联关系
-  KnowledgeChunk.associate = function() {
-    app.model.KnowledgeChunk.belongsTo(app.model.KnowledgeDocument, {
+  RagChunk.associate = function() {
+    app.model.RagChunk.belongsTo(app.model.RagDocument, {
       foreignKey: 'document_id',
       as: 'document'
     });
-    app.model.KnowledgeChunk.belongsTo(app.model.KnowledgeBase, {
-      foreignKey: 'knowledge_base_id',
-      as: 'knowledgeBase'
+    app.model.RagChunk.belongsTo(app.model.RagBase, {
+      foreignKey: 'rag_base_id',
+      as: 'ragBase'
     });
   };
 
-  return KnowledgeChunk
+  return RagChunk
 }

@@ -1,10 +1,4 @@
 {
-  "milvus": {
-    "host": "localhost",
-    "port": 19530,
-    "username": "",
-    "password": ""
-  },
   "embedding": {
     "model": "nomic-embed-text",
     "dimension": 1024

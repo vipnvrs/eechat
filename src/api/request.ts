@@ -458,3 +458,66 @@ const handleStream = async (response, onProgress, onProgressReasoning) => {
   }
 }
 
+// RAG相关的API方法
+export const ragApi = {
+  // 获取RAG配置
+  async getConfig() {
+    return request.get('/api/rag/config')
+  },
+
+  // 保存RAG配置
+  async saveConfig(data: any) {
+    return request.post('/api/rag/config', data)
+  },
+
+  // 处理文档
+  async processDocument(data: any) {
+    return request.post('/api/rag/document', data)
+  },
+
+  // 查询知识库
+  async query(data: any) {
+    return request.post('/api/rag/query', data)
+  },
+
+  // 获取服务状态
+  async getStatus() {
+    return request.get('/api/rag/status')
+  },
+
+  // 重启服务
+  async restartService() {
+    return request.post('/api/rag/restart')
+  },
+
+  // 创建知识库
+  async createBase(data: any) {
+    return request.post('/api/rag/base', data)
+  },
+
+  // 获取知识库列表
+  async listBase(params = {}) {
+    return request.get('/api/rag/base', params)
+  },
+
+  // 获取知识库详情
+  async getBase(id: number | string) {
+    return request.get(`/api/rag/base/${id}`)
+  },
+
+  // 更新知识库
+  async updateBase(id: number | string, data: any) {
+    return request.put(`/api/rag/base/${id}`, data)
+  },
+
+  // 删除知识库
+  async deleteBase(id: number | string) {
+    return request.delete(`/api/rag/base/${id}`)
+  },
+
+  // 设置默认知识库
+  async setDefaultBase(id: number | string) {
+    return request.post(`/api/rag/base/${id}/default`)
+  }
+}
+

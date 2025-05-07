@@ -1,8 +1,8 @@
 module.exports = app => {
   const { INTEGER, STRING, DATE, TEXT, BOOLEAN, FLOAT } = app.Sequelize
 
-  const KnowledgeDocument = app.model.define(
-    'knowledge_document',
+  const RagDocument = app.model.define(
+    'rag_document',
     {
       id: {
         type: INTEGER,
@@ -10,7 +10,7 @@ module.exports = app => {
         autoIncrement: true,
         comment: '文档ID',
       },
-      knowledge_base_id: {
+      rag_base_id: {
         type: INTEGER,
         allowNull: false,
         comment: '所属知识库ID',
@@ -73,6 +73,12 @@ module.exports = app => {
         allowNull: true,
         comment: '使用的嵌入模型',
       },
+      embedding_dimension: {
+        type: INTEGER,
+        allowNull: true,
+        defaultValue: 1024,
+        comment: '嵌入向量维度',
+      },
       chunk_size: {
         type: INTEGER,
         allowNull: true,
@@ -87,6 +93,12 @@ module.exports = app => {
         type: STRING(20),
         allowNull: true,
         comment: '分块方法',
+      },
+      collection_name: {
+        type: STRING(100),
+        allowNull: true,
+        defaultValue: 'documents',
+        comment: '向量集合名称',
       },
       error_message: {
         type: TEXT,
@@ -117,20 +129,25 @@ module.exports = app => {
       },
     },
     {
-      tableName: 'knowledge_document',
+      tableName: 'rag_document',
       paranoid: true,
       timestamps: true,
       underscored: true,
     },
   )
 
-  // 定义关联关系
-  KnowledgeDocument.associate = function() {
-    app.model.KnowledgeDocument.belongsTo(app.model.KnowledgeBase, {
-      foreignKey: 'knowledge_base_id',
-      as: 'knowledgeBase'
+   // 定义关联关系
+   RagDocument.associate = function() {
+    app.model.RagDocument.belongsTo(app.model.RagBase, {
+      foreignKey: 'rag_base_id',
+      as: 'ragBase'
+    });
+    
+    app.model.RagDocument.hasMany(app.model.RagChunk, {
+      foreignKey: 'document_id',
+      as: 'chunks'
     });
   };
 
-  return KnowledgeDocument
+  return RagDocument
 }

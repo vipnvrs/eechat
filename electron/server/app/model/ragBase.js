@@ -1,8 +1,8 @@
 module.exports = app => {
   const { INTEGER, STRING, DATE, TEXT, BOOLEAN } = app.Sequelize
 
-  const KnowledgeBase = app.model.define(
-    'knowledge_base',
+  const RagBase = app.model.define(
+    'rag_base',
     {
       id: {
         type: INTEGER,
@@ -48,6 +48,18 @@ module.exports = app => {
         allowNull: true,
         comment: '使用的嵌入模型',
       },
+      embedding_dimension: {
+        type: INTEGER,
+        allowNull: true,
+        defaultValue: 1024,
+        comment: '嵌入向量维度',
+      },
+      model_type: {
+        type: STRING(20),
+        allowNull: true,
+        defaultValue: 'api',
+        comment: '模型类型(local/api)',
+      },
       chunk_size: {
         type: INTEGER,
         allowNull: true,
@@ -66,21 +78,23 @@ module.exports = app => {
         defaultValue: 'sliding_window',
         comment: '分块方法',
       },
-      created_at: {
-        type: DATE,
+      rerank_enabled: {
+        type: BOOLEAN,
         allowNull: false,
+        defaultValue: true,
+        comment: '是否启用重排序',
       },
-      updated_at: {
-        type: DATE,
-        allowNull: false,
-      },
-      deleted_at: {
-        type: DATE,
+      rerank_model: {
+        type: STRING(100),
         allowNull: true,
+        comment: '重排序模型',
       },
+      created_at: DATE,
+      updated_at: DATE,
+      deleted_at: DATE,
     },
     {
-      tableName: 'knowledge_base',
+      tableName: 'rag_base',
       paranoid: true,
       timestamps: true,
       underscored: true,
@@ -88,12 +102,12 @@ module.exports = app => {
   )
 
   // 定义关联关系
-  KnowledgeBase.associate = function() {
-    app.model.KnowledgeBase.hasMany(app.model.KnowledgeDocument, {
-      foreignKey: 'knowledge_base_id',
+  RagBase.associate = function() {
+    app.model.RagBase.hasMany(app.model.RagDocument, {
+      foreignKey: 'rag_base_id',
       as: 'documents'
     });
   };
 
-  return KnowledgeBase
+  return RagBase
 }

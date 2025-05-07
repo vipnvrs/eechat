@@ -94,4 +94,12 @@ module.exports = app => {
   router.post('/api/rag/query', controller.rag.query)
   router.get('/api/rag/status', controller.rag.getStatus)
   router.post('/api/rag/restart', controller.rag.restartService)
+
+  // RagBase 知识库管理接口
+  router.post('/api/rag/base', controller.rag.createBase)
+  router.get('/api/rag/base', controller.rag.listBase)
+  router.get('/api/rag/base/:id', controller.rag.getBase)
+  router.put('/api/rag/base/:id', controller.rag.updateBase)
+  router.delete('/api/rag/base/:id', controller.rag.deleteBase)
+  router.post('/api/rag/base/:id/default', controller.rag.setDefaultBase)
 }

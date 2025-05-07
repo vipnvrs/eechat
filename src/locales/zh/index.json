@@ -65,7 +65,16 @@
     "title": "知识库",
     "sidebar": {
       "title": "知识库",
-      "create": "新知识库"
+      "create": "新知识库",
+      "knowledgeBases": "知识库",
+      "noKnowledgeBases": "暂无知识库",
+      "description": "描述",
+      "isDefault": "默认知识库",
+      "createBaseDesc": "创建新的知识库",
+      "documents": "文档",
+      "edit":"编辑",
+      "delete":"删除",
+      "setDefault": "设为默认"
     },
     "document": {
       "name": "文档名称",
