@@ -44,7 +44,9 @@ import {
   FolderOpen,
   Upload,
   Star,
-  Settings
+  Settings,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-vue-next'
 import { h, ref, onMounted, computed } from 'vue'
 import { useEnvStore } from "@/stores/env"
@@ -53,6 +55,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { RagForm, RagResponse } from "@/types/rag"
 
 const envStore = useEnvStore()
 const ragStore = useRagStore()
@@ -107,22 +117,79 @@ const confirmDeleteFolder = async () => {
   }
 }
 
+// 模型选项
+const chunkMethodOptions = [
+  { value: 'sliding_window', label: '滑动窗口' },
+  // { value: 'recursive', label: '递归分割' },
+  // { value: 'sentence', label: '按句子分割' }
+]
+
+const embeddingModelOptions = [
+  { value: 'text-embedding-v3', label: '阿里云通用文本向量-v3' },
+]
+
+const embeddingDimensionOptions = [
+  { value: 1024, label: '1024（默认）' },
+  { value: 768, label: '768' },
+  { value: 512, label: '512' },
+  { value: 256, label: '256' },
+  { value: 128, label: '128' },
+  { value: 64, label: '64' }
+]
+
+const embeddingModelTypeOptions = [
+  { value: 'api', label: 'API 模型' },
+  { value: 'local', label: '本地模型' }
+]
+
+const textUnderstandingModelOptions = [
+  { value: 'qwen-max', label: '通义千问-Max' },
+]
+
+const imageUnderstandingModelOptions = [
+  { value: 'qwen-vl-max', label: '通义千问VL-Max' },
+]
+
+const rerankModelOptions = [
+  { value: 'gte-rerank', label: '阿里通义gte-rerank' },
+]
+
 // 创建新知识库相关
 const showCreateDialog = computed(() => ragStore.showCreateDialog)
-const newBase = ref({
+const newBase = ref<RagForm>({
   title: '',
   description: '',
-  is_default: false
+  chunk_size: 1000,
+  chunk_overlap: 200,
+  chunk_method: 'sliding_window',
+  embedding_model: 'text-embedding-v3',
+  embedding_dimension: 1024,
+  embedding_model_type: 'api',
+  text_understanding_model: 'qwen-max',
+  image_understanding_model: 'qwen-vl-max',
+  rerank_enabled: false,
+  rerank_model: 'gte-rerank',
+  is_default: false,
 })
 
 const createLoading = ref(false)
 
 const openCreateDialog = () => {
-  newBase.value = {
-    title: '',
-    description: '',
-    is_default: false
-  }
+  // newBase.value = {
+  //   title: '',
+  //   description: '',
+  //   chunk_size: 1000,
+  //   chunk_overlap: 200,
+  //   chunk_method: 'sliding_window',
+  //   embedding_model: 'text-embedding-v3',
+  //   embedding_dimension: 1024,
+  //   embedding_model_type: 'api',
+  //   text_understanding_model: 'gpt-3.5-turbo',
+  //   image_understanding_model: 'gpt-4-vision',
+  //   rerank_enabled: false,
+  //   rerank_model: 'cohere-rerank',
+  //   is_default: false,
+  // }
   ragStore.openCreateDialog()
 }
 
@@ -156,20 +223,41 @@ const handleCreateBase = async () => {
 
 // 编辑知识库相关
 const showEditDialog = computed(() => ragStore.showEditDialog)
-const editBase = ref({
+const editBase = ref<RagResponse>({
   id: '',
   title: '',
   description: '',
+  chunk_size: 1000,
+  chunk_overlap: 200,
+  chunk_method: 'sliding_window',
+  embedding_model: '',
+  embedding_dimension: 1024,
+  embedding_model_type: 'api',
+  text_understanding_model: '',
+  image_understanding_model: '',
+  rerank_enabled: false,
+  rerank_model: '',
   is_default: false
 })
 
 const editLoading = ref(false)
+const isShowMoreConfig = ref(false)
 
 const openEditDialog = (base) => {
   editBase.value = {
     id: base.id,
     title: base.title,
     description: base.description || '',
+    chunk_size: base.chunk_size || 1000,
+    chunk_overlap: base.chunk_overlap || 200,
+    chunk_method: base.chunk_method || 'sliding_window',
+    embedding_model: base.embedding_model || 'text-embedding-v3',
+    embedding_dimension: base.embedding_dimension || 1024,
+    embedding_model_type: base.embedding_model_type || 'api',
+    text_understanding_model: base.text_understanding_model || 'gpt-3.5-turbo',
+    image_understanding_model: base.image_understanding_model || 'gpt-4-vision',
+    rerank_enabled: base.rerank_enabled || false,
+    rerank_model: base.rerank_model || 'cohere-rerank',
     is_default: base.is_default || false
   }
   ragStore.openEditDialog(base)
@@ -193,6 +281,16 @@ const handleUpdateBase = async () => {
     await ragStore.updateBase(editBase.value.id, {
       title: editBase.value.title,
       description: editBase.value.description,
+      chunk_size: editBase.value.chunk_size,
+      chunk_overlap: editBase.value.chunk_overlap,
+      chunk_method: editBase.value.chunk_method,
+      embedding_model: editBase.value.embedding_model,
+      embedding_dimension: editBase.value.embedding_dimension,
+      embedding_model_type: editBase.value.embedding_model_type,
+      text_understanding_model: editBase.value.text_understanding_model,
+      image_understanding_model: editBase.value.image_understanding_model,
+      rerank_enabled: editBase.value.rerank_enabled,
+      rerank_model: editBase.value.rerank_model,
       is_default: editBase.value.is_default
     })
     closeEditDialog()
@@ -274,14 +372,14 @@ onMounted(async () => {
 
   <!-- 创建知识库对话框 -->
   <Dialog :open="showCreateDialog" @update:open="closeCreateDialog">
-    <DialogContent>
+    <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{{ t("rag.sidebar.create") }}</DialogTitle>
         <DialogDescription>
           {{ t("rag.sidebar.createBaseDesc") }}
         </DialogDescription>
       </DialogHeader>
-      <div class="grid gap-4 py-4">
+      <div class="grid gap-4 py-2">
         <div class="grid grid-cols-4 items-center gap-4">
           <Label class="text-right" for="title">{{ t("rag.sidebar.title") }}</Label>
           <Input id="title" v-model="newBase.title" class="col-span-3" />
@@ -292,12 +390,157 @@ onMounted(async () => {
           }}</Label>
           <Textarea id="description" v-model="newBase.description" class="col-span-3" />
         </div>
+
+        <!-- 嵌入模型类型 -->
         <div class="grid grid-cols-4 items-center gap-4">
-          <Label class="text-right" for="is_default">{{
-            t("rag.sidebar.isDefault")
-          }}</Label>
-          <Checkbox id="is_default" v-model="newBase.is_default" />
+          <Label class="text-right" for="embedding_model_type">{{ t("rag.sidebar.embeddingModelType") }}</Label>
+          <div class="col-span-3 w-full">
+            <Select v-model="newBase.embedding_model_type" class="col-span-3">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingModelType')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="option in embeddingModelTypeOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+        
+        <!-- 嵌入模型 -->
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label class="text-right" for="embedding_model">{{ t("rag.sidebar.embeddingModel") }}</Label>
+          <div class="col-span-3 w-full">
+            <Select v-model="newBase.embedding_model" class="col-span-3">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingModel')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="option in embeddingModelOptions" :key="option.value" :value="option.value">
+                  {{ option.label }} ({{ option.value }})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label class="text-right text-zinc-500" for="moreConfig"></Label>
+          <div @click="isShowMoreConfig = !isShowMoreConfig" class="flex cursor-pointer text-sm text-zinc-500 items-center space-x-2"> 
+            <span>{{ t("rag.sidebar.moreConfig") }}</span> 
+            <ChevronDown v-if="!isShowMoreConfig" class="size-4" /> 
+            <ChevronUp v-else  class="size-4" /> 
+          </div> 
+        </div>
+        
+        <!-- 分块方法 -->
+        <div v-if="isShowMoreConfig" class="py-2 grid gap-4">
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="chunk_method">{{ t("rag.sidebar.chunkMethod") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="newBase.chunk_method">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectChunkMethod')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in chunkMethodOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 分块大小 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="chunk_size">{{ t("rag.sidebar.chunkSize") }}</Label>
+            <Input id="chunk_size" type="number" v-model="newBase.chunk_size" class="col-span-3" />
+          </div>
+          
+          <!-- 分块重叠 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="chunk_overlap">{{ t("rag.sidebar.chunkOverlap") }}</Label>
+            <Input id="chunk_overlap" type="number" v-model="newBase.chunk_overlap" class="col-span-3" />
+          </div>
+          
+          <!-- 嵌入维度 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-embedding_dimension">{{ t("rag.sidebar.embeddingDimension") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="newBase.embedding_dimension">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingDimension')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 文本理解模型 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="text_understanding_model">{{ t("rag.sidebar.textUnderstandingModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="newBase.text_understanding_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectTextModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in textUnderstandingModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 图像理解模型 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="image_understanding_model">{{ t("rag.sidebar.imageUnderstandingModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="newBase.image_understanding_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectImageModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in imageUnderstandingModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 重排序启用 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="rerank_enabled">{{ t("rag.sidebar.rerankEnabled") }}</Label>
+            <Checkbox id="rerank_enabled" v-model="newBase.rerank_enabled" />
+          </div>
+          
+          <!-- 重排序模型 -->
+          <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.rerank_enabled">
+            <Label class="text-right" for="rerank_model">{{ t("rag.sidebar.rerankModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="newBase.rerank_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectRerankModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in rerankModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+        </div>
+        
+        <!--  -->
       </div>
       <DialogFooter>
         <Button variant="outline" @click="closeCreateDialog">{{
@@ -313,14 +556,14 @@ onMounted(async () => {
 
   <!-- 编辑知识库对话框 -->
   <Dialog :open="showEditDialog" @update:open="closeEditDialog">
-    <DialogContent>
+    <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle>{{ t("rag.sidebar.editBase") }}</DialogTitle>
         <DialogDescription>
           {{ t("rag.sidebar.editBaseDesc") }}
         </DialogDescription>
       </DialogHeader>
-      <div class="grid gap-4 py-4">
+      <div class="grid gap-4 py-2">
         <div class="grid grid-cols-4 items-center gap-4">
           <Label class="text-right" for="edit-title">{{ t("rag.sidebar.title") }}</Label>
           <Input id="edit-title" v-model="editBase.title" class="col-span-3" />
@@ -335,6 +578,156 @@ onMounted(async () => {
             class="col-span-3"
           />
         </div>
+        
+        <!-- 嵌入模型类型 -->
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label class="text-right" for="edit-embedding_model_type">{{ t("rag.sidebar.embeddingModelType") }}</Label>
+          <div class="col-span-3 w-full">
+            <Select v-model="editBase.embedding_model_type" class="col-span-3">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingModelType')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="option in embeddingModelTypeOptions" :key="option.value" :value="option.value">
+                  {{ option.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <!-- 嵌入模型 -->
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label class="text-right" for="edit-embedding_model">{{ t("rag.sidebar.embeddingModel") }}</Label>
+          <div class="col-span-3 w-full">
+            <Select v-model="editBase.embedding_model" class="col-span-3">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingModel')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="option in embeddingModelOptions" :key="option.value" :value="option.value">
+                  {{ option.label }} ({{ option.value }})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 items-center gap-4">
+          <Label class="text-right text-zinc-500" for="edit-moreConfig"></Label>
+          <div @click="isShowMoreConfig = !isShowMoreConfig" class="flex cursor-pointer text-sm text-zinc-500 items-center space-x-2"> 
+            <span>{{ t("rag.sidebar.moreConfig") }}</span> 
+            <ChevronDown v-if="!isShowMoreConfig" class="size-4" /> 
+            <ChevronUp v-else class="size-4" /> 
+          </div> 
+        </div>
+        
+        <!-- 更多配置（折叠部分） -->
+        <div v-if="isShowMoreConfig" class="py-2 grid gap-4">
+          <!-- 分块方法 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-chunk_method">{{ t("rag.sidebar.chunkMethod") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="editBase.chunk_method">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectChunkMethod')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in chunkMethodOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 分块大小 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-chunk_size">{{ t("rag.sidebar.chunkSize") }}</Label>
+            <Input id="edit-chunk_size" type="number" v-model="editBase.chunk_size" class="col-span-3" />
+          </div>
+          
+          <!-- 分块重叠 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-chunk_overlap">{{ t("rag.sidebar.chunkOverlap") }}</Label>
+            <Input id="edit-chunk_overlap" type="number" v-model="editBase.chunk_overlap" class="col-span-3" />
+          </div>
+          
+          <!-- 嵌入维度 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-embedding_dimension">{{ t("rag.sidebar.embeddingDimension") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="editBase.embedding_dimension">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingDimension')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 文本理解模型 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-text_understanding_model">{{ t("rag.sidebar.textUnderstandingModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="editBase.text_understanding_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectTextModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in textUnderstandingModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 图像理解模型 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-image_understanding_model">{{ t("rag.sidebar.imageUnderstandingModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="editBase.image_understanding_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectImageModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in imageUnderstandingModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <!-- 重排序启用 -->
+          <div class="grid grid-cols-4 items-center gap-4">
+            <Label class="text-right" for="edit-rerank_enabled">{{ t("rag.sidebar.rerankEnabled") }}</Label>
+            <Checkbox id="edit-rerank_enabled" v-model="editBase.rerank_enabled" />
+          </div>
+          
+          <!-- 重排序模型 -->
+          <div class="grid grid-cols-4 items-center gap-4" v-if="editBase.rerank_enabled">
+            <Label class="text-right" for="edit-rerank_model">{{ t("rag.sidebar.rerankModel") }}</Label>
+            <div class="col-span-3 w-full">
+              <Select v-model="editBase.rerank_model" class="col-span-3">
+                <SelectTrigger>
+                  <SelectValue :placeholder="t('rag.sidebar.selectRerankModel')" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem v-for="option in rerankModelOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+        
         <div class="grid grid-cols-4 items-center gap-4">
           <Label class="text-right" for="edit-is_default">{{
             t("rag.sidebar.isDefault")
@@ -414,10 +807,10 @@ onMounted(async () => {
                     <Settings class="mr-2 h-4 w-4" />
                     {{ t("rag.sidebar.edit") }}
                   </DropdownMenuItem>
-                  <DropdownMenuItem v-if="!base.is_default" @click="setDefaultBase(base)">
+                  <!-- <DropdownMenuItem v-if="!base.is_default" @click="setDefaultBase(base)">
                     <Star class="mr-2 h-4 w-4" />
                     {{ t("rag.sidebar.setDefault") }}
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> -->
                   <DropdownMenuItem
                     class="text-destructive"
                     @click="handleRemoveFolder(base)"

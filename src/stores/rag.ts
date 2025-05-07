@@ -1,33 +1,6 @@
 import { defineStore } from 'pinia'
 import { ragApi } from '@/api/request'
-
-interface RagBase {
-  id: number | string
-  title: string
-  description?: string
-  uid?: string
-  vector_collection?: string
-  is_default?: boolean
-  created_at?: string
-  updated_at?: string
-  document_count?: number
-}
-
-interface RagState {
-  bases: RagBase[]
-  loading: boolean
-  loadingBases: boolean
-  selectedBase: RagBase | null
-  error: string | null
-  initialized: boolean
-  showCreateDialog: boolean
-  showEditDialog: boolean
-  processingDocument: boolean
-  serviceStatus: {
-    running: boolean
-    error: string | null
-  }
-}
+import type { RagResponse, RagState } from '@/types/rag'
 
 export const useRagStore = defineStore('rag', {
   state: (): RagState => ({
@@ -85,7 +58,7 @@ export const useRagStore = defineStore('rag', {
     },
 
     // 创建知识库
-    async createBase(data: Partial<RagBase>) {
+    async createBase(data: Partial<RagResponse>) {
       try {
         this.loading = true
         this.error = null
@@ -111,7 +84,7 @@ export const useRagStore = defineStore('rag', {
     },
 
     // 更新知识库
-    async updateBase(id: number | string, data: Partial<RagBase>) {
+    async updateBase(id: number | string, data: Partial<RagResponse>) {
       try {
         this.loading = true
         this.error = null
@@ -180,7 +153,7 @@ export const useRagStore = defineStore('rag', {
     },
 
     // 选择知识库
-    selectBase(base: RagBase) {
+    selectBase(base: RagResponse) {
       this.selectedBase = base
     },
 
@@ -200,7 +173,7 @@ export const useRagStore = defineStore('rag', {
     },
 
     // 打开编辑知识库对话框
-    openEditDialog(base: RagBase) {
+    openEditDialog(base: RagResponse) {
       this.selectedBase = base
       this.showEditDialog = true
     },

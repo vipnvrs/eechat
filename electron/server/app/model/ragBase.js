@@ -43,23 +43,6 @@ module.exports = app => {
         defaultValue: 0,
         comment: '文档数量',
       },
-      embedding_model: {
-        type: STRING(50),
-        allowNull: true,
-        comment: '使用的嵌入模型',
-      },
-      embedding_dimension: {
-        type: INTEGER,
-        allowNull: true,
-        defaultValue: 1024,
-        comment: '嵌入向量维度',
-      },
-      model_type: {
-        type: STRING(20),
-        allowNull: true,
-        defaultValue: 'api',
-        comment: '模型类型(local/api)',
-      },
       chunk_size: {
         type: INTEGER,
         allowNull: true,
@@ -77,6 +60,33 @@ module.exports = app => {
         allowNull: true,
         defaultValue: 'sliding_window',
         comment: '分块方法',
+      },
+      embedding_model: {
+        type: STRING(50),
+        allowNull: true,
+        comment: '使用的嵌入模型',
+      },
+      embedding_dimension: {
+        type: INTEGER,
+        allowNull: true,
+        defaultValue: 1024,
+        comment: '嵌入向量维度',
+      },
+      embedding_model_type: {
+        type: STRING(20),
+        allowNull: true,
+        defaultValue: 'api',
+        comment: '模型类型(local/api)',
+      },
+      text_understanding_model: {
+        type: STRING(50),
+        allowNull: true,
+        comment: '文本理解模型',
+      },
+      image_understanding_model: {
+        type: STRING(50),
+        allowNull: true,
+        comment: '图像理解模型',
       },
       rerank_enabled: {
         type: BOOLEAN,
