@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, screen } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, screen, session } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -128,12 +128,29 @@ async function startEggServer(pathArg): Promise<void> {
     const baseDir = isDev
       ? path.join(__dirname, '../../electron/server')
       : path.join(process.resourcesPath, 'app.asar.unpacked')
-    // log.info('baseDir:', baseDir)
+    
+    // 获取系统代理设置
     try {
+      // 使用 Electron 的 session API 获取系统代理
+      const proxySettings = await session.defaultSession.resolveProxy('https://www.google.com')
+      log.info('系统代理设置:', proxySettings)
+      
+      if (proxySettings && proxySettings !== 'DIRECT') {
+        // 解析代理字符串，格式通常为 "PROXY host:port" 或 "DIRECT"
+        const match = proxySettings.match(/PROXY\s+([^;\s]+)/)
+        if (match && match[1]) {
+          const proxyUrl = `http://${match[1]}`
+          log.info(`设置系统代理: ${proxyUrl}`)
+          process.env.http_proxy = proxyUrl
+          process.env.https_proxy = proxyUrl
+        }
+      }
+      
       appServer = await egg.start({
         baseDir: baseDir,
         // mode: 'single',
         // typescript: false,
+        env: process.env.NODE_ENV // Pass the NODE_ENV string instead of the entire process.env object
       })
       appServer.listen(7002)
       log.info(`Server started on ${7002}`)

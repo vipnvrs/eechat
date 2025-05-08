@@ -1,9 +1,9 @@
 const { Service } = require('egg')
-const MilvusService = require('./milvus')
+const LanceDbService = require('./lancedb')
 class IndexerService extends Service {
   constructor(ctx) {
     super(ctx)
-    this.milvus = new MilvusService(ctx)
+    this.lancedb = new LanceDbService(ctx)
   }
 
   /**
@@ -18,16 +18,16 @@ class IndexerService extends Service {
     const { collection = 'documents' } = options
 
     try {
-      // 获取Milvus服务
-      const milvusService = this.milvus
+      // 获取LanceDB服务
+      const lancedbService = this.lancedb
       const config = await this.ctx.service.rag.getConfig()
 
-      // 确保Milvus已初始化
-      await milvusService.ensureInitialized(config)
+      // 确保LanceDB已初始化
+      await lancedbService.ensureInitialized(config)
 
-      // 确保集合存在
-      const dimension = config.embedding.dimension || 384
-      await milvusService.createCollection(collection, dimension)
+      // 确保表存在
+      const dimension = config.embedding.dimension
+      await lancedbService.createTable(collection, dimension)
 
       // 构建实体数据
       const entities = chunks.map((chunk, index) => ({
@@ -44,7 +44,7 @@ class IndexerService extends Service {
       }))
 
       // 插入数据
-      const result = await milvusService.insert(collection, entities)
+      const result = await lancedbService.insert(collection, entities)
 
       this.ctx.logger.info('文档索引完成:', {
         documentId: document.id,
@@ -74,11 +74,11 @@ class IndexerService extends Service {
     const { collection = 'documents', topK = 10, filter = '' } = options
 
     try {
-      // 获取Milvus服务
-      const milvusService = this.ctx.service.rag.milvus
+      // 获取LanceDB服务
+      const lancedbService = this.lancedb
 
       // 执行搜索
-      const result = await milvusService.search(collection, queryVector, {
+      const result = await lancedbService.search(collection, queryVector, {
         topK,
         filter,
         outputFields: ['document_id', 'text', 'metadata'],
@@ -101,17 +101,11 @@ class IndexerService extends Service {
     const { collection = 'documents' } = options
 
     try {
-      // 获取Milvus服务
-      const milvusService = this.ctx.service.rag.milvus
-
-      // 构建过滤条件
-      const filter = `document_id == "${documentId}"`
+      // 获取LanceDB服务
+      const lancedbService = this.lancedb
 
       // 执行删除
-      await milvusService.client.delete({
-        collection_name: collection,
-        expr: filter,
-      })
+      await lancedbService.deleteDocument(collection, documentId)
 
       this.ctx.logger.info('文档删除成功:', { documentId, collection })
       return { success: true, documentId }

@@ -6,8 +6,10 @@
     "password": ""
   },
   "embedding": {
-    "model": "nomic-embed-text",
-    "dimension": 384
+    "model": "text-embedding-v3",
+    "dimension": 1024,
+    "baseURL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "apiKey": "sk-d74fcc93c1c147b49b0132f309a8475f"
   },
   "chunking": {
     "defaultSize": 1000,

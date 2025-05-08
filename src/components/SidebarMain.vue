@@ -25,6 +25,7 @@ import {
   Plus,
   Sparkles,
   Compass,
+  BookOpen,
 } from 'lucide-vue-next'
 import Updater from '@/components/Updater.vue'
 import { h, ref, onMounted, computed } from 'vue'
@@ -51,6 +52,12 @@ const data = {
       icon: Inbox,
       isActive: false,
     },
+    // {
+    //   title: t('rag.title'),
+    //   url: '/rag',
+    //   icon: BookOpen,
+    //   isActive: false,
+    // },
     {
       title: t('chat.mcp.title'),
       url: '/mcp',
@@ -59,13 +66,13 @@ const data = {
     },
     {
       title: t('chat.discover.title'),
-      url: 'discover',
+      url: '/discover',
       icon: Compass,
       isActive: false,
     },
     {
       title: t('chat.settings.title'),
-      url: 'setting',
+      url: '/setting',
       icon: SlidersHorizontal,
       isActive: false,
     },
