@@ -102,4 +102,10 @@ module.exports = app => {
   router.put('/api/rag/base/:id', controller.rag.updateBase)
   router.delete('/api/rag/base/:id', controller.rag.deleteBase)
   router.post('/api/rag/base/:id/default', controller.rag.setDefaultBase)
+
+  // 代理设置相关接口
+  router.get('/api/proxy/config', controller.proxy.getProxyConfig)
+  router.post('/api/proxy/config', controller.proxy.updateProxyConfig)
+  router.post('/api/proxy/enable', controller.proxy.enableProxy)
+  router.post('/api/proxy/disable', controller.proxy.disableProxy)
 }

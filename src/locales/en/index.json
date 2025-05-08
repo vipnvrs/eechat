@@ -216,7 +216,26 @@
       "interface": "Interface",
       "about": "About",
       "data": "Data",
+      "proxy": "Proxy Settings",
       "playground": "Playground"
+    },
+    "proxy": {
+      "title": "Proxy Settings",
+      "enableProxy": "Enable Proxy",
+      "enableProxyDesc": "When enabled, the application will connect to the network through a proxy server",
+      "httpProxy": "HTTP Proxy",
+      "httpsProxy": "HTTPS Proxy",
+      "proxyPlaceholder": "e.g. http://127.0.0.1:1080",
+      "getConfigFailed": "Failed to get proxy configuration",
+      "updateSuccess": "Proxy configuration updated",
+      "updateSuccessDesc": "Proxy configuration has been successfully updated",
+      "updateFailed": "Failed to update proxy configuration",
+      "enableSuccess": "Proxy enabled",
+      "enableSuccessDesc": "Proxy has been successfully enabled",
+      "enableFailed": "Failed to enable proxy",
+      "disableSuccess": "Proxy disabled",
+      "disableSuccessDesc": "Proxy has been successfully disabled",
+      "disableFailed": "Failed to disable proxy"
     },
     "models": {
       "localModel": "Local Model",

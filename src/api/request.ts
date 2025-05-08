@@ -521,3 +521,25 @@ export const ragApi = {
   }
 }
 
+export const proxyApi = {
+  // 获取代理配置
+  async getProxyConfig() {
+    return request.get('/api/proxy/config')
+  },
+  
+  // 更新代理配置
+  async updateProxyConfig(config: { http?: string, https?: string, enabled?: boolean }) {
+    return request.post('/api/proxy/config', config)
+  },
+  
+  // 启用代理
+  async enableProxy() {
+    return request.post('/api/proxy/enable')
+  },
+  
+  // 禁用代理
+  async disableProxy() {
+    return request.post('/api/proxy/disable')
+  }
+}
+

@@ -46,7 +46,7 @@ class DeepseekService extends BaseLLMService {
       return response.choices.length > 0
     } catch (error) {
       if (error.status == 401) {
-        throw new Error(this.ctx.__('connection.auth_failed'))
+        throw new Error(this.ctx.__('connection.auth_failed') + `(${error.status})`)
       } else {
         throw new Error(this.ctx.__('connection.test_failed') + error.message)
       }

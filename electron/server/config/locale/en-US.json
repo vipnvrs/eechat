@@ -6,7 +6,7 @@
   "not.found": "Resource Not Found",
   "internal.error": "Internal Server Error",
   "chat.key_empty": "Please configure your ApiKey and BaseUrl in the settings",
-  "connection.auth_failed": "Connection failed, please check your ApiKey",
+  "connection.auth_failed": "Auth failed, please check your ApiKey",
   "connection.test_failed": "Connection test failed: ",
   "ollama.not_found": "Ollama installation path not found",
   "ollama.not_running": "Model manager is not running",

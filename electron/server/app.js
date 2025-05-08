@@ -2,6 +2,70 @@
 const paths = require('./config/paths')
 const path = require('path')
 const fs = require('fs')
+
+// 获取系统代理设置
+const getSystemProxy = () => {
+  // 从环境变量中获取系统代理设置
+  const httpProxy = process.env.http_proxy
+  const httpsProxy = process.env.https_proxy
+  
+  return {
+    http: httpProxy,
+    https: httpsProxy
+  }
+}
+
+// 尝试读取代理配置
+try {
+  const configFile = path.join(paths.configPath, 'proxy.config.json');
+  if (fs.existsSync(configFile)) {
+    const configContent = fs.readFileSync(configFile, 'utf8');
+    const config = JSON.parse(configContent);
+    
+    // 如果代理已启用，设置环境变量
+    if (config.enabled) {
+      process.env.GLOBAL_AGENT_HTTP_PROXY = config.http;
+      process.env.GLOBAL_AGENT_HTTPS_PROXY = config.https;
+      require('global-agent/bootstrap');
+      console.log('代理已启用:', {
+        http: config.http,
+        https: config.https
+      });
+    } else {
+      console.log('代理已禁用');
+    }
+  } else {
+    使用系统代理设置作为默认值
+    const systemProxy = getSystemProxy();
+    if (systemProxy.http || systemProxy.https) {
+      process.env.GLOBAL_AGENT_HTTP_PROXY = systemProxy.http;
+      process.env.GLOBAL_AGENT_HTTPS_PROXY = systemProxy.https;
+      require('global-agent/bootstrap');
+      console.log('使用系统代理设置:', {
+        http: systemProxy.http,
+        https: systemProxy.https
+      });
+    } else {
+      console.log('未检测到系统代理，不使用代理');
+    }
+  }
+} catch (error) {
+  console.error('读取代理配置失败:', error);
+  // 使用系统代理设置作为备选
+  const systemProxy = getSystemProxy();
+  if (systemProxy.http || systemProxy.https) {
+    process.env.GLOBAL_AGENT_HTTP_PROXY = systemProxy.http;
+    process.env.GLOBAL_AGENT_HTTPS_PROXY = systemProxy.https;
+    require('global-agent/bootstrap');
+    console.log('使用系统代理设置:', {
+      http: systemProxy.http,
+      https: systemProxy.https
+    });
+  } else {
+    console.log('未检测到系统代理，不使用代理');
+  }
+}
+
 class AppBootHook {
   constructor(app) {
     this.app = app

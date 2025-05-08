@@ -271,7 +271,26 @@
       "interface": "界面",
       "about": "关于",
       "data": "数据",
+      "proxy": "代理设置",
       "playground": "Playground"
+    },
+    "proxy": {
+      "title": "代理设置",
+      "enableProxy": "启用代理",
+      "enableProxyDesc": "启用后，应用将通过代理服务器连接网络",
+      "httpProxy": "HTTP代理",
+      "httpsProxy": "HTTPS代理",
+      "proxyPlaceholder": "例如: http://127.0.0.1:1080",
+      "getConfigFailed": "获取代理配置失败",
+      "updateSuccess": "更新代理配置成功",
+      "updateSuccessDesc": "代理配置已成功更新",
+      "updateFailed": "更新代理配置失败",
+      "enableSuccess": "启用代理成功",
+      "enableSuccessDesc": "代理已成功启用",
+      "enableFailed": "启用代理失败",
+      "disableSuccess": "禁用代理成功",
+      "disableSuccessDesc": "代理已成功禁用",
+      "disableFailed": "禁用代理失败"
     },
     "data": {
       "title": "数据管理",
