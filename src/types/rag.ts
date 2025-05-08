@@ -6,7 +6,7 @@ interface RagBase {
   chunk_overlap: number
   chunk_method: string
   embedding_model: string
-  embedding_dimension: number
+  embedding_dimension: any
   embedding_model_type: string
   text_understanding_model: string
   image_understanding_model: string

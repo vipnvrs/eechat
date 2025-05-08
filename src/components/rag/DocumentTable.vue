@@ -3,7 +3,6 @@ import { ref, computed } from 'vue'
 import {
   Table,
   TableBody,
-  td,
   TableHead,
   TableHeader,
   TableRow,

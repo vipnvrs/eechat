@@ -473,7 +473,7 @@ onMounted(async () => {
                   <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingDimension')" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="option.value">
+                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="String(option.value)">
                     {{ option.label }}
                   </SelectItem>
                 </SelectContent>
@@ -662,7 +662,7 @@ onMounted(async () => {
                   <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingDimension')" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="option.value">
+                  <SelectItem v-for="option in embeddingDimensionOptions" :key="option.value" :value="String(option.value)">
                     {{ option.label }}
                   </SelectItem>
                 </SelectContent>
