@@ -35,7 +35,7 @@ class ToolCallMerger {
     }
 
     // 判断是否是 tool_call 结束
-    if (finishReason === 'tool_calls') {
+    if (finishReason === 'tool_calls' || finishReason === 'tool_use') {
       return this.getMergedToolCalls()
     }
 

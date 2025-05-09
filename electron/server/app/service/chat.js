@@ -82,6 +82,9 @@ class ChatService extends Service {
         if (ctx.res.writableEnded) {
           break
         }
+        if(!chunk.choices || !chunk.choices[0] || !chunk.choices[0].delta) {
+          continue
+        }
         const tool_calls = toolCallMerger.handleChunk(chunk)
         if (tool_calls) {
           console.log('✅ tool_calls 完整结果：', tool_calls)
