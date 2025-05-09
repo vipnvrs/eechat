@@ -53,7 +53,7 @@ import type {
 Model,
 } from "@/types/llm"
 import { ProviderConfig as ProviderConfigNew } from '@/types/provider'
-import { Loader2, Check, EyeClosed, Eye, Plus, Trash2, EllipsisVertical } from "lucide-vue-next"
+import { Loader2, Check, EyeClosed, Eye, Plus, Trash2, EllipsisVertical,Link } from "lucide-vue-next"
 import { Switch } from "@/components/ui/switch"
 import { useEnvStore } from "@/stores/env"
 const envStore = useEnvStore()
@@ -181,8 +181,10 @@ onMounted(() => {
   getProviders(true)
 })
 
+const currentProviderObj = ref()
 const handleProviderChange = async (provider: string, value) => {
   currentProvider.value = provider
+  currentProviderObj.value = value
   getModels()
   // 查询配置
   // const res = await getConfigProvider()
@@ -455,6 +457,8 @@ const deleteModel = async () => {
     saveLoading.value = false
   }
 }
+
+const { locale } = useI18n()
 </script>
 
 <template>
@@ -540,7 +544,7 @@ const deleteModel = async () => {
               </div>
               <div class="flex-1 flex items-center space-x-2">
                 <Icon :name="String(provider)" :size="24" />
-                <span>{{ provider }}</span>
+                <span>{{ locale == 'zh-CN' && value.name_zh ? value.name_zh : value.name }}</span>
               </div>
             </div>
           </div>
@@ -554,7 +558,8 @@ const deleteModel = async () => {
           <div class="flex justify-between items-center mb-4 border-b pb-4">
             <div class="font-bold flex items-center space-x-2">
               <Icon :name="currentProvider" :size="24" />
-              <span>{{ currentProvider }}</span>
+              <!-- <span>{{ currentProvider }}</span> -->
+              <span v-if="currentProviderObj">{{ locale == 'zh-CN' && currentProviderObj.name_zh ? `${currentProviderObj.name_zh}(${currentProviderObj.name})` : currentProviderObj.name }}</span>
             </div>
             <div class="flex space-x-2 items-center">
               <TooltipProvider>
@@ -597,9 +602,17 @@ const deleteModel = async () => {
 
           <!-- 配置表单 -->
           <div class="space-y-4">
-            <Label class="text-zinc-500">{{ t('settings.apiModel.modelConfig') }}</Label>
+            <Label class="text-zinc-500 flex items-center space-x-2 justify-between">
+              <span>{{ t('settings.apiModel.modelConfig') }} </span>
+            </Label>
             <div class="grid gap-2">
-              <Label class="font-bold">API Key</Label>
+              <Label class="font-bold justify-between flex items-center">API Key  
+                <a 
+                  v-if="currentProviderObj && currentProviderObj.api_key_url" 
+                  class="text-zinc-500 underline text-sm font-normal" 
+                  :href="currentProviderObj.api_key_url">获取 API Key
+                </a> 
+              </Label>
               <div class="flex items-center space-x-2">
                 <Input
                   v-model="apiConfig.apiKey"
@@ -656,9 +669,12 @@ const deleteModel = async () => {
 
           <!-- 模型列表 -->
           <div class="flex-1 pt-6 min-h-0 overflow-hidden">
-            <div class="flex items-center space-x-2">
-              <Label class="text-zinc-500">{{ t('settings.apiModel.availableModels') }}</Label>
-              <AddCustomModel @refresh="getModels()" :provider_id="currentProvider" :edit-model="null" ></AddCustomModel>
+            <div class="flex items-center space-x-2 justify-between">
+              <div class="flex items-center space-x-2">
+                <Label class="text-zinc-500">{{ t('settings.apiModel.availableModels') }}</Label>
+                <AddCustomModel @refresh="getModels()" :provider_id="currentProvider" :edit-model="null" ></AddCustomModel>
+              </div>
+              <a v-if="currentProviderObj && currentProviderObj.models_url" class="text-zinc-500 text-sm font-normal underline" :href="currentProviderObj.models_url">模型列表</a>
             </div>
             <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
               <div v-for="(group, key) in models" :key="key" class="space-y-1">
@@ -689,7 +705,7 @@ const deleteModel = async () => {
                         <div class="font-medium">
                           {{
                             //@ts-ignore
-                            model.name
+                            $i18n.locale === 'zh' && model.name_zh ? model.name_zh : model.name
                           }}
                         </div>
                       </div>

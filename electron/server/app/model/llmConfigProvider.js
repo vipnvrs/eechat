@@ -20,6 +20,14 @@ module.exports = app => {
         allowNull: false,
         comment: '提供商ID',
       },
+      name: {
+        type: STRING,
+        comment: '提供商名称',
+      },
+      name_zh: {
+        type: STRING,
+        comment: '提供商名称(中文)',
+      },
       api_key: {
         type: TEXT,
         allowNull: false,

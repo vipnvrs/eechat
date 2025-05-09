@@ -70,6 +70,7 @@ export interface Model {
 export interface ModelProvider {
   id: string,
   name: string,
+  name_zh?: string,
   icon: string,
   type: 'api' | 'local',
   api_key?: string,

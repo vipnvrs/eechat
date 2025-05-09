@@ -13,6 +13,10 @@ module.exports = app => {
         allowNull: false,
         comment: '提供商名称',
       },
+      name_zh: {
+        type: STRING,
+        comment: '提供商名称(中文)',
+      },
       api_url: {
         type: STRING,
         comment: 'API基础地址',
