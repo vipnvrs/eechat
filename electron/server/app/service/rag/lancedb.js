@@ -4,12 +4,11 @@ const path = require('path')
 const lancedb = require('@lancedb/lancedb')
 const paths = require('../../../config/paths')
 
-// 全局变量，用于存储 LanceDB 连接和状态
+// 使用全局状态管理 LanceDB 连接
 const globalState = {
   db: null,
-  tables: new Map(),
+  dbPath: null,
   initialized: false,
-  dbPath: null
 }
 
 class LanceDbService extends Service {
@@ -31,7 +30,10 @@ class LanceDbService extends Service {
       }
 
       // 获取数据库存储路径
-      globalState.dbPath = path.join(path.dirname(paths.databasePath), 'lancedb')
+      globalState.dbPath = path.join(
+        path.dirname(paths.databasePath),
+        'lancedb',
+      )
 
       // 确保目录存在
       if (!fs.existsSync(globalState.dbPath)) {
@@ -42,8 +44,10 @@ class LanceDbService extends Service {
       globalState.db = await lancedb.connect(globalState.dbPath)
       globalState.initialized = true
 
-      this.ctx.logger.info('LanceDB客户端初始化成功:', { path: globalState.dbPath })
-      
+      this.ctx.logger.info('LanceDB客户端初始化成功:', {
+        path: globalState.dbPath,
+      })
+
       return { success: true }
     } catch (error) {
       this.ctx.logger.error('LanceDB客户端初始化失败:', error)
@@ -77,19 +81,21 @@ class LanceDbService extends Service {
         this.ctx.logger.info(`表 ${tableName} 已存在`)
         return { success: true, exists: true }
       }
-  
+
       // 创建一个示例数据
-      const sampleData = [{
-        id: 'sample_id',
-        document_id: 'sample_doc_id',
-        text: 'sample text',
-        metadata: '{}',
-        vector: new Array(dimension).fill(0)
-      }];
-  
+      const sampleData = [
+        {
+          id: 'sample_id',
+          document_id: 'sample_doc_id',
+          text: 'sample text',
+          metadata: '{}',
+          vector: new Array(dimension).fill(0),
+        },
+      ]
+
       // 使用示例数据创建表
-      await globalState.db.createTable(tableName, sampleData);
-  
+      await globalState.db.createTable(tableName, sampleData)
+
       this.ctx.logger.info(`表 ${tableName} 创建成功`)
       return { success: true }
     } catch (error) {
@@ -123,13 +129,16 @@ class LanceDbService extends Service {
     try {
       // 获取表
       const table = await globalState.db.openTable(tableName)
-      
+
       // 准备数据 - 确保字段名与表结构完全匹配
       const data = entities.map((e, index) => ({
         id: `${e.document_id}_${index}`,
         document_id: e.document_id,
         text: e.text,
-        metadata: typeof e.metadata === 'string' ? e.metadata : JSON.stringify(e.metadata),
+        metadata:
+          typeof e.metadata === 'string'
+            ? e.metadata
+            : JSON.stringify(e.metadata),
         vector: e.vector,
       }))
 
@@ -164,20 +173,20 @@ class LanceDbService extends Service {
       // 获取表
       const table = await globalState.db.openTable(tableName)
 
-      const schema = await table.schema();  
+      const schema = await table.schema()
       // schema 是一个 Apache Arrow Schema 对象，包含所有字段信息
       schema.fields.forEach(f => {
-        console.log(`${f.name}: ${f.type}`);
-      });
+        console.log(`${f.name}: ${f.type}`)
+      })
 
       // 构建查询
       let query = table.search(vector)
-      
+
       // 添加过滤条件
       if (filter) {
         query = query.where(filter)
       }
-      
+
       // 执行搜索
       const results = await query
         .limit(topK)
@@ -222,7 +231,15 @@ class LanceDbService extends Service {
    */
   async dropTable(tableName) {
     try {
+      // 检查表是否存在
+      const hasTable = await this.hasTable(tableName)
+      if (!hasTable) {
+        this.ctx.logger.info(`表 ${tableName} 不存在，无需删除`)
+        return { success: true, notExists: true }
+      }
+
       await globalState.db.dropTable(tableName)
+      this.ctx.logger.info(`表 ${tableName} 删除成功`)
       return { success: true }
     } catch (error) {
       this.ctx.logger.error(`删除表 ${tableName} 失败:`, error)
@@ -276,7 +293,10 @@ class LanceDbService extends Service {
       await table.delete(`document_id = '${documentId}'`)
       return { success: true }
     } catch (error) {
-      this.ctx.logger.error(`从表 ${tableName} 删除文档 ${documentId} 失败:`, error)
+      this.ctx.logger.error(
+        `从表 ${tableName} 删除文档 ${documentId} 失败:`,
+        error,
+      )
       return { success: false, error: error.message || '未知错误' }
     }
   }

@@ -14,21 +14,46 @@ class RagBaseService extends Service {
       if (!data.title) {
         data.title = '新知识库'
       }
-      
+
       // 设置用户ID
       if (!uid) {
         uid = 'default_user'
       }
       data.uid = uid
-      
+
       // 生成 vector_collection 名称（如果没有提供）
       if (!data.vector_collection) {
-        data.vector_collection = `kb_${Date.now()}_${Math.floor(Math.random() * 1000)}`
+        data.vector_collection = `kb_${Date.now()}_${Math.floor(
+          Math.random() * 1000,
+        )}`
       }
-      
+
       // 创建知识库记录
       const ragBase = await ctx.model.RagBase.create(data)
-      
+
+      // 同步创建 LanceDB 表
+      try {
+        const lancedbService = ctx.service.rag.manager.lancedb
+        const config = await ctx.service.rag.getConfig()
+
+        // 确保 LanceDB 已初始化
+        await lancedbService.ensureInitialized(config)
+
+        // 获取嵌入维度
+        const dimension = data.embedding_dimension || config.embedding.dimension
+
+        // 创建表
+        await lancedbService.createTable(data.vector_collection, dimension)
+
+        ctx.logger.info('知识库向量表创建成功:', {
+          collection: data.vector_collection,
+          dimension,
+        })
+      } catch (e) {
+        ctx.logger.error('创建向量表失败:', e)
+        // 不影响主流程，继续执行
+      }
+
       return { success: true, data: ragBase }
     } catch (error) {
       ctx.logger.error('创建知识库失败:', error)
@@ -104,18 +129,54 @@ class RagBaseService extends Service {
     const { ctx } = this
     try {
       const ragBase = await ctx.model.RagBase.findByPk(id)
-      
+
       if (!ragBase) {
         return { success: false, error: '知识库不存在' }
       }
-      
+
       // 不允许修改的字段
       delete data.uid
       delete data.vector_collection
-      
+
       // 更新知识库
       await ragBase.update(data)
-      
+
+      // 如果更新了嵌入维度，需要检查 LanceDB 表
+      if (
+        data.embedding_dimension &&
+        data.embedding_dimension !== ragBase.embedding_dimension
+      ) {
+        try {
+          const lancedbService = ctx.service.rag.manager.lancedb
+          const config = await ctx.service.rag.getConfig()
+
+          // 确保 LanceDB 已初始化
+          await lancedbService.ensureInitialized(config)
+
+          // 检查表是否存在
+          const hasTable = await lancedbService.hasTable(
+            ragBase.vector_collection,
+          )
+
+          if (hasTable) {
+            // 如果表已存在且维度变更，需要删除旧表并创建新表
+            await lancedbService.dropTable(ragBase.vector_collection)
+            await lancedbService.createTable(
+              ragBase.vector_collection,
+              data.embedding_dimension,
+            )
+
+            ctx.logger.info('知识库向量表重建成功:', {
+              collection: ragBase.vector_collection,
+              dimension: data.embedding_dimension,
+            })
+          }
+        } catch (e) {
+          ctx.logger.error('更新向量表失败:', e)
+          // 不影响主流程，继续执行
+        }
+      }
+
       return { success: true, data: ragBase }
     } catch (error) {
       ctx.logger.error('更新知识库失败:', error)
