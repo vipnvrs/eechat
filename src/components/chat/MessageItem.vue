@@ -138,8 +138,8 @@ const processedFormalContent = computed(() => {
           <!-- 思考已完成，显示思考内容和正式内容 -->
           <template v-else>
             <div
-              v-if="thinkContent"
-              class="think mb-3"
+              v-if="processedThinkContent"
+              class="think mb-3 border-b pb-1"
               v-html="processedThinkContent"
             ></div>
             <div v-html="processedFormalContent || sanitizedContent"></div>
