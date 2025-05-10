@@ -35,18 +35,18 @@ try {
       console.log('代理已禁用');
     }
   } else {
-    使用系统代理设置作为默认值
-    const systemProxy = getSystemProxy();
+    // 使用系统代理设置作为默认值
+    const systemProxy = getSystemProxy()
     if (systemProxy.http || systemProxy.https) {
-      process.env.GLOBAL_AGENT_HTTP_PROXY = systemProxy.http;
-      process.env.GLOBAL_AGENT_HTTPS_PROXY = systemProxy.https;
-      require('global-agent/bootstrap');
+      process.env.GLOBAL_AGENT_HTTP_PROXY = systemProxy.http
+      process.env.GLOBAL_AGENT_HTTPS_PROXY = systemProxy.https
+      require('global-agent/bootstrap')
       console.log('使用系统代理设置:', {
         http: systemProxy.http,
-        https: systemProxy.https
-      });
+        https: systemProxy.https,
+      })
     } else {
-      console.log('未检测到系统代理，不使用代理');
+      console.log('未检测到系统代理，不使用代理')
     }
   }
 } catch (error) {

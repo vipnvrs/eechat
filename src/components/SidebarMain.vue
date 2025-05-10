@@ -52,12 +52,12 @@ const data = {
       icon: Inbox,
       isActive: false,
     },
-    // {
-    //   title: t('rag.title'),
-    //   url: '/rag',
-    //   icon: BookOpen,
-    //   isActive: false,
-    // },
+    {
+      title: t('rag.title'),
+      url: '/rag',
+      icon: BookOpen,
+      isActive: false,
+    },
     {
       title: t('chat.mcp.title'),
       url: '/mcp',
