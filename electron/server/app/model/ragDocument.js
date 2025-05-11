@@ -115,18 +115,9 @@ module.exports = app => {
         allowNull: true,
         comment: '处理时间(秒)',
       },
-      created_at: {
-        type: DATE,
-        allowNull: false,
-      },
-      updated_at: {
-        type: DATE,
-        allowNull: false,
-      },
-      deleted_at: {
-        type: DATE,
-        allowNull: true,
-      },
+      created_at: DATE,
+      updated_at: DATE,
+      deleted_at: DATE,
     },
     {
       tableName: 'rag_document',

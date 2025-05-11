@@ -80,5 +80,31 @@ module.exports = appInfo => {
     cookieMaxAge: '1y',
   }
 
+  // 文件上传
+  config.multipart = {
+    fileSize: '100mb',
+    mode: 'file',
+    tmpdir: path.join(paths.tmpPath, 'upload'),
+    whitelist: [
+      '.pdf',
+      '.docx',
+      '.doc',
+      '.txt',
+      '.md',
+      '.csv',
+      '.xlsx',
+      '.xls',
+      '.pptx',
+      '.ppt',
+      '.html',
+      '.json',
+    ],
+    cleanSchedule: {
+      // run tmpdir clean job on every day 04:30 am
+      // cron: '0 30 4 * * *',
+      // disable: true,
+    },
+  }
+
   return config
 }

@@ -108,4 +108,13 @@ module.exports = app => {
   router.post('/api/proxy/config', controller.proxy.updateProxyConfig)
   router.post('/api/proxy/enable', controller.proxy.enableProxy)
   router.post('/api/proxy/disable', controller.proxy.disableProxy)
+
+  // 文档管理接口
+  router.post('/api/rag/base/:baseId/document', controller.rag.createDocument)
+  router.get('/api/rag/base/:baseId/document', controller.rag.listDocuments)
+  router.get('/api/rag/document/:id', controller.rag.getDocument)
+  router.put('/api/rag/document/:id', controller.rag.updateDocument)
+  router.delete('/api/rag/document/:id', controller.rag.deleteDocument)
+  router.post('/api/rag/document/:id/process', controller.rag.processDocument)
+  router.post('/api/rag/base/:baseId/upload', controller.rag.uploadDocument)
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   Table,
   TableBody,
@@ -25,65 +25,85 @@ import {
   MoreHorizontal,
   FileType,
   CheckCircle,
-  Clock
+  Clock,
+  Loader2,
+  AlertCircle
 } from 'lucide-vue-next'
+import { useRagStore } from '@/stores/rag'
+import { useDocumentStore } from '@/stores/documentStore'
 
 const { t } = useI18n()
 const { toast } = useToast()
+const ragStore = useRagStore()
+const documentStore = useDocumentStore()
 
-// 模拟文档数据
-const documents = ref([
-  { 
-    id: '1', 
-    title: '产品说明书.pdf', 
-    description: '详细介绍产品功能和使用方法的说明文档',
-    type: 'pdf',  
-    created_at: '2023-06-15T10:30:00Z',
-    dataCount: 5,
-    status: 'ready', // ready 或 indexing
-    enabled: true
-  },
-  { 
-    id: '2', 
-    title: '用户手册.docx', 
-    description: '面向最终用户的操作指南和常见问题解答',
-    type: 'docx',  
-    created_at: '2023-06-16T14:20:00Z',
-    dataCount: 3,
-    status: 'indexing',
-    enabled: true
-  },
-  { 
-    id: '3', 
-    title: '技术规格.xlsx', 
-    description: '产品技术参数和性能指标详细说明',
-    type: 'xlsx',  
-    created_at: '2023-07-01T09:15:00Z',
-    dataCount: 8,
-    status: 'ready',
-    enabled: false
-  },
-  { 
-    id: '4', 
-    title: '常见问题.md', 
-    description: '用户常见问题和解决方案汇总',
-    type: 'md',  
-    created_at: '2023-07-10T16:45:00Z',
-    dataCount: 12,
-    status: 'ready',
-    enabled: true
-  },
-  { 
-    id: '5', 
-    title: '安装指南.txt', 
-    description: '软件安装步骤和环境配置要求',
-    type: 'txt',  
-    created_at: '2023-08-05T11:30:00Z',
-    dataCount: 2,
-    status: 'indexing',
-    enabled: false
-  },
-])
+// 文档数据
+const documents = computed(() => documentStore.documents)
+const loading = computed(() => documentStore.loading)
+
+// 获取文档列表
+const fetchDocuments = async () => {
+  if (!ragStore.selectedBase) return
+  
+  try {
+    await documentStore.fetchDocuments(ragStore.selectedBase.id)
+  } catch (error) {
+    toast({
+      title: t('rag.document.fetchFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
+
+// 监听选中的知识库变化
+watch(() => ragStore.selectedBase, (newBase) => {
+  if (newBase) {
+    fetchDocuments()
+  }
+}, { immediate: true })
+
+// 下载文档
+const downloadDocument = (doc) => {
+  toast({
+    title: t('rag.document.downloadStarted'),
+    description: t('rag.document.downloadStartedDesc', { title: doc.title })
+  })
+}
+
+// 删除文档
+const deleteDocument = async (doc) => {
+  try {
+    await documentStore.deleteDocument(doc.id)
+    toast({
+      title: t('rag.document.deleteSuccess'),
+      description: t('rag.document.deleteSuccessDesc', { title: doc.title })
+    })
+  } catch (error) {
+    toast({
+      title: t('rag.document.deleteFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
+
+// 切换文档启用状态
+const toggleDocumentEnabled = async (doc, enabled) => {
+  try {
+    await documentStore.toggleDocumentEnabled(doc.id, enabled)
+    toast({
+      title: enabled ? t('rag.document.enableSuccess') : t('rag.document.disableSuccess'),
+      description: t('rag.document.toggleStatusDesc', { title: doc.title, status: enabled ? t('common.enabled') : t('common.disabled') })
+    })
+  } catch (error) {
+    toast({
+      title: t('rag.document.updateFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+  }
+}
 
 // 格式化日期
 const formatDate = (dateString: string) => {
@@ -111,50 +131,51 @@ const getFileIcon = (type: string) => {
   }
 }
 
-// 获取状态图标
+// 获取状态图标 (pending/indexing/ready/failed)
 const getStatusIcon = (status: string) => {
-  return status === 'ready' ? CheckCircle : Clock
+  switch (status) {
+    case 'ready':
+      return CheckCircle
+    case 'pending':
+      return Clock
+    case 'indexing':
+      return Loader2
+    case 'failed':
+      return AlertCircle
+    default:
+      return Clock
+  }
 }
 
 // 获取状态颜色
 const getStatusColor = (status: string) => {
-  return status === 'ready' ? 'text-green-500' : 'text-gray-400'
+  switch (status) {
+    case 'ready':
+      return 'text-green-500'
+    case 'pending':
+      return 'text-yellow-500'
+    case 'indexing':
+      return 'text-blue-500'
+    case 'failed':
+      return 'text-red-500'
+    default:
+      return 'text-gray-400'
+  }
 }
 
 // 获取状态文本
 const getStatusText = (status: string) => {
-  return status === 'ready' ? t('rag.document.statusReady') : t('rag.document.statusIndexing')
-}
-
-// 下载文档
-const downloadDocument = (doc) => {
-  toast({
-    title: t('rag.document.downloadStarted'),
-    description: t('rag.document.downloadStartedDesc', { title: doc.title })
-  })
-}
-
-// 删除文档
-const deleteDocument = (doc) => {
-  documents.value = documents.value.filter(d => d.id !== doc.id)
-  toast({
-    title: t('rag.document.deleteSuccess'),
-    description: t('rag.document.deleteSuccessDesc', { title: doc.title })
-  })
-}
-
-// 切换启用状态
-const toggleEnabled = (doc) => {
-  const index = documents.value.findIndex(d => d.id === doc.id)
-  if (index !== -1) {
-    documents.value[index].enabled = !documents.value[index].enabled
-    
-    toast({
-      title: documents.value[index].enabled 
-        ? t('rag.document.enabled') 
-        : t('rag.document.disabled'),
-      description: t('rag.document.toggleStatusDesc', { title: doc.title })
-    })
+  switch (status) {
+    case 'ready':
+      return t('rag.document.statusReady')
+    case 'pending':
+      return t('rag.document.statusPending')
+    case 'indexing':
+      return t('rag.document.statusIndexing')
+    case 'failed':
+      return t('rag.document.statusFailed')
+    default:
+      return t('rag.document.statusUnknown')
   }
 }
 </script>
@@ -178,7 +199,7 @@ const toggleEnabled = (doc) => {
           <td class="">
             <div class="flex flex-col">
               <div class="flex items-center gap-2">
-                <component :is="getFileIcon(doc.type)" class="h-4 w-4" />
+                <component :is="getFileIcon(doc.file_type)" class="h-4 w-4" />
                 <span>{{ doc.title }}</span>
               </div>
               <div class="text-xs text-gray-500 mt-1 ml-6">
@@ -186,7 +207,7 @@ const toggleEnabled = (doc) => {
               </div>
             </div>
           </td>
-          <td>{{ doc.dataCount }} 条</td>
+          <td>{{ doc.chunk_count }} 条</td>
           <td>
             <div class="flex items-center gap-2">
               <component :is="getStatusIcon(doc.status)" class="h-4 w-4" :class="getStatusColor(doc.status)" />

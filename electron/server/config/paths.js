@@ -29,4 +29,5 @@ module.exports = {
   logsPath: path.join(getAppDataPath(), 'logs'),
   binPath: path.join(getAppDataPath(), 'bin'),
   configPath: path.join(getAppDataPath(), 'config'),
+  tmpPath: path.join(getAppDataPath(), 'tmp'),
 }

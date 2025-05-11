@@ -9,6 +9,7 @@
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",
+    "close": "关闭",
     "timeGroup": {
       "today": "今天",
       "yesterday": "昨天",
@@ -55,7 +56,7 @@
       "title": "编辑提示词",
       "placeholder": "请在此输入提示词..."
     },
-    "discover":{
+    "discover": {
       "title": "发现"
     },
     "mcp": {
@@ -73,8 +74,8 @@
       "isDefault": "默认知识库",
       "createBaseDesc": "创建新的知识库",
       "documents": "文档",
-      "edit":"编辑",
-      "delete":"删除",
+      "edit": "编辑",
+      "delete": "删除",
       "setDefault": "设为默认",
       "chunkMethod": "分块方法",
       "selectChunkMethod": "选择分块方法",
@@ -106,9 +107,31 @@
       "status": "状态",
       "statusReady": "就绪",
       "statusIndexing": "处理中",
+      "statusFailed": "失败",
+      "statusPending": "待处理",
+      "statusUnknown": "未知",
       "enabled": "启用",
       "createdAt": "创建时间",
-      "actions": "操作"
+      "actions": "操作",
+      "documentList": "文档列表",
+      "modelConfig": "模型配置",
+      "help": "帮助文档",
+      "unsupportedFileType": "不支持的文件类型",
+      "unsupportedFileTypeDesc": "请上传以下文件类型的文档：{fileTypes}",
+      "dragAndDrop": "拖放文件或文件夹",
+      "supportedFormats": "支持的文件格式",
+      "noBaseSelected": "请先选择一个知识库",
+      "pleaseSelectBase": "请先选择一个知识库",
+      "uploadSuccess": "上传成功",
+      "uploadSuccessDesc": "{count} 条数据已成功上传",
+      "uploadFailed": "上传失败",
+      "uploadFailedDesc": "{count} 条数据上传失败",
+      "uploadDocument": "上传文档",
+      "uploadDocumentDesc": "上传文档后，系统将自动将文档转换为向量并存储到数据库中",
+      "browseFiles": "浏览文件",
+      "upload": "上传",
+      "uploading": "上传中...",
+      "uploadingDesc": "正在上传文档，请稍候"
     }
   },
   "discover": {

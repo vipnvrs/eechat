@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ragApi } from '@/api/request'
+import { useDocumentStore } from '@/stores/documentStore'
 import type { RagResponse, RagState } from '@/types/rag'
 
 export const useRagStore = defineStore('rag', {
@@ -15,8 +16,8 @@ export const useRagStore = defineStore('rag', {
     processingDocument: false,
     serviceStatus: {
       running: false,
-      error: null
-    }
+      error: null,
+    },
   }),
 
   actions: {
@@ -33,7 +34,8 @@ export const useRagStore = defineStore('rag', {
         return this.bases
       } catch (error) {
         console.error('获取知识库列表失败:', error)
-        this.error = error instanceof Error ? error.message : '获取知识库列表失败'
+        this.error =
+          error instanceof Error ? error.message : '获取知识库列表失败'
       } finally {
         this.loadingBases = false
       }
@@ -50,7 +52,8 @@ export const useRagStore = defineStore('rag', {
         return response
       } catch (error) {
         console.error('获取知识库详情失败:', error)
-        this.error = error instanceof Error ? error.message : '获取知识库详情失败'
+        this.error =
+          error instanceof Error ? error.message : '获取知识库详情失败'
         throw error
       } finally {
         this.loading = false
@@ -145,7 +148,8 @@ export const useRagStore = defineStore('rag', {
         return true
       } catch (error) {
         console.error('设置默认知识库失败:', error)
-        this.error = error instanceof Error ? error.message : '设置默认知识库失败'
+        this.error =
+          error instanceof Error ? error.message : '设置默认知识库失败'
         throw error
       } finally {
         this.loading = false
@@ -221,14 +225,14 @@ export const useRagStore = defineStore('rag', {
         const response = await ragApi.getStatus()
         this.serviceStatus = {
           running: response.running || false,
-          error: response.error || null
+          error: response.error || null,
         }
         return this.serviceStatus
       } catch (error) {
         console.error('获取服务状态失败:', error)
         this.serviceStatus = {
           running: false,
-          error: error instanceof Error ? error.message : '获取服务状态失败'
+          error: error instanceof Error ? error.message : '获取服务状态失败',
         }
         return this.serviceStatus
       }
@@ -259,14 +263,14 @@ export const useRagStore = defineStore('rag', {
       this.initialized = false
       this.showCreateDialog = false
       this.showEditDialog = false
-    }
+    },
   },
 
   getters: {
     // 获取默认知识库
     defaultBase: state => state.bases.find(base => base.is_default),
-    
+
     // 获取知识库总数
-    baseCount: state => state.bases.length
-  }
+    baseCount: state => state.bases.length,
+  },
 })

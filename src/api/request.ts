@@ -521,6 +521,56 @@ export const ragApi = {
   }
 }
 
+export const documentApi = {
+  // 获取文档列表
+  async listDocuments(baseId: number | string, params?: any) {
+    return request.get(`/api/rag/base/${baseId}/document`, params)
+  },
+
+  // 获取文档详情
+  async getDocument(id: number | string) {
+    return request.get(`/api/rag/document/${id}`)
+  },
+
+  // 创建文档
+  async createDocument(baseId: number | string, data: any) {
+    return request.post(`/api/rag/base/${baseId}/document`, data)
+  },
+
+  // 更新文档
+  async updateDocument(id: number | string, data: any) {
+    return request.put(`/api/rag/document/${id}`, data)
+  },
+
+  // 删除文档
+  async deleteDocument(id: number | string) {
+    return request.delete(`/api/rag/document/${id}`)
+  },
+
+  // 处理文档（索引）
+  async processDocument(id: number | string) {
+    return request.post(`/api/rag/document/${id}/process`)
+  },
+
+  // 上传文档
+  async uploadDocument(
+    baseId: number | string,
+    formData: FormData,
+    onProgress?: (progress: number) => void,
+  ) {
+    const config: any = {}
+    if (onProgress) {
+      config.onUploadProgress = (progressEvent: any) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total,
+        )
+        onProgress(percentCompleted)
+      }
+    }
+    return request.post(`/api/rag/base/${baseId}/upload`, formData, config)
+  },
+}
+
 export const proxyApi = {
   // 获取代理配置
   async getProxyConfig() {

@@ -38,3 +38,46 @@ export interface RagState {
     error: string | null
   }
 }
+
+// 文档状态类型
+export type DocumentStatus = 'pending' | 'indexing' | 'ready' | 'failed'
+
+// 文档类型
+export interface Document {
+  id: number | string
+  rag_base_id: number | string
+  title: string
+  description?: string
+  file_path?: string
+  file_size?: number
+  file_type: string
+  mime_type?: string
+  source?: string
+  status: DocumentStatus
+  enabled: boolean
+  chunk_count: number
+  embedding_model?: string
+  embedding_dimension?: number
+  chunk_size?: number
+  chunk_overlap?: number
+  chunk_method?: string
+  collection_name?: string
+  error_message?: string
+  metadata?: string
+  processing_time?: number
+  created_at: string
+  updated_at: string
+}
+
+// 文档 Store 状态
+export interface DocumentState {
+  documents: Document[]
+  currentDocument: Document | null
+  loading: boolean
+  uploading: boolean
+  processing: boolean
+  error: string | null
+  totalCount: number
+  page: number
+  pageSize: number
+}
