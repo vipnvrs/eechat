@@ -87,6 +87,9 @@ module.exports = app => {
   router.post('/api/mcp/server/:key/start', controller.mcp.startServer)
   router.post('/api/mcp/server/:key/stop', controller.mcp.stopServer)
 
+  // tts
+  router.post('/api/tts', controller.tts.tts)
+
   // RAG 相关接口
   router.get('/api/rag/config', controller.rag.getConfig)
   router.post('/api/rag/config', controller.rag.saveConfig)

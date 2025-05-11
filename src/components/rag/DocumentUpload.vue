@@ -80,7 +80,7 @@ const handleFileSelect = (event) => {
 }
 
 // 添加文件到列表
-const addFiles = (files: File[]) => {
+const addFiles = (files) => {
   // 过滤不支持的文件类型
   const validFiles = files.filter(file => {
     const extension = '.' + file.name.split('.').pop()?.toLowerCase()

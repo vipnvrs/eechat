@@ -31,6 +31,7 @@ import {
 } from 'lucide-vue-next'
 import { useRagStore } from '@/stores/rag'
 import { useDocumentStore } from '@/stores/documentStore'
+import FileTypeIcon from '@/components/rag/FileTypeIcon.vue'
 
 const { t } = useI18n()
 const { toast } = useToast()
@@ -117,7 +118,7 @@ const formatDate = (dateString: string) => {
   }).format(date)
 }
 
-// 获取文件图标
+// 移除旧的 getFileIcon 函数
 const getFileIcon = (type: string) => {
   switch (type.toLowerCase()) {
     case 'pdf':
@@ -199,7 +200,8 @@ const getStatusText = (status: string) => {
           <td class="">
             <div class="flex flex-col">
               <div class="flex items-center gap-2">
-                <component :is="getFileIcon(doc.file_type)" class="h-4 w-4" />
+                <!-- 替换为新的 FileTypeIcon 组件 -->
+                <FileTypeIcon :fileType="doc.file_type" :size="28" />
                 <span>{{ doc.title }}</span>
               </div>
               <div class="text-xs text-gray-500 mt-1 ml-6">

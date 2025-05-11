@@ -297,15 +297,15 @@ class RagDocumentService extends Service {
     try {
       // 创建文档记录
       const documentData = {
+        ...options,
         rag_base_id: ragBaseId,
-        title: options.title || path.basename(file.filename),
+        title: options.title || file.filename,
         description: options.description || '',
         file_path: file.filepath,
-        file_size: file.size,
+        file_size: file.size || 0,
         file_type: path.extname(file.filename).substring(1),
-        mime_type: file.mime,
+        mime_type: file.mimeType,
         source: options.source || 'upload',
-        ...options,
       }
 
       const createResult = await this.create(documentData, ragBaseId)
