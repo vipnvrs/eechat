@@ -81,3 +81,9 @@ export interface DocumentState {
   page: number
   pageSize: number
 }
+
+export interface DocumentChunks {
+  chunk_index: number
+  id: number,
+  content: string
+}

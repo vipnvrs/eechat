@@ -1,4 +1,5 @@
 const { Service } = require('egg')
+const { nanoid } = require('nanoid')
 
 class RagBaseService extends Service {
   /**
@@ -23,9 +24,7 @@ class RagBaseService extends Service {
 
       // 生成 vector_collection 名称（如果没有提供）
       if (!data.vector_collection) {
-        data.vector_collection = `kb_${Date.now()}_${Math.floor(
-          Math.random() * 1000,
-        )}`
+        data.vector_collection = `rag_${nanoid(10)}`
       }
 
       // 创建知识库记录

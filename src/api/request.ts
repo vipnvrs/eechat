@@ -569,6 +569,10 @@ export const documentApi = {
     }
     return request.post(`/api/rag/base/${baseId}/upload`, formData, config)
   },
+
+  async getDocumentChunks(id: number | string, params) {
+    return request.get(`/api/rag/document/${id}/chunks`, { params })
+  },
 }
 
 export const proxyApi = {

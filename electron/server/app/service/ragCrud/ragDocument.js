@@ -329,6 +329,99 @@ class RagDocumentService extends Service {
       return { success: false, error: error.message || '上传文档失败' }
     }
   }
+
+  /**
+   * 获取文档分段列表
+   * @param {number} id 文档ID
+   * @param {Object} options 查询选项
+   * @returns {Promise<Object>} 分段列表
+   */
+  async getChunks(id, options = {}) {
+    const { ctx } = this
+    try {
+      const document = await ctx.model.RagDocument.findByPk(id)
+
+      if (!document) {
+        return { success: false, error: '文档不存在' }
+      }
+
+      // 获取知识库信息
+      const ragBase = await ctx.model.RagBase.findByPk(document.rag_base_id)
+      if (!ragBase) {
+        return { success: false, error: '知识库不存在' }
+      }
+
+      // 如果文档状态不是ready，则从数据库获取分段
+      if (document.status !== 'ready') {
+        // 从数据库获取分段
+        const chunkService = ctx.service.ragCrud.ragChunk
+        const result = await chunkService.list(id, options.page, options.pageSize)
+        return result
+      }
+
+      // 从LanceDB获取分段
+      try {
+        const lancedbService = ctx.service.rag.manager.lancedb
+        const collection = document.collection_name || ragBase.vector_collection
+        
+        // 构建过滤条件，只获取当前文档的分段
+        const filter = `document_id = '${id}'`
+        
+        // 执行查询
+        await lancedbService.ensureInitialized()
+        const result = await lancedbService.getAllRecords(
+          collection,
+          {
+            limit: options.limit || 1000,
+            outputFields: ['id', 'document_id', 'text', 'metadata'],
+            filter,
+          }
+        )
+
+        if (!result.success) {
+          throw new Error(result.error || '获取分段失败')
+        }
+
+        // 处理结果
+        const chunks = result.matches.map((match, index) => {
+          // 解析元数据
+          let metadata = match.metadata
+          if (typeof metadata === 'string') {
+            try {
+              metadata = JSON.parse(metadata)
+            } catch (e) {
+              // 解析失败，保持原样
+            }
+          }
+
+          return {
+            id: match.id,
+            document_id: match.document_id,
+            content: match.text,
+            chunk_index: index,
+            metadata
+          }
+        })
+
+        return {
+          success: true,
+          data: chunks,
+          total: chunks.length,
+          page: 1,
+          pageSize: chunks.length
+        }
+      } catch (error) {
+        ctx.logger.error('从LanceDB获取分段失败:', error)
+        
+        // 如果从LanceDB获取失败，尝试从数据库获取
+        const chunkService = ctx.service.ragCrud.ragChunk
+        return await chunkService.list(id, options.page, options.pageSize)
+      }
+    } catch (error) {
+      ctx.logger.error('获取文档分段列表失败:', error)
+      return { success: false, error: error.message || '获取文档分段列表失败' }
+    }
+  }
 }
 
 module.exports = RagDocumentService

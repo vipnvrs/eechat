@@ -224,6 +224,21 @@ export const useDocumentStore = defineStore('document', {
       return this.updateDocument(id, { enabled })
     },
 
+    // 获取文档分段
+    async getDocumentChunks(id: number | string, params = {}) {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await documentApi.getDocumentChunks(id, params)
+        return response
+      } catch (error) {
+        console.error('获取文档分段失败:', error)
+        this.error =
+          error instanceof Error? error.message : '获取文档分段失败'
+        throw error
+      }
+    },
+
     // 重置状态
     resetState() {
       this.documents = []

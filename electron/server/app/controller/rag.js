@@ -374,7 +374,7 @@ class RagController extends Controller {
         {
           title,
           description,
-          autoProcess: autoProcess !== 'false',
+          autoProcess: true,
         },
       )
 
@@ -385,6 +385,34 @@ class RagController extends Controller {
       }
     } catch (error) {
       ctx.logger.error('上传文档失败:', error)
+      ctx.body = ctx.helper.error(error.message)
+    }
+  }
+
+  // 获取文档分段列表
+  async getDocumentChunks() {
+    const { ctx } = this
+    const { id } = ctx.params
+    const { page = 1, pageSize = 100 } = ctx.query
+
+    try {
+      const result = await ctx.service.ragCrud.ragDocument.getChunks(id, {
+        page,
+        pageSize
+      })
+
+      if (result.success) {
+        ctx.body = ctx.helper.success({
+          list: result.data,
+          total: result.total,
+          page: result.page,
+          pageSize: result.pageSize,
+        })
+      } else {
+        ctx.body = ctx.helper.error(result.error)
+      }
+    } catch (error) {
+      ctx.logger.error('获取文档分段列表失败:', error)
       ctx.body = ctx.helper.error(error.message)
     }
   }

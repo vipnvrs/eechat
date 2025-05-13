@@ -3,6 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const lancedb = require('@lancedb/lancedb')
 const paths = require('../../../config/paths')
+const nanoid = require('nanoid')
 
 // 使用全局状态管理 LanceDB 连接
 const globalState = {
@@ -132,7 +133,7 @@ class LanceDbService extends Service {
 
       // 准备数据 - 确保字段名与表结构完全匹配
       const data = entities.map((e, index) => ({
-        id: `${e.document_id}_${index}`,
+        id: `${e.document_id}_${index}_${nanoid.nanoid(10)}`,
         document_id: e.document_id,
         text: e.text,
         metadata:
@@ -298,6 +299,32 @@ class LanceDbService extends Service {
         error,
       )
       return { success: false, error: error.message || '未知错误' }
+    }
+  }
+
+  
+  /**
+   * 获取表中的所有记录
+   * @param {string} tableName 表名称
+   * @param {Object} options 查询选项
+   * @returns {Promise<Object>} 查询结果
+   */
+  async getAllRecords(tableName, options = {}) {
+    try {
+      const {limit, outputFields, filter} = options
+
+      // 获取表
+      const table = await globalState.db.openTable(tableName)
+      const matches = await table.query()
+      .select([...outputFields])
+      .filter(filter)
+      .limit(limit)
+      .toArray()
+
+      return { success: true, matches }
+    } catch (error) {
+      this.ctx.logger.error(`获取表 ${tableName} 所有记录失败:`, error)
+      return { success: false, error: error.message || '未知错误', matches: [] }
     }
   }
 }

@@ -120,4 +120,5 @@ module.exports = app => {
   router.delete('/api/rag/document/:id', controller.rag.deleteDocument)
   router.post('/api/rag/document/:id/process', controller.rag.processDocument)
   router.post('/api/rag/base/:baseId/upload', controller.rag.uploadDocument)
+  router.get('/api/rag/document/:id/chunks', controller.rag.getDocumentChunks)
 }

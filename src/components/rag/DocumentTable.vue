@@ -32,6 +32,8 @@ import {
 import { useRagStore } from '@/stores/rag'
 import { useDocumentStore } from '@/stores/documentStore'
 import FileTypeIcon from '@/components/rag/FileTypeIcon.vue'
+import { Badge } from '@/components/ui/badge'
+import { DocumentChunks, Document } from '@/types/rag'
 
 const { t } = useI18n()
 const { toast } = useToast()
@@ -179,6 +181,64 @@ const getStatusText = (status: string) => {
       return t('rag.document.statusUnknown')
   }
 }
+
+
+const isShowChunkDrawer = ref(false)
+const currentDocument = ref<Document>()
+const documentChunks = ref<DocumentChunks[]>([])
+const chunksLoading = ref(false)
+
+const showChunks = async (doc) => {
+  try {
+    currentDocument.value = doc
+    isShowChunkDrawer.value = true
+    chunksLoading.value = true
+    
+    const result = await documentStore.getDocumentChunks(doc.id)
+    if (result && result.list) {
+      documentChunks.value = result.list
+    } else {
+      documentChunks.value = []
+      toast({
+        title: t('rag.document.chunksEmpty'),
+        description: t('rag.document.chunksEmptyDesc'),
+        variant: 'default'
+      })
+    }
+  } catch (error) {
+    toast({
+      title: t('rag.document.fetchChunksFailed'),
+      description: error instanceof Error ? error.message : String(error),
+      variant: 'destructive'
+    })
+    documentChunks.value = []
+  } finally {
+    chunksLoading.value = false
+  }
+}
+
+// 格式化元数据显示
+const formatMetadata = (metadata) => {
+  if (!metadata) return ''
+  
+  // 过滤掉不需要显示的字段
+  const filtered = { ...metadata }
+  delete filtered.document_id
+  
+  return Object.entries(filtered)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n')
+}
+
+// 关闭抽屉
+const closeChunkDrawer = () => {
+  isShowChunkDrawer.value = false
+  setTimeout(() => {
+    documentChunks.value = []
+    // @ts-ignore
+    currentDocument.value = null
+  }, 300)
+}
 </script>
 
 <template>
@@ -199,7 +259,7 @@ const getStatusText = (status: string) => {
         <tr v-for="doc in documents" :key="doc.id">
           <td class="">
             <div class="flex flex-col">
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 cursor-pointer" @click="showChunks(doc)">
                 <!-- 替换为新的 FileTypeIcon 组件 -->
                 <FileTypeIcon :fileType="doc.file_type" :size="28" />
                 <span>{{ doc.title }}</span>
@@ -219,7 +279,7 @@ const getStatusText = (status: string) => {
           <td>
             <Switch 
               v-model="doc.enabled" 
-              @update:checked="toggleEnabled(doc)"
+              @update:checked="toggleDocumentEnabled(doc, !doc.enabled)"
               :disabled="doc.status === 'indexing'"
             />
           </td>
@@ -252,6 +312,67 @@ const getStatusText = (status: string) => {
       </tbody>
     </table>
     </ScrollArea>
+    
+    <!-- 自定义右侧抽屉 -->
+    <Teleport to="body">
+      <div v-if="isShowChunkDrawer" class="fixed inset-0 bg-black/30 z-50" @click="closeChunkDrawer"></div>
+      <div 
+        class="fixed top-0 right-0 h-full w-[50%] bg-background shadow-lg z-50 overflow-hidden transition-transform duration-300 ease-in-out border-l"
+        :class="isShowChunkDrawer ? 'translate-x-0' : 'translate-x-full'"
+      >
+        <!-- 抽屉头部 -->
+        <div class="p-6 border-b">
+          <div class="flex items-center gap-2 font-semibold mt-6">
+            <FileTypeIcon v-if="currentDocument" :fileType="currentDocument.file_type" :size="20" />
+            {{ currentDocument?.title }} - {{ t('rag.document.chunks') }}
+          </div>
+          <div class="text-sm text-muted-foreground mt-1">
+            {{ t('rag.document.chunksDesc') }}
+          </div>
+        </div>
+        
+        <!-- 抽屉内容 -->
+        <ScrollArea class="p-6 overflow-y-auto" style="height: calc(100% - 150px);">
+          <div v-if="chunksLoading" class="flex justify-center items-center py-8">
+            <Loader2 class="h-8 w-8 animate-spin text-primary" />
+          </div>
+          
+          <div v-else-if="documentChunks.length === 0" class="text-center py-8 text-muted-foreground">
+            {{ t('rag.document.noChunks') }}
+          </div>
+          
+          <div v-else class="space-y-4">
+            <div v-for="(chunk, index) in documentChunks" :key="chunk.id" 
+                 class="">
+              <div class="flex justify-between items-start mb-2">
+                <Badge variant="outline" class="mb-2">
+                  {{ t('rag.document.chunkIndex') }}: {{ chunk.chunk_index || index }}
+                </Badge>
+                <Badge variant="secondary" class="text-xs">
+                  ID: {{ chunk.id }}
+                </Badge>
+              </div>
+              
+              <ScrollArea class="text-sm whitespace-pre-wrap mb-4 overflow-hidden bg-muted p-4 rounded">
+                {{ chunk.content }}
+              </ScrollArea>
+              
+              <!-- <details class="text-xs">
+                <summary class="cursor-pointer text-muted-foreground hover:text-foreground">
+                  {{ t('rag.document.metadata') }}
+                </summary>
+                <pre class="mt-2 p-2 bg-muted rounded-md overflow-x-auto">{{ JSON.stringify(chunk.metadata, null, 2) }}</pre>
+              </details> -->
+            </div>
+          </div>
+        </ScrollArea>
+        
+        <!-- 抽屉底部 -->
+        <div class="p-4 border-t absolute bottom-0 w-full bg-background">
+          <Button class="w-full" @click="closeChunkDrawer">{{ t('common.close') }}</Button>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 

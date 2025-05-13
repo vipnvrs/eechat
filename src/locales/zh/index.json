@@ -131,7 +131,15 @@
       "browseFiles": "浏览文件",
       "upload": "上传",
       "uploading": "上传中...",
-      "uploadingDesc": "正在上传文档，请稍候"
+      "uploadingDesc": "正在上传文档，请稍候",
+      "chunks": "文档分片",
+      "chunksDesc": "查看文档被分割成的所有片段",
+      "chunkIndex": "片段索引",
+      "metadata": "元数据",
+      "noChunks": "该文档没有分片数据",
+      "fetchChunksFailed": "获取分片失败",
+      "chunksEmpty": "分片数据为空",
+      "chunksEmptyDesc": "该文档可能尚未处理完成"
     }
   },
   "discover": {
