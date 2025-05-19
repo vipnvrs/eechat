@@ -12,6 +12,9 @@ INSERT OR IGNORE INTO "llm_models" VALUES ('siliconcloud:THUDM/GLM-Z1-32B-0414',
 INSERT OR IGNORE INTO "llm_models" VALUES ('siliconcloud:Qwen/Qwen2.5-VL-72B-Instruct', 'siliconcloud', 'Qwen2.5-VL-72B-Instruct', 'Qwen', 0, 9, '2025-03-04T14:37:12.932Z', '2025-03-04T14:37:12.932Z', NULL);
 
 
+UPDATE llm_config_provider SET name ='Silicon Cloud' WHERE provider_id ='siliconcloud';
+UPDATE llm_providers SET name ='Silicon Cloud' WHERE id ='siliconcloud';
+
 -- 添加中文模型名称
 UPDATE llm_config_provider SET name_zh ='硅基流动' WHERE provider_id ='siliconcloud';
 UPDATE llm_providers SET name_zh ='硅基流动' WHERE id ='siliconcloud';
