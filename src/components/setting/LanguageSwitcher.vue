@@ -15,7 +15,7 @@ const changeLanguage = (value: string) => {
   currentLanguage.value = lang
   setLanguage(lang)
   systemApi.locale(lang)
-  // window.location.reload()
+  window.location.reload()
 }
 
 onMounted(() => {
