@@ -190,7 +190,7 @@ onMounted(() => {
             id="test-text" 
             v-model="testText" 
             :placeholder="t('settings.tts.enterTestText', '输入测试文本')"
-            class="flex-1"
+            class="flex-1 bg-background"
           />
           <Button @click="testVoice" :disabled="testLoading">
             <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
