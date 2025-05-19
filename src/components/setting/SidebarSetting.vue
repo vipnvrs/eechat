@@ -17,7 +17,7 @@ import {
   type SidebarProps,
 } from '@/components/ui/sidebar'
 import Icon from '@/components/icon.vue'
-import { Brain, HardDrive, Heart, PocketKnife, Database, Globe } from 'lucide-vue-next'
+import { Brain, HardDrive, Heart, PocketKnife, Database, Globe, Volume2 } from 'lucide-vue-next'
 import LocalModel from '@/components/setting/LocalModel.vue'
 import ApiModel from '@/components/setting/ApiModel.vue'
 import About from '@/components/setting/About.vue'
@@ -25,6 +25,7 @@ import Appearance from '@/components/setting/Appearance.vue'
 import DataSet from '@/components/setting/DataSet.vue'
 import Playground from '@/components/setting/Playground.vue'
 import ProxySettings from '@/components/setting/ProxySettings.vue'
+import TtsSettings from '@/components/setting/TtsSettings.vue'
 
 const { t } = useI18n()
 
@@ -47,6 +48,18 @@ const menuData = [
         icon: Brain,
         key: 'ApiModel',
         component: markRaw(ApiModel),
+      },
+    ],
+  },
+  {
+    label: t('settings.sidebar.voice'),
+    icon: Volume2,
+    items: [
+      {
+        label: t('settings.sidebar.tts'),
+        icon: HardDrive,
+        key: 'tts',
+        component: markRaw(TtsSettings),
       },
     ],
   },

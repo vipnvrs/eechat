@@ -89,6 +89,7 @@ module.exports = app => {
 
   // tts
   router.post('/api/tts', controller.tts.tts)
+  router.get('/api/tts/voices', controller.tts.getVoices)
 
   // RAG 相关接口
   router.get('/api/rag/config', controller.rag.getConfig)

@@ -217,7 +217,18 @@
       "about": "About",
       "data": "Data",
       "proxy": "Proxy Settings",
-      "playground": "Playground"
+      "playground": "Playground",
+      "voice": "Voice",
+      "tts": "Text to speech"
+    },
+    "tts": {
+      "title": "Text to Speech settings",
+      "voice": "Voice",
+      "refresh": "Refresh",
+      "currentLanguageVoices": "Current Language Voices",
+      "selectVoice": "Select Voice",
+      "testTextTitle": "Test Text",
+      "testText": "eechat is great, i like it!"
     },
     "proxy": {
       "title": "Proxy Settings",

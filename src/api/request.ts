@@ -597,3 +597,15 @@ export const proxyApi = {
   }
 }
 
+export const ttsApi = {
+  // 获取TTS语音列表
+  async getVoices() {
+    return request.get('/api/tts/voices')
+  },
+  
+  // 文本转语音
+  async textToSpeech(text: string, voice?: string, format?: string) {
+    return request.post('/api/tts', { text, voice, format })
+  }
+}
+

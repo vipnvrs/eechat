@@ -303,7 +303,19 @@
       "about": "关于",
       "data": "数据",
       "proxy": "代理设置",
-      "playground": "Playground"
+      "playground": "Playground",
+      "voice": "语音",
+      "tts": "文本转语音"
+    },
+    
+    "tts": {
+      "title": "文本转语音设置",
+      "voice": "音色",
+      "refresh": "刷新",
+      "currentLanguageVoices": "当前语言可用音色",
+      "selectVoice": "选择音色",
+      "testTextTitle": "测试文本",
+      "testText": "eechat 真棒，我很喜欢！"
     },
     "proxy": {
       "title": "代理设置",

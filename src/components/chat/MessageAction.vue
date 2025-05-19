@@ -1,20 +1,29 @@
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue'
+import { ref, watch, onBeforeUnmount, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Volume2, VolumeX, Copy, Check, Headphones } from 'lucide-vue-next'
 import { useVolcanoTTS } from '@/composables/useVolcanoTTS'
 import { useSpeechStore } from '@/stores/speech'
+import { ttsApi } from '@/api/request'
 
 const props = defineProps<{
   message: string,
   role: string
 }>()
 
-const { t } = useI18n()
+onMounted(() => {
+  const localVoice = localStorage.getItem('tts-voice')
+  if(!localVoice) {
+    localStorage.setItem('tts-voice', 'zh-CN-XiaoxiaoNeural')
+  }
+})
+
+const { t, locale } = useI18n()
 const isSpeaking = ref(false)
 const isCopied = ref(false)
 const isVolcanoSpeaking = ref(false)
+const isEdgeTtsSpeaking = ref(false)
 const speechSynthesis = window.speechSynthesis
 let utterance:any = null
 
@@ -47,11 +56,15 @@ const getPlainText = (html) => {
 
 // 开始朗读文本 (Web Speech API)
 const speak = () => {
-  // 如果火山引擎TTS正在播放，先停止它
+  // 如果火山引擎TTS或Edge TTS正在播放，先停止它
   if (isVolcanoSpeaking.value) {
     volcanoStop()
     isVolcanoSpeaking.value = false
     speechStore.stopSpeaking()
+  }
+  
+  if (isEdgeTtsSpeaking.value) {
+    stopEdgeTts()
   }
   
   if (isSpeaking.value) {
@@ -64,8 +77,8 @@ const speak = () => {
   
   utterance = new SpeechSynthesisUtterance(text)
   
-  // 设置语言，默认使用中文
-  utterance.lang = 'zh-CN'
+  // 设置语言，默认使用当前i18n的语言
+  utterance.lang = locale.value
   
   // 监听语音结束事件
   utterance.onend = () => {
@@ -97,9 +110,13 @@ const stopSpeaking = () => {
 
 // 使用火山引擎TTS朗读
 const speakWithVolcano = async () => {
-  // 如果系统TTS正在播放，先停止它
+  // 如果系统TTS或Edge TTS正在播放，先停止它
   if (isSpeaking.value) {
     stopSpeaking()
+  }
+  
+  if (isEdgeTtsSpeaking.value) {
+    stopEdgeTts()
   }
   
   if (isVolcanoSpeaking.value) {
@@ -129,6 +146,108 @@ const speakWithVolcano = async () => {
     isVolcanoSpeaking.value = false
     speechStore.stopSpeaking()
   }
+}
+
+// 使用Edge TTS朗读
+// const speakWithEdgeTts = async () => {
+//   // 如果系统TTS或火山引擎TTS正在播放，先停止它
+//   if (isSpeaking.value) {
+//     stopSpeaking()
+//   }
+  
+//   if (isVolcanoSpeaking.value) {
+//     await volcanoStop()
+//     isVolcanoSpeaking.value = false
+//     speechStore.stopSpeaking()
+//   }
+  
+//   if (isEdgeTtsSpeaking.value) {
+//     stopEdgeTts()
+//     return
+//   }
+// }
+
+// 添加一个变量来保存当前播放的音频实例
+let currentEdgeTtsAudio = null
+
+const speakWithEdgeTts = async () => {
+  const text = getPlainText(props.message)
+  if (!text) return
+
+  if (isSpeaking.value) {
+    stopSpeaking()
+  }
+
+  if (isVolcanoSpeaking.value) {
+    await volcanoStop()
+    isVolcanoSpeaking.value = false
+    speechStore.stopSpeaking()
+  }
+
+  if (isEdgeTtsSpeaking.value) {
+    stopEdgeTts()
+    return
+  }
+  
+  try {
+    isEdgeTtsSpeaking.value = true
+    // 获取存储的语音设置，如果没有则使用默认值
+    const voice = localStorage.getItem('tts-voice') || 
+                 (locale.value.startsWith('zh') ? 'zh-CN-XiaoxiaoNeural' : 'en-US-AriaNeural')
+    
+    // 调用API进行TTS转换
+    const result = await ttsApi.textToSpeech(text, voice)
+    
+    // 创建音频源
+    const audioSrc = `data:${result.mimeType};base64,${result.base64Audio}`
+    
+    // 播放音频
+    const audio = new Audio(audioSrc)
+    
+    // 保存音频实例的引用
+    // @ts-ignore
+    currentEdgeTtsAudio = audio
+    
+    // 更新全局语音状态
+    speechStore.startSpeaking(text, 'edge-tts', audioSrc)
+    
+    // 播放音频
+    audio.play()
+    
+    // 监听播放结束
+    audio.onended = () => {
+      isEdgeTtsSpeaking.value = false
+      speechStore.stopSpeaking()
+      currentEdgeTtsAudio = null
+    }
+    
+    // 监听播放错误
+    audio.onerror = () => {
+      isEdgeTtsSpeaking.value = false
+      speechStore.stopSpeaking()
+      currentEdgeTtsAudio = null
+    }
+  } catch (error) {
+    console.error('Edge TTS错误:', error)
+    isEdgeTtsSpeaking.value = false
+    speechStore.stopSpeaking()
+    currentEdgeTtsAudio = null
+  }
+}
+
+// 停止Edge TTS播放
+const stopEdgeTts = () => {
+  // 如果有正在播放的音频，停止它
+  if (currentEdgeTtsAudio) {
+    // @ts-ignore
+    currentEdgeTtsAudio.pause()
+    // @ts-ignore
+    currentEdgeTtsAudio.currentTime = 0
+    currentEdgeTtsAudio = null
+  }
+  
+  isEdgeTtsSpeaking.value = false
+  speechStore.stopSpeaking()
 }
 
 // 监听火山引擎播放状态
@@ -163,6 +282,9 @@ watch(() => props.message, () => {
     volcanoStop()
     speechStore.stopSpeaking()
   }
+  if (isEdgeTtsSpeaking.value) {
+    stopEdgeTts()
+  }
 })
 
 // 组件卸载时清理
@@ -174,6 +296,9 @@ onBeforeUnmount(() => {
     volcanoStop()
     speechStore.stopSpeaking()
   }
+  if (isEdgeTtsSpeaking.value) {
+    stopEdgeTts()
+  }
 })
 </script>
 
@@ -181,6 +306,17 @@ onBeforeUnmount(() => {
   <div class="message-actions space-x-2 mt-[-10px]" :class="role === 'user' ? 'flex justify-end' : 'flex justify-start'">
     
     <Button 
+      variant="outline" 
+      size="icon" 
+      class="h-8 w-8" 
+      @click="speakWithEdgeTts" 
+      :title="isEdgeTtsSpeaking ? t('chat.stopEdgeTtsSpeaking') : t('chat.speakWithEdgeTts')"
+    >
+      <Headphones v-if="!isEdgeTtsSpeaking" class="h-4 w-4" />
+      <VolumeX v-else class="h-4 w-4" />
+    </Button>
+    
+    <!-- <Button 
       variant="outline" 
       size="icon" 
       class="h-8 w-8" 
@@ -201,7 +337,7 @@ onBeforeUnmount(() => {
       <Volume2 v-if="!isSpeaking" class="h-4 w-4" />
       <VolumeX v-else class="h-4 w-4" />
     </Button>
-    
+     -->
     <Button 
       variant="outline" 
       size="icon" 
