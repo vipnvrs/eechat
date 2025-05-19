@@ -13,6 +13,9 @@ hero:
     - theme: alt
       text: Github
       link: https://github.com/Lucassssss/eechat
+    - theme: alt
+      text: 文档
+      link: /guide/about
 
 features:
   - title: Feature A

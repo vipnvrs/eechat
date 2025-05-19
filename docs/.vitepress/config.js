@@ -32,6 +32,18 @@ export default {
         ]
       },
       {
+        text: 'MCP',
+        items: [
+          { text: 'MCP 简介', link: '/mcp/about' },
+        ]
+      },
+      {
+        text: '知识库',
+        items: [
+          { text: '知识库简介', link: '/rag/about' },
+        ]
+      },
+      {
         text: '在其他平台使用',
         items: [
           { text: '硅基流动', link: '/model/use-in-siliconflow' },
