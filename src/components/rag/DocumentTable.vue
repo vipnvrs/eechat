@@ -293,10 +293,10 @@ const closeChunkDrawer = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem @click="downloadDocument(doc)">
+                <!-- <DropdownMenuItem @click="downloadDocument(doc)">
                   <Download class="mr-2 h-4 w-4" />
                   <span>{{ t('rag.document.download') }}</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> -->
                 <DropdownMenuItem 
                   @click="deleteDocument(doc)" 
                   class="text-red-600 hover:text-red-500"
