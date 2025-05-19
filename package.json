@@ -1,6 +1,6 @@
 {
   "name": "eechat",
-  "version": "0.7.7",
+  "version": "0.8.0",
   "main": "dist-electron/main/index.js",
   "description": "a light weight chat tool for llm.",
   "author": "eechat <oodoobvideo@gmail.com>",
