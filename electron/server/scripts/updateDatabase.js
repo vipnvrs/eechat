@@ -175,31 +175,37 @@ async function updateDatabase(appLogger) {
 
     if (needInitialize) {
       await initializeDatabase(db)
-    } else {
-      // 获取当前数据库版本
-      const currentVersion = await getCurrentVersion(db)
-      logger.info(`当前数据库版本: ${currentVersion}`)
+    } 
+    // 获取当前数据库版本
+    const currentVersion = await getCurrentVersion(db)
+    logger.info(`当前数据库版本: ${currentVersion}`)
 
-      // 获取所有SQL升级文件
-      const updateFiles = getSqlUpdateFiles()
-      logger.info(`找到 ${updateFiles.length} 个SQL升级文件`)
+    // 获取所有SQL升级文件
+    const updateFiles = getSqlUpdateFiles()
+    logger.info(`找到 ${updateFiles.length} 个SQL升级文件`)
 
-      // 执行版本高于当前版本的SQL文件
-      for (const file of updateFiles) {
-        if (file.version > currentVersion) {
-          logger.info(
-            `执行SQL升级文件: ${path.basename(file.path)} (版本 ${
-              file.version
-            })`,
-          )
-          await executeSqlFile(db, file.path)
-          await setVersion(db, file.version)
-          logger.info(`数据库已升级到版本 ${file.version}`)
-        }
+    // 执行版本高于当前版本的SQL文件
+    for (const file of updateFiles) {
+      if (file.version > currentVersion) {
+        logger.info(
+          `执行SQL升级文件: ${path.basename(file.path)} (版本 ${
+            file.version
+          })`,
+        )
+        await executeSqlFile(db, file.path)
+        await setVersion(db, file.version)
+        logger.info(`数据库已升级到版本 ${file.version}`)
+      } else {
+        logger.info(
+          `跳过SQL升级文件: ${path.basename(file.path)} (版本 ${
+            file.version
+          })，当前版本高于或等于目标版本`,
+        )
       }
-
-      logger.info('数据库升级完成')
     }
+
+    logger.info('数据库升级完成')
+    
   } catch (err) {
     logger.error('升级数据库时出错:', err)
     throw err

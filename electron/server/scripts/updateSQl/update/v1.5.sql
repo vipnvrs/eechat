@@ -1,5 +1,10 @@
 -- v1.5 升级脚本
 
+-- 如果没有列 name_zh， 添加列 name_zh
+ALTER TABLE llm_config_provider ADD COLUMN name_zh TEXT;
+ALTER TABLE llm_providers ADD COLUMN name_zh TEXT;
+
+
 -- 更改硅基流动模型id名称
 UPDATE llm_config_provider SET provider_id = 'siliconcloud' WHERE provider_id = 'silicon';
 UPDATE llm_providers SET id = 'siliconcloud' WHERE id = 'silicon';
