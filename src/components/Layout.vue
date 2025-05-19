@@ -14,7 +14,7 @@ import TitleBar from '@/components/TitleBar.vue'
   <div class="flex w-full flex-col">
     <div class="fixed w-full h-full pointer-events-none">
       <img src="/photo.jpeg" alt="" 
-      class="w-full h-[100dvh] object-cover opacity-10 z-[-1] pointer-events-none">
+      class="w-full h-[100dvh] object-cover opacity-[0.06] z-[-1] pointer-events-none">
       <!-- <div class="absolute inset-0 bg-black/5 backdrop-blur-[2px] z-[-2] pointer-events-none"></div> -->
     </div>
     <TitleBar class="h-[30px] w-full"></TitleBar>

@@ -182,6 +182,10 @@ const toggleServerStatus = async (mcp) => {
     loadingMcps.value[mcp.key] = false
   }
 }
+
+const opendoc = () => {
+  window.open('https://docs.ee.chat/mcp/about.html')
+}
 </script>
 
 <template>
@@ -197,7 +201,7 @@ const toggleServerStatus = async (mcp) => {
       <div class="flex items-center space-x-2">
         <Config></Config>
         <Env></Env>
-        <Button variant="outline">
+        <Button variant="outline" @click="opendoc">
           <FileText/>
           帮助文档
         </Button>

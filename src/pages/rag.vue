@@ -17,6 +17,10 @@ const ragStore = useRagStore()
 
 // 当前选中的知识库
 const selectedBase = computed(() => ragStore.selectedBase)
+
+const opendoc = () => {
+  window.open('https://docs.ee.chat/rag/about.html')
+}
 </script>
 
 <template>
@@ -37,7 +41,7 @@ const selectedBase = computed(() => ragStore.selectedBase)
         <div class="flex items-center space-x-3">
           <DocumentUpload />
           <!-- <Button variant="outline"><Cog />{{ $t('rag.document.modelConfig') }}</Button> -->
-          <Button variant="outline"><FileText />{{ $t('rag.document.help') }}</Button>
+          <Button variant="outline" @click="opendoc"><FileText />{{ $t('rag.document.help') }}</Button>
         </div>
       </div>
       <div class="p-4 pt-0">

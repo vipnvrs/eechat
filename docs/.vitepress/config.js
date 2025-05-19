@@ -38,7 +38,7 @@ export default {
         ]
       },
       {
-        text: '知识库',
+        text: '知识库(Beta)',
         items: [
           { text: '知识库简介', link: '/rag/about' },
         ]

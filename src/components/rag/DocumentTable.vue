@@ -244,7 +244,7 @@ const closeChunkDrawer = () => {
 <template>
   <div class="w-full h-full overflow-hidden flex flex-col">
     <ScrollArea class="max-h-[calc(100vh-180px)] relative">
-    <table class="max-w-full w-full">
+    <table class="max-w-full w-full rounded-md overflow-hidden">
       <thead>
         <tr>
           <th class="w-[300px]">{{ t('rag.document.name') }}</th>
@@ -378,7 +378,7 @@ const closeChunkDrawer = () => {
 
 <style scoped>
 td {
-  @apply text-sm p-3;
+  @apply text-sm p-3 bg-background;
 }
 
 th {
