@@ -268,7 +268,7 @@ const handleInstall = async () => {
         <p>建议: 由于硬件资源有限，建议选择轻量级的模型，如: 1b、2b 等</p>
       </AlertDescription>
     </Alert>
-    <div class="flex rounded p-4 border justify-between items-center">
+    <div class="flex rounded p-4 border justify-between items-center bg-background">
       <div class="font-bold flex items-center space-x-2">
         <template v-if="ollamaState.running">
           <div class="rounded-full w-2 h-2 mr-3 bg-green-500"></div>
@@ -339,7 +339,7 @@ const handleInstall = async () => {
     <ScrollArea class="flex-1 flex flex-col space-y-2">
       <template v-for="item in filteredModels">
         <div
-          class="rounded border p-4 mb-4"
+          class="rounded border p-4 mb-4 bg-background"
           v-for="(model, modelIndex) in item.sizes"
           :key="`${item.name}-${model}-${modelIndex}`"
         >

@@ -163,7 +163,7 @@ const newBase = ref<RagForm>({
   chunk_overlap: 200,
   chunk_method: 'sliding_window',
   embedding_model: 'text-embedding-v3',
-  embedding_dimension: 1024,
+  embedding_dimension: '1024',
   embedding_model_type: 'api',
   text_understanding_model: 'qwen-max',
   image_understanding_model: 'qwen-vl-max',

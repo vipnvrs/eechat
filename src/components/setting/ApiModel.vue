@@ -618,6 +618,7 @@ const { locale } = useI18n()
                   v-model="apiConfig.apiKey"
                   :type="isShowApiKey? 'text' : 'password'"
                   :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
+                  class="bg-background"
                 />
                 <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 
                   <EyeClosed v-if="isShowApiKey" />
@@ -633,6 +634,7 @@ const { locale } = useI18n()
                 :placeholder="`https://api.${currentProvider}.com${
                   currentProvider === 'openai' ? '/v1' : ''
                 }`"
+                class="bg-background"
               />
             </div>
             <div class="grid gap-2">
@@ -691,7 +693,7 @@ const { locale } = useI18n()
                       //@ts-ignore
                       model.name
                     "
-                    class="flex flex-col space-y-2 px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 group/item border-b"
+                    class="flex flex-col space-y-2 px-4 py-2 rounded bg-background hover:bg-slate-100 dark:hover:bg-slate-800 group/item border-b"
                   >
                     <div class="flex items-center space-x-2 justify-between">
                       <div class="flex items-center space-x-2">

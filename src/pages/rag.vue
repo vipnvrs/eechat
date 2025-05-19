@@ -36,7 +36,7 @@ const selectedBase = computed(() => ragStore.selectedBase)
         </div>
         <div class="flex items-center space-x-3">
           <DocumentUpload />
-          <Button variant="outline"><Cog />{{ $t('rag.document.modelConfig') }}</Button>
+          <!-- <Button variant="outline"><Cog />{{ $t('rag.document.modelConfig') }}</Button> -->
           <Button variant="outline"><FileText />{{ $t('rag.document.help') }}</Button>
         </div>
       </div>

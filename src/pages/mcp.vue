@@ -220,7 +220,7 @@ const toggleServerStatus = async (mcp) => {
       <AddNew></AddNew>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- 添加新应用卡片 -->
-        <div class="rounded-md border overflow-hidden cursor-pointer hover:border-primary flex flex-col justify-center" @click="handleAddNew">
+        <div class="rounded-md border overflow-hidden cursor-pointer hover:border-primary flex flex-col justify-center bg-background" @click="handleAddNew">
           <div class="flex flex-col items-center justify-center">
             <PlusCircle class="w-8 h-8 mb-2" />
             <span class="text-sm">添加新应用</span>
@@ -231,7 +231,7 @@ const toggleServerStatus = async (mcp) => {
         <div 
           v-for="item in mcpStore.installedServers" 
           :key="item.key"
-          class="rounded-md border overflow-hidden"
+          class="rounded-md border overflow-hidden bg-background"
         >
           <div class="font-bold p-4 flex justify-between items-center">
             <span>{{ item.chineseName }}</span>
@@ -301,7 +301,7 @@ const toggleServerStatus = async (mcp) => {
       </div>
         <div class="">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div v-for="item in filteredMcpList" :key="item.Id" class="rounded-md border overflow-hidden">
+            <div v-for="item in filteredMcpList" :key="item.Id" class="rounded-md border overflow-hidden bg-background">
               <!-- 卡片内容保持不变 -->
               <div class="font-bold p-4">
                 {{ item.ChineseName || item.Name }}
