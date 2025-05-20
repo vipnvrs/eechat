@@ -1,4 +1,5 @@
 export default {
+  lang: 'zh-CN',
   title: 'eechat 官方文档',
   description: 'eechat 官方文档',
   themeConfig: {
@@ -7,6 +8,9 @@ export default {
       { text: 'eechat文档', link: '/guide/about' },
       { text: '官方网站', link: 'https://ee.chat' },
       { text: 'Github', link: 'https://github.com/Lucassssss/eechat' },
+    ],
+    head: [
+      ['meta', { name: 'baidu-site-verification', content: 'codeva-4RkxZNQi90' }]
     ],
     sidebar: [
       // {
