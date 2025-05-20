@@ -18,9 +18,14 @@ export const useRagStore = defineStore('rag', {
       running: false,
       error: null,
     },
+    usingBases: []
   }),
 
   actions: {
+    // 设置使用的知识库
+    setUsingBases(usingBase: number[]) {
+      this.usingBases = usingBase
+    },
     // 获取知识库列表
     async fetchBases(params = {}) {
       if (this.loadingBases) return
@@ -272,5 +277,8 @@ export const useRagStore = defineStore('rag', {
 
     // 获取知识库总数
     baseCount: state => state.bases.length,
+
+    // 获取使用的知识库
+    getUsingBases: state => state.usingBases,
   },
 })

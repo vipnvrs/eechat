@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ArrowUpToLine } from "lucide-vue-next"
 import { CornerDownLeft, Mic } from "lucide-vue-next"
 import UseTool from "@/components/chat/UseTool.vue" // 导入 UseTool 组件
+import UseKnowledgeBase from "@/components/chat/UseKnowledgeBase.vue" // 导入 UseKnowledgeBase 组件
 
 const { t } = useI18n()
 
@@ -84,6 +85,7 @@ const handleRecord = () => {
       ></Textarea>
       <div class="ml-auto gap-1.5 absolute bottom-4 right-4 flex items-center space-x-1">
         <UseTool class="relative"></UseTool>
+        <UseKnowledgeBase class="relative"></UseKnowledgeBase>
         <Button
           @click="handleRecord"
           :variant="isRecording ? 'destructive' : 'outline'"

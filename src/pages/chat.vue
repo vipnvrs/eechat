@@ -39,10 +39,12 @@ import { useSessionStore } from '@/stores/session'
 import { useMcpStore } from '@/stores/mcp'
 import { computed } from "vue"
 import { useEnvStore } from "@/stores/env"
+import { useRagStore } from "@/stores/rag"
 const envStore = useEnvStore()
 
 const sessionStore = useSessionStore()
 const mcpStore = useMcpStore()
+const ragStore = useRagStore()
 
 const route = useRoute()
 const assistantStore = useAssistantStore()
@@ -70,6 +72,10 @@ watch(() => sessionStore.currentSession, (newValue, oldValue) => {
 
 const tools = computed(() => {
   return mcpStore.getSelectedTools
+})
+
+const knowledge = computed(() => {
+  return ragStore.getUsingBases
 })
 
 const handleSessionChange = async (session) => {
@@ -115,7 +121,17 @@ const sendMsgLocalOllama = async (model: LLMModel, msg: string) => {
         // 更新最后一条消息的内容
         const lastMessage = chatHistory.value[chatHistory.value.length - 1]
         lastMessage.content += content
-      }
+      },
+      (reasoning_content) => {
+        // 思考过程
+        const lastMessage = chatHistory.value[chatHistory.value.length - 1]
+        if(typeof lastMessage.reasoning_content == 'undefined') {
+          lastMessage.reasoning_content = ""
+        }
+        lastMessage.reasoning_content += reasoning_content
+      },
+      tools.value, // 工具列表
+      knowledge.value?.join(','),  // 知识库列表 id
     )
   } catch (error) {
     console.error("Error during chat:", error)
@@ -157,7 +173,8 @@ const sendMsgLlmApi = async (model: LLMModel, msg: string) => {
         }
         lastMessage.reasoning_content += reasoning_content
       },
-      tools.value,
+      tools.value, // 工具列表
+      knowledge.value?.join(','),  // 知识库列表 id
     )
   } catch (error) {
     console.error("Error during chat:", error)

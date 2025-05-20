@@ -69,7 +69,7 @@ class DeepseekService extends BaseLLMService {
    *   frequency_penalty: 0,
    * }
    */
-  async chat(model, messages, config, sessionSettings, tools) {
+  async chat(model, messages, config, sessionSettings, tools, docs) {
     const { ctx } = this
     try {
       const configSaved = await this.getConfig(model.provider_id)

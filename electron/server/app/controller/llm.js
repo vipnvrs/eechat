@@ -169,8 +169,11 @@ class LLMController extends Controller {
   // 对话
   async chat() {
     const { ctx } = this
-    const { model, provider, messages, sessionId, config, tools } = ctx.request.body
+    const { model, provider, messages, sessionId, config, tools, context } = ctx.request.body
     const uid = ctx.request.query.uid || 'default-user'
+    if(context && typeof context === 'string') {
+      context = context.split(',')
+    }
     try {
       const res = await ctx.service.llm.chat(
         model,
@@ -179,6 +182,8 @@ class LLMController extends Controller {
         sessionId,
         config,
         tools,
+        null,
+        context
       )
       ctx.body = ctx.helper.success(res)
     } catch (error) {

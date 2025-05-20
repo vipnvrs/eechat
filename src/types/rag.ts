@@ -36,7 +36,8 @@ export interface RagState {
   serviceStatus: {
     running: boolean
     error: string | null
-  }
+  },
+  usingBases?: number[]
 }
 
 // 文档状态类型

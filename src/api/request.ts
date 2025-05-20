@@ -157,7 +157,26 @@ export const chatApi = {
     sessionId,
     onProgress?: (content: string) => void,
     onProgressReasoning?: (reasoning_content: string) => void,
+    tools?: any[], // 工具列表
+    context?: string,  // 知识库
   ) {
+
+    const requestBody: any = { model, messages, sessionId }
+    
+    // 只有当tools存在且长度大于0时才添加到请求体中
+    if (tools && tools.length > 0) {
+      requestBody.tools = tools
+    } else {
+      console.log('没有tools，不添加到请求体中')
+    }
+
+    // 只有当context存在且不为空时才添加到请求体中
+    if (context && context.trim() !== '') {
+      requestBody.context = context
+    } else {
+      console.log('没有context，不添加到请求体中')
+    }
+
     try {
       const currentLang = i18n.global.locale.value
       const response = await fetch(API_BASE_URL + '/api/local/chat', {
@@ -166,7 +185,7 @@ export const chatApi = {
           'Content-Type': 'application/json',
           'Accept-Language': currentLang,
         },
-        body: JSON.stringify({ model, messages, sessionId }),
+        body: JSON.stringify(requestBody)
       })
       handleStream(response, onProgress, onProgressReasoning)
     } catch (error) {
@@ -363,7 +382,8 @@ export const llmApi = {
     sessionId,
     onProgress?: (content: string) => void,
     onProgressReasoning?: (reasoning_content: string) => void,
-    tools?: any[],
+    tools?: any[], // 工具列表
+    context?: string,  // 知识库
   ) {
     const provider = model.provider_id
 
@@ -374,6 +394,13 @@ export const llmApi = {
       requestBody.tools = tools
     } else {
       console.log('没有tools，不添加到请求体中')
+    }
+
+    // 只有当context存在且不为空时才添加到请求体中
+    if (context && context.trim() !== '') {
+      requestBody.context = context
+    } else {
+      console.log('没有context，不添加到请求体中')
     }
 
     try {

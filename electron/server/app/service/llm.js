@@ -461,7 +461,7 @@ class LLMService extends BaseLLMService {
    * @param {*} messages
    * @param {*} config
    */
-  async chat(model, provider, messages, sessionId, config, tools, msgSaved) {
+  async chat(model, provider, messages, sessionId, config, tools, msgSaved, context) {
     const { ctx } = this
     const chatService = ctx.service.chat
     const loopArgs = {
@@ -472,6 +472,8 @@ class LLMService extends BaseLLMService {
       config,
     }
     try {
+      const lastMessage = messages[messages.length - 1]
+      let docs = this.getDocsByContextId(context, lastMessage)
       let service = this.getProviderService(provider)
       const sessionSettings = await chatService.getSettings(sessionId)
       const stream = await service.chat(
@@ -480,6 +482,7 @@ class LLMService extends BaseLLMService {
         config,
         sessionSettings,
         tools,
+        docs,
       )
       // 使用 ChatService 的 handleStream 处理流数据
       await chatService.handleStream(
@@ -513,6 +516,12 @@ class LLMService extends BaseLLMService {
 
   async getConfig(provider) {
     return await super.getConfig(provider)
+  }
+
+  async getDocsByContextId(contextIds, message) {
+    const { ctx } = this
+    const vectorArray = this.ctx.service.rag.embedder.embedTexts(message)
+    return await ctx.service.rag.search(vectorArray, contextIds)
   }
 }
 

@@ -263,14 +263,14 @@ const uploadFiles = async () => {
             <p class="text-xs text-muted-foreground mt-1">
               {{ t('rag.document.supportedFormats') }}: {{ supportedFileTypes.join(', ') }}
             </p>
-            <label class="mt-4 inline-block">
+            <label class="mt-4 inline-block relative w-[72px] h-[32px] overflow-hidden">
               <Button size="sm" type="button">
                 {{ t('rag.document.browseFiles') }}
               </Button>
               <input
                 type="file"
                 multiple
-                class="hidden"
+                class="absolute z-50 left-0 top-0 opacity-0 cursor-pointer"
                 :accept="fileTypeFilter"
                 @change="handleFileSelect"
               />
