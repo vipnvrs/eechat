@@ -473,7 +473,7 @@ class LLMService extends BaseLLMService {
     }
     try {
       const lastMessage = messages[messages.length - 1]
-      let docs = this.getDocsByContextId(context, lastMessage)
+      let docs = await this.getDocsByContextId(context, lastMessage)
       let service = this.getProviderService(provider)
       const sessionSettings = await chatService.getSettings(sessionId)
       const stream = await service.chat(
@@ -519,9 +519,28 @@ class LLMService extends BaseLLMService {
   }
 
   async getDocsByContextId(contextIds, message) {
+    if(!contextIds || contextIds.length === 0) {
+      return []
+    }
     const { ctx } = this
-    const vectorArray = this.ctx.service.rag.embedder.embedTexts(message)
-    return await ctx.service.rag.search(vectorArray, contextIds)
+    try {
+      const { data } = await ctx.service.ragCrud.ragBase.get(contextIds[0])
+      const options = {
+        chunkSize: data.chunk_size,
+        chunkOverlap: data.chunk_overlap,
+        chunkMethod: data.chunk_method,
+        model: data.embedding_model,
+        dimensions: data.embedding_dimension,
+        collection: data.collection_name || data.vector_collection,
+        baseURL: data.base_url,
+        apiKey: data.api_key,
+      }
+      const res  = await ctx.service.ragService.manager.query(message.content, options)
+      return res
+    } catch (error) {
+      ctx.logger.error('文档召回失败:', error)
+      throw new Error(error.message)
+    }
   }
 }
 

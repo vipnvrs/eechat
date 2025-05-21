@@ -58,17 +58,6 @@ class DeepseekService extends BaseLLMService {
     return super.listModels()
   }
 
-  /**
-   *
-   * sessionSettings = {
-   *   title: '',
-   *   systemPrompt: '',
-   *   temperature: 0.7,
-   *   top_p: 1,
-   *   presence_penalty: 0,
-   *   frequency_penalty: 0,
-   * }
-   */
   async chat(model, messages, config, sessionSettings, tools, docs) {
     const { ctx } = this
     try {
@@ -78,20 +67,6 @@ class DeepseekService extends BaseLLMService {
       const model_id = model.id.includes(':')
         ? model.id.split(model.provider_id + ':').pop()
         : model.id
-      //       if (tools && tools.length > 0) {
-      //         sessionSettings.systemPrompt += `
-      // You must respond ONLY with a valid and well-formed JSON object.
-
-      // - Use double quotes '"' around all keys and string values.
-      // - Do NOT include any extra text, comments, markdown, explanations, or code blocks.
-      // - The JSON must be directly parsable using "JSON.parse()" in JavaScript.
-      // - Do NOT include newlines ("\n") or trailing commas.
-      // - All values must be correctly escaped according to JSON standards.
-      // - The output must start with "{" and end with "}" (or "[" and "]" if it’s an array).
-
-      // `
-      //       }
-
       /**
        * 合并相同角色的消息
        * */
@@ -130,14 +105,24 @@ class DeepseekService extends BaseLLMService {
         mergedMessages.push(currentMessage)
       }
 
-      const messagesWithSystemPrompt = sessionSettings.systemPrompt
-        ? [
-            { role: 'system', content: sessionSettings.systemPrompt },
-            ...mergedMessages,
-          ]
-        : mergedMessages
+      const systemPrompts = this.ctx.service.prompt.buildSystemPrompt(
+        sessionSettings.systemPrompt,
+        docs,
+        tools,
+        // customPrompts
+      );
 
+      const messagesWithSystemPrompt = [
+        { role:'system', content: systemPrompts },
+        ...mergedMessages,
+      ]
 
+      // const messagesWithSystemPrompt = sessionSettings.systemPrompt
+      //   ? [
+      //       { role: 'system', content: sessionSettings.systemPrompt },
+      //       ...mergedMessages,
+      //     ]
+      //   : mergedMessages
 
       console.log(sessionSettings)
 

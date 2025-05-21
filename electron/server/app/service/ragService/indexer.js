@@ -28,7 +28,6 @@ class IndexerService extends Service {
       // 确保表存在
       const dimension = config.embedding.dimension
       await lancedbService.createTable(collection, dimension)
-
       // 构建实体数据
       const entities = chunks.map((chunk, index) => ({
         document_id: document.id,
@@ -81,7 +80,7 @@ class IndexerService extends Service {
       const result = await lancedbService.search(collection, queryVector, {
         topK,
         filter,
-        outputFields: ['document_id', 'text', 'metadata'],
+        // outputFields: ['document_id', 'text', 'metadata'],
       })
 
       return result

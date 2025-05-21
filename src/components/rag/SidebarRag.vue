@@ -159,8 +159,8 @@ const showCreateDialog = computed(() => ragStore.showCreateDialog)
 const newBase = ref<RagForm>({
   title: '',
   description: '',
-  chunk_size: 1000,
-  chunk_overlap: 200,
+  chunk_size: 200,
+  chunk_overlap: 10,
   chunk_method: 'sliding_window',
   embedding_model: 'text-embedding-v3',
   embedding_dimension: '1024',

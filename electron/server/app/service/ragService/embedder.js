@@ -3,36 +3,6 @@ const http = require('http')
 const https = require('https')
 
 class EmbedderService extends Service {
-  /**
-   * 生成文本嵌入向量
-   * @param {Array<string>} texts 文本数组
-   * @param {Object} options 选项
-   * @returns {Promise<Array<Array<number>>>} 嵌入向量数组
-   */
-  async embedTexts(texts, options = {}) {
-    const { batchSize = 32 } = options
-    const config = await this.ctx.service.rag.getConfig()
-    if (!config) {
-      throw new Error('RAG配置未找到')
-    }
-    const model = config.embedding.model
-
-    try {
-      // 分批处理，避免一次性处理太多文本
-      const batches = this.createBatches(texts, batchSize)
-      const allEmbeddings = []
-
-      for (const batch of batches) {
-        const embeddings = await this.embedBatch(batch, model)
-        allEmbeddings.push(...embeddings)
-      }
-
-      return allEmbeddings
-    } catch (error) {
-      this.ctx.logger.error('生成嵌入向量失败:', error)
-      throw error
-    }
-  }
 
   /**
    * 创建批次
@@ -51,15 +21,15 @@ class EmbedderService extends Service {
    * @param {string} model 模型名称
    * @returns {Promise<Array<Array<number>>>} 嵌入向量数组
    */
-  async embedBatch(texts, model) {
+  async embedBatch(texts, options) {
     const embeddings = []
     
     // 为每个文本生成嵌入向量
+    const {model, dimensions, baseURL, apiKey} = options
     for (const text of texts) {
       try {
         // const embedding = await this.callOllamaEmbedding(text, model)
-        const config = await this.ctx.service.rag.getConfig()
-        const embedding = await this.callOpenAIEmbedding(text, model, config.embedding.dimension, config.embedding.baseURL, config.embedding.apiKey)
+        const embedding = await this.callOpenAIEmbedding(text, model, dimensions, baseURL, apiKey)
         embeddings.push(embedding)
       } catch (error) {
         this.ctx.logger.error(`获取文本嵌入向量失败: ${text.substring(0, 50)}...`, error)
@@ -199,7 +169,7 @@ class EmbedderService extends Service {
               // 提取嵌入向量
               const embeddings = response.data.map(item => item.embedding);
               this.ctx.logger.info(`成功获取 ${embeddings.length} 个嵌入向量`);
-              resolve(embeddings);
+              resolve(embeddings[0]);
             } else {
               this.ctx.logger.error('OpenAI API 返回无效响应:', response);
               reject(new Error('无效的嵌入向量响应'));

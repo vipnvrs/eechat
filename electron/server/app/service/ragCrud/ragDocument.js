@@ -244,8 +244,11 @@ class RagDocumentService extends Service {
           chunkSize: document.chunk_size,
           chunkOverlap: document.chunk_overlap,
           chunkMethod: document.chunk_method,
-          embeddingModel: document.embedding_model,
+          model: document.embedding_model,
+          dimensions: ragBase.embedding_dimension,
           collection: document.collection_name || ragBase.vector_collection,
+          baseURL: ragBase.base_url,
+          apiKey: ragBase.api_key,
         })
 
         if (!result.success) {

@@ -80,7 +80,7 @@ class ManagerService extends Service {
    * @param {Object} options 处理选项
    * @returns {Promise<Object>} 处理结果
    */
-  async processDocumentRag(document, options = {}) {
+  async processDocumentRag(document, options) {
     await this.ensureInitialized()
 
     try {
@@ -97,8 +97,13 @@ class ManagerService extends Service {
 
       // 3. 向量嵌入
       const embedderService = this.embedder
-      const embeddings = await embedderService.embedTexts(textChunks, {
-        model: options.embeddingModel,
+      const config = await this.ctx.service.rag.getConfig()
+      const embeddings = await embedderService.embedBatch(textChunks, {
+        texts: textChunks, 
+        model: options.model,
+        dimensions: options.dimensions, 
+        baseURL: options.baseURL || config.embedding.baseURL,
+        apiKey: options.apiKey || config.embedding.apiKey,
       })
 
       // 4. 索引存储
@@ -130,23 +135,50 @@ class ManagerService extends Service {
    */
   async query(query, options = {}) {
     await this.ensureInitialized()
+    const extractedText = query
 
     try {
       // 设置默认查询模式
       const mode = options.mode || 'naive'
       const collection = options.collection || 'documents'
 
+      // 0. 文本分块
+      const chunkerService = this.chunker
+      const textChunks = await chunkerService.chunkText(extractedText, {
+        chunkSize: options.chunkSize,
+        chunkOverlap: options.chunkOverlap,
+        method: options.chunkMethod,
+      })
+
       // 1. 向量嵌入
       const embedderService = this.embedder
-      const queryEmbedding = (await embedderService.embedTexts([query]))[0]
+      const config = await this.ctx.service.rag.getConfig()
+      const embeddings = await embedderService.embedBatch(textChunks, {
+        texts: textChunks, 
+        model: options.model,
+        dimensions: options.dimensions, 
+        baseURL: options.baseURL || config.embedding.baseURL,
+        apiKey: options.apiKey || config.embedding.apiKey,
+      })
 
       // 2. 向量检索
       const indexerService = this.indexer
-      let searchResult = await indexerService.search(queryEmbedding, {
-        collection,
-        topK: options.topK || 10,
-        filter: options.filter || '',
-      })
+      let searchResult = []
+      for (const embedding of embeddings) {
+        let res = await indexerService.search(embedding, {
+          collection,
+          topK: options.topK || 10,
+          filter: options.filter || '',
+        })
+        if(res.success) {
+          const { matches } = res
+          searchResult = searchResult.concat(matches)
+        }
+      }
+
+      // 去重并根据查询距离值排序
+      searchResult = this.deduplicateAndSortResults(searchResult);
+      
 
       // 3. 重新排序（如果启用）
       if (
@@ -166,7 +198,7 @@ class ManagerService extends Service {
       }
 
       // 4. 构建上下文
-      const context = this.buildContext(searchResult.matches, options)
+      // const context = this.buildContext(searchResult.matches, options)
 
       // 5. 生成回答
       // const answer = await this.generateAnswer(query, context, options)
@@ -174,9 +206,9 @@ class ManagerService extends Service {
       return {
         query,
         mode,
-        context,
+        // context,
         // answer,
-        matches: searchResult.matches,
+        matches: searchResult,
       }
     } catch (error) {
       this.ctx.logger.error('查询处理失败:', error)
@@ -224,6 +256,45 @@ class ManagerService extends Service {
       this.ctx.logger.error('生成回答失败:', error)
       return '抱歉，我无法基于当前信息回答这个问题。'
     }
+  }
+
+  /**
+   * 对搜索结果进行去重和排序
+   * @param {Array<Object>} results 搜索结果数组
+   * @returns {Array<Object>} 去重并排序后的结果
+   */
+  deduplicateAndSortResults(results) {
+    // 使用Map进行去重，以id为键
+    const uniqueMap = new Map();
+    
+    for (const item of results) {
+      // 如果Map中不存在该id，或者存在但当前项的_distance更小（且不为null），则更新Map
+      if (!uniqueMap.has(item.id) || 
+          (item._distance !== null && 
+           (uniqueMap.get(item.id)._distance === null || 
+            item._distance < uniqueMap.get(item.id)._distance))) {
+        uniqueMap.set(item.id, item);
+      }
+    }
+    
+    // 将Map转换回数组
+    const uniqueResults = Array.from(uniqueMap.values());
+    
+    // 根据_distance排序，null值排在最后
+    uniqueResults.sort((a, b) => {
+      // 如果a的_distance为null，排在后面
+      if (a._distance === null) return 1;
+      // 如果b的_distance为null，排在后面
+      if (b._distance === null) return -1;
+      // 正常比较_distance值，升序排列（距离越小越相关）
+      return a._distance - b._distance;
+    });
+
+    uniqueResults.forEach((item, index) => {
+      delete item.vector
+    })
+    
+    return uniqueResults;
   }
 }
 

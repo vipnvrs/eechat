@@ -171,8 +171,9 @@ class LLMController extends Controller {
     const { ctx } = this
     const { model, provider, messages, sessionId, config, tools, context } = ctx.request.body
     const uid = ctx.request.query.uid || 'default-user'
+    let ragBaseIds = []
     if(context && typeof context === 'string') {
-      context = context.split(',')
+      ragBaseIds = context.split(',')
     }
     try {
       const res = await ctx.service.llm.chat(
@@ -183,7 +184,7 @@ class LLMController extends Controller {
         config,
         tools,
         null,
-        context
+        ragBaseIds
       )
       ctx.body = ctx.helper.success(res)
     } catch (error) {

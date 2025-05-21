@@ -90,7 +90,7 @@ class LanceDbService extends Service {
           document_id: 'sample_doc_id',
           text: 'sample text',
           metadata: '{}',
-          vector: new Array(dimension).fill(0),
+          vector: new Array(Number(dimension)).fill(0),
         },
       ]
 
@@ -130,6 +130,7 @@ class LanceDbService extends Service {
     try {
       // 获取表
       const table = await globalState.db.openTable(tableName)
+      console.log(await table.schema())
 
       // 准备数据 - 确保字段名与表结构完全匹配
       const data = entities.map((e, index) => ({
@@ -145,6 +146,9 @@ class LanceDbService extends Service {
 
       // 插入数据
       await table.add(data)
+      const results = await table.query().limit(10).toArray();
+      console.log(JSON.parse(JSON.stringify(results)));
+      // this.ctx.logger.info(`插入数据到表 ${tableName} 成功`)
 
       return {
         success: true,
@@ -166,7 +170,7 @@ class LanceDbService extends Service {
   async search(tableName, vector, options = {}) {
     try {
       const {
-        topK = 10,
+        topK = 3,
         outputFields = ['document_id', 'text', 'metadata'],
         filter = '',
       } = options
@@ -175,50 +179,52 @@ class LanceDbService extends Service {
       const table = await globalState.db.openTable(tableName)
 
       const schema = await table.schema()
-      // schema 是一个 Apache Arrow Schema 对象，包含所有字段信息
-      schema.fields.forEach(f => {
-        console.log(`${f.name}: ${f.type}`)
-      })
+
+      const matches = await table.vectorSearch(vector).distanceType("cosine")
+      .limit(options.topK)
+      .toArray();
+
+      const plainResults = JSON.parse(JSON.stringify(matches));
 
       // 构建查询
-      let query = table.search(vector)
+      // let query = table.search(vector)
 
-      // 添加过滤条件
-      if (filter) {
-        query = query.where(filter)
-      }
+      // // 添加过滤条件
+      // if (filter) {
+      //   query = query.where(filter)
+      // }
 
-      // 执行搜索
-      const results = await query
-        .limit(topK)
-        .select(['id', ...outputFields])
-        .toArray()
+      // // 执行搜索
+      // const results = await query
+      //   .limit(topK)
+      //   .select(['id', ...outputFields])
+      //   .toArray()
 
       // 处理结果
-      const matches = results.map(result => {
-        const match = {
-          id: result.id,
-          score: result.score,
-        }
+      // const matches = results.map(result => {
+      //   const match = {
+      //     id: result.id,
+      //     score: result.score,
+      //   }
 
-        // 添加输出字段
-        outputFields.forEach(field => {
-          match[field] = result[field]
+      //   // 添加输出字段
+      //   outputFields.forEach(field => {
+      //     match[field] = result[field]
 
-          // 如果是元数据字段，尝试解析JSON
-          if (field === 'metadata' && typeof result[field] === 'string') {
-            try {
-              match[field] = JSON.parse(result[field])
-            } catch (e) {
-              // 如果解析失败，保持原始字符串
-            }
-          }
-        })
+      //     // 如果是元数据字段，尝试解析JSON
+      //     if (field === 'metadata' && typeof result[field] === 'string') {
+      //       try {
+      //         match[field] = JSON.parse(result[field])
+      //       } catch (e) {
+      //         // 如果解析失败，保持原始字符串
+      //       }
+      //     }
+      //   })
 
-        return match
-      })
+      //   return match
+      // })
 
-      return { success: true, matches }
+      return { success: true, matches: plainResults }
     } catch (error) {
       this.ctx.logger.error(`搜索表 ${tableName} 失败:`, error)
       return { success: false, error: error.message || '未知错误', matches: [] }
