@@ -72,12 +72,12 @@
   },
   "packageManager": "pnpm@9.14.2+sha512.6e2baf77d06b9362294152c851c4f278ede37ab1eba3a55fda317a4a17b209f4dbb973fb250a77abc463a341fcb1f17f17cfa24091c4eb319cda0d9b84278387",
   "dependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "@repo/agents": "workspace:*",
     "@analytics/google-analytics": "^1.1.0",
     "@lancedb/lancedb": "^0.19.0",
     "@modelcontextprotocol/sdk": "^1.9.0",
+    "@repo/agents": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@supabase/supabase-js": "^2.49.1",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.0",
@@ -89,6 +89,7 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "csv-parser": "^3.2.0",
     "dayjs": "^1.11.13",
     "egg": "^3.30.1",
     "egg-cors": "^3.0.1",
@@ -139,6 +140,7 @@
     "vaul-vue": "^0.4.1",
     "vee-validate": "^4.15.0",
     "vue-router": "4",
+    "xlsx": "^0.18.5",
     "ylru": "^1.4.0",
     "zod": "^3.24.2"
   }

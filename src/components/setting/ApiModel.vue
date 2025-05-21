@@ -210,7 +210,7 @@ const modelsArray = computed(() => {
 
 // 新增，使用全局数据
 const models = computed(() => {
-  const modelsList = modelStore.providers.get(currentProvider.value)?.models || [];
+  const modelsList = modelStore.providers.get(currentProvider.value)?.models || [] as Model[];
   const groupedModels = {};
   
   // 先对模型列表进行排序
@@ -471,7 +471,9 @@ const { locale } = useI18n()
           <div class="font-bold ml-2">{{ t('settings.apiModel.modelProvider') }}</div>
           <Dialog v-model:open="showAddProviderDialog">
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline"><Plus></Plus>新增</Button>
+              <Button size="sm" variant="outline">
+                <Plus></Plus>新增
+              </Button>
             </DialogTrigger>
             <DialogContent class="sm:max-w-[425px]">
               <DialogHeader>
@@ -483,31 +485,18 @@ const { locale } = useI18n()
               <div class="grid gap-4 space-y-4">
                 <div class="grid grid-cols-4 items-center gap-4 ">
                   <Label class="text-right" for="provider-id">供应商 ID</Label>
-                  <Input
-                    id="provider-id"
-                    v-model="newProviderForm.provider_id"
-                    placeholder="例如: openai, anthropic"
-                    class="col-span-3"
-                  />
+                  <Input id="provider-id" v-model="newProviderForm.provider_id" placeholder="例如: openai, anthropic"
+                    class="col-span-3" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label class="text-right" for="api-key">API Key</Label>
-                  <Input
-                    id="api-key"
-                    v-model="newProviderForm.api_key"
-                    type="password"
-                    placeholder="sk-..."
-                    class="col-span-3"
-                  />
+                  <Input id="api-key" v-model="newProviderForm.api_key" type="password" placeholder="sk-..."
+                    class="col-span-3" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label class="text-right" for="base-url">API URL</Label>
-                  <Input
-                    id="base-url"
-                    v-model="newProviderForm.base_url"
-                    placeholder="https://api.example.com"
-                    class="col-span-3"
-                  />
+                  <Input id="base-url" v-model="newProviderForm.base_url" placeholder="https://api.example.com"
+                    class="col-span-3" />
                 </div>
                 <div class="grid grid-cols-4 items-center gap-4">
                   <Label class="text-right" for="state">启用状态</Label>
@@ -527,19 +516,15 @@ const { locale } = useI18n()
             </DialogContent>
           </Dialog>
         </div>
-        <ScrollArea class="h-[calc(100vh-8rem)] pr-4" :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
+        <ScrollArea class="h-[calc(100vh-8rem)] pr-4"
+          :class="!envStore.isWeb ? 'h-[calc(100dvh-80px-30px-60px)]' : 'h-[calc(100dvh-80px-60px)]'">
           <div class="space-y-2">
-            <div
-              v-for="(value, provider) in providers"
-              :key="provider"
+            <div v-for="(value, provider) in providers" :key="provider"
               @click="handleProviderChange(String(provider), value)"
               class="flex items-center justify-between space-x-2 p-2 rounded-lg cursor-pointer"
-              :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }"
-            >
+              :class="{ 'bg-slate-100 dark:bg-slate-800': currentProvider === provider }">
               <div>
-                <div
-                  class="w-1.5 h-1.5 rounded-full"
-                  :class="(value as any).state ? 'bg-green-400' : ''">
+                <div class="w-1.5 h-1.5 rounded-full" :class="(value as any).state ? 'bg-green-400' : ''">
                 </div>
               </div>
               <div class="flex-1 flex items-center space-x-2">
@@ -559,16 +544,14 @@ const { locale } = useI18n()
             <div class="font-bold flex items-center space-x-2">
               <Icon :name="currentProvider" :size="24" />
               <!-- <span>{{ currentProvider }}</span> -->
-              <span v-if="currentProviderObj">{{ locale == 'zh-CN' && currentProviderObj.name_zh ? `${currentProviderObj.name_zh}(${currentProviderObj.name})` : currentProviderObj.name }}</span>
+              <span v-if="currentProviderObj">{{ locale == 'zh-CN' && currentProviderObj.name_zh ?
+                `${currentProviderObj.name_zh}(${currentProviderObj.name})` : currentProviderObj.name }}</span>
             </div>
             <div class="flex space-x-2 items-center">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Switch
-                      v-model="providers[currentProvider].state"
-                      @update:model-value="saveConfigProviderState"
-                    />
+                    <Switch v-model="providers[currentProvider].state" @update:model-value="saveConfigProviderState" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>{{ t('settings.apiModel.enableProvider') }}</p>
@@ -606,45 +589,32 @@ const { locale } = useI18n()
               <span>{{ t('settings.apiModel.modelConfig') }} </span>
             </Label>
             <div class="grid gap-2">
-              <Label class="font-bold justify-between flex items-center">API Key  
-                <a 
-                  v-if="currentProviderObj && currentProviderObj.api_key_url" 
-                  class="text-zinc-500 underline text-sm font-normal" 
-                  :href="currentProviderObj.api_key_url">获取 API Key
-                </a> 
+              <Label class="font-bold justify-between flex items-center">API Key
+                <a v-if="currentProviderObj && currentProviderObj.api_key_url"
+                  class="text-zinc-500 underline text-sm font-normal" :href="currentProviderObj.api_key_url">获取 API Key
+                </a>
               </Label>
               <div class="flex items-center space-x-2">
-                <Input
-                  v-model="apiConfig.apiKey"
-                  :type="isShowApiKey? 'text' : 'password'"
-                  :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`"
-                  class="bg-background"
-                />
-                <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10"> 
+                <Input v-model="apiConfig.apiKey" :type="isShowApiKey? 'text' : 'password'"
+                  :placeholder="`sk-${currentProvider === 'anthropic' ? 'ant-' : ''}...`" class="bg-background" />
+                <Button @click="toggleShowApiKey" size="icon" variant="outline" class="w-10">
                   <EyeClosed v-if="isShowApiKey" />
-                  <Eye v-else/>
+                  <Eye v-else />
                 </Button>
               </div>
             </div>
 
             <div class="grid gap-2">
               <Label class="font-bold">API URL</Label>
-              <Input
-                v-model="apiConfig.baseUrl"
-                :placeholder="`https://api.${currentProvider}.com${
+              <Input v-model="apiConfig.baseUrl" :placeholder="`https://api.${currentProvider}.com${
                   currentProvider === 'openai' ? '/v1' : ''
-                }`"
-                class="bg-background"
-              />
+                }`" class="bg-background" />
             </div>
             <div class="grid gap-2">
               <Label class="text-zinc-500">{{ t('settings.apiModel.connectivityCheck') }}</Label>
               <div class="flex items-center space-x-2">
-                <Select
-                  class="w-full flex-1"
-                  v-model="currentCheckModel"
-                  @update:modelValue="handleCurrentCheckModelUpdate"
-                >
+                <Select class="w-full flex-1" v-model="currentCheckModel"
+                  @update:modelValue="handleCurrentCheckModelUpdate">
                   <SelectTrigger class="w-full flex-1">
                     <SelectValue :placeholder="t('settings.apiModel.selectModelToTest')" />
                   </SelectTrigger>
@@ -654,15 +624,10 @@ const { locale } = useI18n()
                     </SelectItem>
                   </SelectContent>
                 </Select>
-                <Button
-                  :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
-                  @click="testConnection(currentProvider)"
-                >
+                <Button :disabled="testLoading || !apiConfig.apiKey || !apiConfig.baseUrl"
+                  @click="testConnection(currentProvider)">
                   <Loader2 v-if="testLoading" class="mr-2 h-4 w-4 animate-spin" />
-                  <Check
-                    v-else-if="testPassed[currentProvider]"
-                    class="mr-1 h-4 w-4 text-green-500"
-                  />
+                  <Check v-else-if="testPassed[currentProvider]" class="mr-1 h-4 w-4 text-green-500" />
                   {{ testLoading ? t('settings.apiModel.testing') : t('settings.apiModel.testConnection') }}
                 </Button>
               </div>
@@ -674,11 +639,14 @@ const { locale } = useI18n()
             <div class="flex items-center space-x-2 justify-between">
               <div class="flex items-center space-x-2">
                 <Label class="text-zinc-500">{{ t('settings.apiModel.availableModels') }}</Label>
-                <AddCustomModel @refresh="getModels()" :provider_id="currentProvider" :edit-model="null" ></AddCustomModel>
+                <AddCustomModel @refresh="getModels()" :provider_id="currentProvider" :edit-model="null">
+                </AddCustomModel>
               </div>
-              <a v-if="currentProviderObj && currentProviderObj.models_url" class="text-zinc-500 text-sm font-normal underline" :href="currentProviderObj.models_url">模型列表</a>
+              <a v-if="currentProviderObj && currentProviderObj.models_url"
+                class="text-zinc-500 text-sm font-normal underline" :href="currentProviderObj.models_url">模型列表</a>
             </div>
-            <ScrollArea class="h-full w-full rounded-md pb-8" :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
+            <ScrollArea class="h-full w-full rounded-md pb-8"
+              :class="!envStore.isWeb ? 'h-[calc(100dvh-430px-30px)]' : 'h-[calc(100dvh-430px)]' ">
               <div v-for="(group, key) in models" :key="key" class="space-y-1">
                 <!-- 组标题 -->
                 <div class="flex items-center space-x-2 pt-6">
@@ -687,46 +655,47 @@ const { locale } = useI18n()
 
                 <!-- 组内模型 -->
                 <div class="flex flex-col mt-0 border rounded-md">
-                  <div
-                    v-for="model in group"
-                    :key="
+                  <div v-for="model in group" :key="
                       //@ts-ignore
                       model.name
                     "
-                    class="flex flex-col space-y-2 px-4 py-2 rounded bg-background hover:bg-slate-100 dark:hover:bg-slate-800 group/item border-b"
-                  >
+                    class="flex flex-col space-y-2 px-4 py-2 rounded bg-background hover:bg-slate-100 dark:hover:bg-slate-800 group/item border-b">
                     <div class="flex items-center space-x-2 justify-between">
                       <div class="flex items-center space-x-2">
-                        <Icon
-                          :name="
+                        <Icon :name="
                             //@ts-ignore
                             model.provider_id
-                          "
-                          :size="24"
-                        />
+                          " :size="24" />
                         <div class="font-medium">
                           {{
-                            //@ts-ignore
-                            $i18n.locale === 'zh' && model.name_zh ? model.name_zh : model.name
+                          //@ts-ignore
+                          $i18n.locale === 'zh' && model.name_zh ? model.name_zh : model.name
                           }}
                         </div>
                       </div>
                       <div class="flex space-x-2 items-center">
-                        <AddCustomModel class="group/edit invisible group-hover/item:visible" @refresh="getModels()" :provider_id="currentProvider" :editButton="true" :edit-model="model" ></AddCustomModel>
-                        <Button @click="confirmDeleteModel(model)" class="group/edit invisible group-hover/item:visible" size="icon" variant="ghost"> <Trash2 class="text-zinc-500"/> </Button>
+                        <AddCustomModel class="group/edit invisible group-hover/item:visible" @refresh="getModels()"
+                          :provider_id="currentProvider" 
+                          :editButton="true" 
+                          :edit-model="
+                          //@ts-ignore
+                          model as Model
+                          "
+                          ></AddCustomModel>
+                        <Button @click="confirmDeleteModel(model)" class="group/edit invisible group-hover/item:visible"
+                          size="icon" variant="ghost">
+                          <Trash2 class="text-zinc-500" />
+                        </Button>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                              <Switch
-                                v-model="
+                              <Switch v-model="
                                   //@ts-ignore
                                   model.state
-                                "
-                                @update:model-value="
+                                " @update:model-value="
                                   //@ts-ignore
                                   saveConfigModelState($event, models, model)
-                                "
-                              >
+                                ">
                               </Switch>
                             </TooltipTrigger>
                             <TooltipContent>

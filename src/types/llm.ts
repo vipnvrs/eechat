@@ -59,12 +59,13 @@ export interface Model {
   state: boolean,
   from?: 'config' | 'common',
   name: string,
+  name_zh?: string,
   capabilities: string[],
   group_name: string,
   sort?: number,
   created_at?: string,
   updated_at?: string,
-  deleted_at?: string | null
+  deleted_at?: string | null,
 }
 
 export interface ModelProvider {
