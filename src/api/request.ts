@@ -445,7 +445,7 @@ const handleStream = async (response, onProgress, onProgressReasoning) => {
             if (line.includes('tool')) {
               // debugger
             }
-            // console.log('data:', data);
+            console.log('data:', data);
             const reasoning_content = data.choices[0]?.delta?.reasoning_content || ''
             const content = data.choices[0]?.delta?.content || ''
 

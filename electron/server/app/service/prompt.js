@@ -28,7 +28,7 @@ class PromptService extends Service {
     }
 
     // 添加知识库文档提示词
-    if (docs && docs.matches.length > 0) {
+    if (docs && docs.matches && docs.matches.length > 0) {
       const docsList = docs.matches
       const question = docs.query
       const docsPrompt = this.buildDocsPrompt(docsList, question, isChinese);
@@ -83,19 +83,19 @@ ${context}
 ${question}
 
 #输出#
-：：：action
-[{id: '文档id', title:'文档title'}]
-：：：
+:::docs{.docs-block}
+[{"id": "文档id", "title":"文档title"}]
+:::
 你的回答内容
 
 #示例#
-：：：action
-[{id: '1', title:'资料文档.doc'}]
-：：：
+:::docs{.docs-block}
+[{"id": "1", "title":"资料文档.doc"}]
+:::
 
 根据根据知识库搜索结果的分析，以下是xxx:
 ##1. 回答内容标题
-回答内容。 :::action[{id: '1', title:'引用资料资料文档.doc'}]：：：
+回答内容。:::{.docs-inline}[{"id": "1", "title":"引用资料资料文档.doc"}]:::
 
 ##2. 回答内容标题
 回答内容。
@@ -103,9 +103,9 @@ ${question}
 #注意#
 - 请不要在回答中包含资料中不存在的内容。
 - 如果你引用了资料中的内容，请在你每句回答的后面使用指令，":::" 符号为英文半角，如
-：：：action
-[{id: '1', title:'资料文档.doc'}]
-：：：
+:::docs{.docs-block}
+[{"id": "1", "title":"资料文档.doc"}]
+:::
 输出引用内容。
 
 `;

@@ -71,14 +71,14 @@ onMounted(() => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" class="w-56">
-        <DropdownMenuLabel class="flex justify-between items-center">
+        <DropdownMenuLabel class="flex justify-between items-center py-0">
           <span>知识库</span>
-          <Button variant="ghost" size="icon" @click="loadBases" :disabled="loading">
-            <RefreshCw :class="['size-3.5', loading ? 'animate-spin' : '']" />
+          <Button variant="ghost" size="icon" class="p-0" @click="loadBases" :disabled="loading">
+            <RefreshCw :class="['size-2', loading ? 'animate-spin' : '']" />
           </Button>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <ScrollArea class="h-[300px]">
+        <ScrollArea class="h-[200px]">
           <DropdownMenuGroup v-if="bases.length > 0">
             <DropdownMenuItem
               v-for="base in bases"
@@ -95,7 +95,7 @@ onMounted(() => {
           <div v-else-if="loading" class="py-2 px-4 text-center text-muted-foreground">
             加载中...
           </div>
-          <div v-else class="py-2 px-4 text-center text-muted-foreground">
+          <div v-else class="py-2 px-4 text-center text-muted-foreground text-sm h-[100px]">
             没有可用的知识库
           </div>
         </ScrollArea>

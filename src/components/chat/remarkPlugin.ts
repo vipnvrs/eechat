@@ -103,6 +103,78 @@ export default function remarkPlugin() {
             ]),
           ]
         }
+
+        if (node.name == 'docs'){
+          const data = node.data || (node.data = {})
+          let content = toString(node)
+          try {
+            content = JSON.parse(content)
+          } catch (error) {
+            console.log('解析文档内容失败:', content)
+          }
+          
+          data.hName = 'div'
+          data.hProperties = {
+            className:
+              'docs-reference my-2 bg-white border border-zinc-200 dark:border-zinc-600 rounded-md overflow-hidden w-[500px] dark:bg-zinc-600 dark:text-zinc-200 dark:border-zinc-500',
+          }
+          
+          // 创建文档列表标题
+          const headerElement = h(
+            'div',
+            {
+              class: 'flex items-center justify-between px-4 py-1 border-b',
+            },
+            [
+              h('span', { class: 'flex items-center' }, [
+                h('svg', {
+                  xmlns: "http://www.w3.org/2000/svg",
+                  width: "16",
+                  height: "16",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  'stroke-width': "2",
+                  'stroke-linecap': "round",
+                  'stroke-linejoin': "round",
+                  class: "lucide lucide-book-open-icon mr-1"
+                }, [
+                  h('path', { d: "M12 7v14" }),
+                  h('path', { d: "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" })
+                ]),
+                '引用文档'
+              ]),
+              // 折叠按钮
+              h(
+                'button',
+                {
+                  class: '',
+                  onclick: 'this.parentElement.nextElementSibling.classList.toggle("hidden")',
+                },
+                '收起',
+              ),
+            ]
+          )
+          
+          // 创建文档列表内容 - 默认不隐藏
+          const listItems = Array.isArray(content) 
+            ? content.map(doc => 
+                h('div', { 
+                  class: 'flex items-center py-1 px-4 border-b last:border-0',
+                  'data-doc-id': doc.id || '',
+                }, [
+                  h('span', { class: 'mr-2' }, '📄'),
+                  h('span', { class: 'flex-1' }, doc.title || '未命名文档'),
+                  h('span', { class: 'text-xs' }, `ID: ${doc.id || 'unknown'}`)
+                ])
+              )
+            : [h('div', { class: 'p-3 text-sm' }, '无可用文档')]
+          
+          // 移除 hidden 类，使其默认展开
+          const listElement = h('div', { class: '' }, listItems)
+          
+          data.hChildren = [headerElement, listElement]
+        }
       }
     })
   }
