@@ -128,6 +128,10 @@ const embeddingModelOptions = [
   { value: 'text-embedding-v3', label: '阿里云通用文本向量-v3' },
 ]
 
+const embeddingModelOptionsLocal = [
+  { value: 'bge-m3', label: 'bge-m3' }
+]
+
 const embeddingDimensionOptions = [
   { value: 1024, label: '1024（默认）' },
   { value: 768, label: '768' },
@@ -165,6 +169,9 @@ const newBase = ref<RagForm>({
   embedding_model: 'text-embedding-v3',
   embedding_dimension: '1024',
   embedding_model_type: 'api',
+  embedding_apikey: '',
+  embedding_baseurl: '',
+  embedding_model_local: 'bge-m3',
   text_understanding_model: 'qwen-max',
   image_understanding_model: 'qwen-vl-max',
   rerank_enabled: false,
@@ -291,7 +298,7 @@ const handleUpdateBase = async () => {
       image_understanding_model: editBase.value.image_understanding_model,
       rerank_enabled: editBase.value.rerank_enabled,
       rerank_model: editBase.value.rerank_model,
-      is_default: editBase.value.is_default
+      is_default: editBase.value.is_default,
     })
     closeEditDialog()
   } catch (error) {
@@ -408,8 +415,8 @@ onMounted(async () => {
           </div>
         </div>
         
-        <!-- 嵌入模型 -->
-        <div class="grid grid-cols-4 items-center gap-4">
+        <!-- 嵌入模型 API-->
+        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
           <Label class="text-right" for="embedding_model">{{ t("rag.sidebar.embeddingModel") }}</Label>
           <div class="col-span-3 w-full">
             <Select v-model="newBase.embedding_model" class="col-span-3">
@@ -418,6 +425,38 @@ onMounted(async () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem v-for="option in embeddingModelOptions" :key="option.value" :value="option.value">
+                  {{ option.label }} ({{ option.value }})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <!-- 嵌入模型 API key-->
+        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
+          <Label class="text-right" for="embedding_model">API Key</Label>
+          <div class="col-span-3 w-full">
+            <Input id="title" v-model="newBase.embedding_apikey" class="col-span-3" />
+          </div>
+        </div>
+        <!-- 嵌入模型 API BaseUrl-->
+        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
+          <Label class="text-right" for="embedding_model">API BaseUrl</Label>
+          <div class="col-span-3 w-full">
+            <Input id="title" v-model="newBase.embedding_baseurl" class="col-span-3" />
+          </div>
+        </div>
+
+        <!-- 嵌入模型本地 -->
+        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'local'">
+          <Label class="text-right" for="embedding_model">{{ t("rag.sidebar.embeddingModel") }}</Label>
+          <div class="col-span-3 w-full">
+            <Select v-model="newBase.embedding_model_local" class="col-span-3">
+              <SelectTrigger>
+                <SelectValue :placeholder="t('rag.sidebar.selectEmbeddingModel')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="option in embeddingModelOptionsLocal" :key="option.value" :value="option.value">
                   {{ option.label }} ({{ option.value }})
                 </SelectItem>
               </SelectContent>
