@@ -13,6 +13,9 @@ interface RagBase {
   rerank_enabled: boolean
   rerank_model?: string
   is_default?: boolean
+  embedding_apikey?: string
+  embedding_baseurl?: string
+  embedding_model_local?: string
 }
 
 export interface RagForm extends Omit<RagBase, 'id'> {}

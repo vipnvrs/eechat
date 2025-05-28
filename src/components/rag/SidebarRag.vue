@@ -433,19 +433,19 @@ onMounted(async () => {
         </div>
 
         <!-- 嵌入模型 API key-->
-        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
+        <!-- <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
           <Label class="text-right" for="embedding_model">API Key</Label>
           <div class="col-span-3 w-full">
             <Input id="title" v-model="newBase.embedding_apikey" class="col-span-3" />
           </div>
-        </div>
+        </div> -->
         <!-- 嵌入模型 API BaseUrl-->
-        <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
+        <!-- <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'api'">
           <Label class="text-right" for="embedding_model">API BaseUrl</Label>
           <div class="col-span-3 w-full">
             <Input id="title" v-model="newBase.embedding_baseurl" class="col-span-3" />
           </div>
-        </div>
+        </div> -->
 
         <!-- 嵌入模型本地 -->
         <div class="grid grid-cols-4 items-center gap-4" v-if="newBase.embedding_model_type == 'local'">
