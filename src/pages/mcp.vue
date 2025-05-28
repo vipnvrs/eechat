@@ -3,6 +3,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-vue-next"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ref, onMounted, computed } from "vue"
 import { SquareArrowOutUpRight, PlusCircle, RefreshCw, Edit, Trash2, Play, Square } from "lucide-vue-next"
@@ -63,19 +65,41 @@ const categories = ref([
 
 // MCP 列表
 const mcpList = ref(mcpMock.McpServer.McpServers)
-const filteredMcpList = ref(mcpList.value)
+// 添加搜索功能
+const searchQuery = ref("")
 
-// 当前选中的分类
-const activeCategory = ref('recommended')
-
-// 处理分类切换
-const handleCategoryChange = (value: string) => {
-  activeCategory.value = value
-  if (value === 'recommended') {
-    filteredMcpList.value = mcpList.value
-  } else {
-    filteredMcpList.value = mcpList.value.filter(item => item.Category === value)
+// 修改过滤逻辑，将原来的 filteredMcpList 改为计算属性
+const filteredMcpList = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim()
+  let filtered = mcpList.value
+  
+  // 按分类过滤
+  // if (activeCategory.value !== 'recommended') {
+  //   filtered = filtered.filter(item => item.Category === activeCategory.value)
+  // }
+  
+  // 按搜索词过滤
+  if (query) {
+    filtered = filtered.filter(item => {
+      const nameMatch = getDisplayName(item).toLowerCase().includes(query)
+      // const descMatch = getDisplayDescription(item).toLowerCase().includes(query)
+      // return nameMatch || descMatch
+      return nameMatch
+    })
   }
+  
+  return filtered
+})
+
+// 添加搜索处理函数
+const handleSearchChange = (value: string) => {
+  searchQuery.value = value
+}
+
+// 修改分类切换处理函数
+const handleCategoryChange = (value: string) => {
+  // activeCategory.value = value
+  // 移除原来的手动过滤逻辑，因为现在使用计算属性
 }
 
 // 处理安装
@@ -319,6 +343,19 @@ const opendoc = () => {
       <div class="font-medium mb-3 flex justify-between">
         <h3>{{ t('mcp.recommendedApps') }}</h3>
         <div class="flex items-center space-x-2">
+          <div class="relative max-w-sm items-center flex justify-end w-[220px] pr-[1px]">
+            <Input
+              id="search"
+              type="text"
+              :model-value="searchQuery"
+              @update:model-value="(payload: string | number) => handleSearchChange(payload.toString())"
+              :placeholder="t('discover.searchPlaceholder')"
+              class="pl-10 w-[220px] bg-background"
+            />
+            <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
+              <Search class="size-6 text-muted-foreground" />
+            </span>
+          </div>
           <Button variant="outline">{{ t('mcp.viewMore') }}</Button>
         </div>
       </div>
