@@ -27,7 +27,9 @@ import { useMcpStore } from "@/stores/mcp"
 // 导入 Markdown 渲染组件
 import MarkdownRenderer from "@/components/common/MarkdownRenderer.vue"
 import { mcpApi } from '@/api/request'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const { toast } = useToast()
 const mcpStore = useMcpStore() // 使用MCP store
 const transportType = ref("stdio")
@@ -49,12 +51,18 @@ const displayReadmeContent = computed(() => {
   return mcpStore.selectedMcp?.ReadmeCN || mcpStore.selectedMcp?.Readme || ""
 })
 
+// 更新对话框标题的计算属性
+const dialogTitle = computed(() => 
+  isEditMode.value ? t('mcp.addNew.title.edit') : t('mcp.addNew.title.add')
+)
+
 // 获取README内容的函数
+// 更新获取README内容的函数中的toast消息
 const fetchReadme = async () => {
   if (!readmeUrl.value.trim()) {
     toast({
-      title: "URL不能为空",
-      description: "请输入有效的README URL",
+      title: t('mcp.addNew.validation.urlEmpty'),
+      description: t('mcp.addNew.validation.urlEmptyDesc'),
       variant: "destructive",
     })
     return
@@ -62,33 +70,33 @@ const fetchReadme = async () => {
 
   isLoadingReadme.value = true
   try {
-    // 调用API获取README内容
     const content = await mcpApi.fetchReadme(readmeUrl.value)
     
     if (content) {
       readmeContent.value = content
       toast({
-        title: "获取成功",
-        description: "README内容已成功获取",
+        title: t('mcp.addNew.messages.fetchSuccess'),
+        description: t('mcp.addNew.messages.fetchSuccessDesc'),
       })
     } else {
       toast({
-        title: "获取失败",
-        description: "无法获取README内容，请检查URL是否正确",
+        title: t('mcp.addNew.messages.fetchFailed'),
+        description: t('mcp.addNew.messages.fetchFailedDesc'),
         variant: "destructive",
       })
     }
   } catch (error) {
     console.error("获取README失败:", error)
     toast({
-      title: "获取失败",
-      description: error.message || "未知错误",
+      title: t('mcp.addNew.messages.fetchFailed'),
+      description: error.message || t('mcp.addNew.messages.unknownError'),
       variant: "destructive",
     })
   } finally {
     isLoadingReadme.value = false
   }
 }
+
 
 const formData = reactive({
   stdio: {
@@ -136,8 +144,8 @@ const autoFillForm = () => {
   if (!mcpStore.selectedMcp && !readmeContent.value) return
 
   toast({
-    title: "AI正在分析",
-    description: "正在分析MCP信息并自动填充表单...",
+    title: t('mcp.addNew.messages.aiAnalyzing'),
+    description: t('mcp.addNew.messages.aiAnalyzingDesc'),
   })
 
   // 根据MCP信息自动填充表单
@@ -252,8 +260,8 @@ const autoFillForm = () => {
     }
 
     toast({
-      title: "填充完成",
-      description: "AI已完成表单自动填充，请检查并修改",
+      title: t('mcp.addNew.messages.fillComplete'),
+      description: t('mcp.addNew.messages.fillCompleteDesc'),
     })
   }, 1500)
 }
@@ -261,7 +269,7 @@ const autoFillForm = () => {
 // 检查是否为编辑模式
 const isEditMode = computed(() => mcpStore.selectedMcp?.isEditing || false)
 // 根据编辑模式设置对话框标题
-const dialogTitle = computed(() => isEditMode.value ? '编辑 MCP 应用' : '添加新 MCP 应用')
+// const dialogTitle = computed(() => isEditMode.value ? '编辑 MCP 应用' : '添加新 MCP 应用')
 
 // 添加加载状态变量
 const loading = ref(false)
@@ -338,8 +346,8 @@ const handleSubmit = async () => {
     // 验证服务标识
     if (!serverKey.value.trim()) {
       toast({
-        title: "验证失败",
-        description: "服务标识不能为空",
+        title: t('mcp.addNew.messages.validationFailed'),
+        description: t('mcp.addNew.validation.serverKeyRequired'),
         variant: "destructive",
       })
       loading.value = false
@@ -349,8 +357,8 @@ const handleSubmit = async () => {
     // 验证传输类型相关字段
     if (transportType.value === "stdio" && !formData.stdio.command.trim()) {
       toast({
-        title: "验证失败",
-        description: "命令不能为空",
+        title: t('mcp.addNew.messages.validationFailed'),
+        description: t('mcp.addNew.validation.commandRequired'),
         variant: "destructive",
       })
       loading.value = false
@@ -359,8 +367,8 @@ const handleSubmit = async () => {
     
     if (transportType.value === "sse" && !formData.sse.url.trim()) {
       toast({
-        title: "验证失败",
-        description: "URL不能为空",
+        title: t('mcp.addNew.messages.validationFailed'),
+        description: t('mcp.addNew.validation.urlRequired'),
         variant: "destructive",
       })
       loading.value = false
@@ -429,15 +437,15 @@ const handleSubmit = async () => {
       // 编辑模式：调用更新API
       res = await mcpApi.updateMcpServer(serverData)
       toast({
-        title: "更新成功",
-        description: `MCP服务 ${serverKey.value} 已更新`,
+        title: t('mcp.addNew.messages.updateSuccess'),
+        description: t('mcp.addNew.messages.updateSuccessDesc', { serverKey: serverKey.value }),
       })
     } else {
       // 新增模式：调用添加API
       res = await mcpApi.addMcpServer(serverData)
       toast({
-        title: "添加成功",
-        description: `MCP服务 ${serverKey.value} 已添加`,
+        title: t('mcp.addNew.messages.addSuccess'),
+        description: t('mcp.addNew.messages.addSuccessDesc', { serverKey: serverKey.value }),
       })
     }
 
@@ -452,8 +460,8 @@ const handleSubmit = async () => {
   } catch (error) {
     console.error(isEditMode.value ? "更新" : "添加", "MCP服务器失败:", error)
     toast({
-      title: isEditMode.value ? "更新失败" : "添加失败",
-      description: error.message || "未知错误",
+      title: isEditMode.value ? t('mcp.addNew.messages.updateFailed') : t('mcp.addNew.messages.addFailed'),
+      description: error.message || t('mcp.addNew.messages.unknownError'),
       variant: "destructive",
     })
   } finally {
@@ -475,18 +483,18 @@ const handleSubmit = async () => {
           <div class="border-r pr-8 p-4 w-[50%]">
             <div class="flex justify-between items-center mb-2">
               <div class="font-bold truncate">
-                {{ mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || "新MCP服务" }}
+                {{ mcpStore.selectedMcp?.ChineseName || mcpStore.selectedMcp?.Name || t('mcp.addNew.readme.newMcpService') }}
               </div>
               <div>
                 <div class="flex items-center space-x-2" v-if="!isEditMode">
                   <Input
                     v-model="readmeUrl"
                     class="w-[25dvw]"
-                    placeholder="https://github.com/repo/project/README.md"
+                    :placeholder="t('mcp.addNew.readme.urlPlaceholder')"
                   />
                   <Button @click="fetchReadme" :disabled="isLoadingReadme">
                     <span v-if="isLoadingReadme" class="animate-spin mr-2">⟳</span>
-                    {{ isLoadingReadme ? "获取中..." : "获取" }}
+                    {{ isLoadingReadme ? t('mcp.addNew.readme.fetching') : t('mcp.addNew.readme.fetch') }}
                   </Button>
                 </div>
               </div>
@@ -509,39 +517,38 @@ const handleSubmit = async () => {
 
             <Button @click="autoFillForm" class="w-full">
               <Wand2 class="w-4 h-4 mr-2" />
-              AI自动填充 (Beta)
+              {{ t('mcp.addNew.buttons.autoFill') }}
             </Button>
           </div>
 
           <!-- 右侧表单部分保持不变 -->
           <div :class="{ 'md:col-span-2': !mcpStore.selectedMcp }" class="space-y-4  w-[50%]">
-            <div class="grid grid-cols-4 items-center gap-4">
-              <Label class="text-right" for="server-key">服务标识</Label>
+            <div class="grid grid-cols-4 items-center gap-4"><Label class="text-right" for="server-key">{{ t('mcp.addNew.form.serverKey') }}</Label>
               <Input
                 id="server-key"
                 v-model="serverKey"
-                placeholder="例如: filesystem, fetch"
+                :placeholder="t('mcp.addNew.form.serverKeyPlaceholder')"
                 class="col-span-3"
               />
             </div>
 
             <div class="grid grid-cols-4 items-center gap-4">
-              <Label class="text-right" for="transport-type">传输类型</Label>
+              <Label class="text-right" for="transport-type">{{ t('mcp.addNew.form.transportType') }}</Label>
               <Select v-model="transportType">
                 <SelectTrigger class="col-span-3">
-                  <SelectValue placeholder="选择传输类型" />
+                  <SelectValue :placeholder="t('mcp.addNew.form.transportTypePlaceholder')" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="stdio">
                     <div class="flex items-center">
                       <Terminal class="w-4 h-4 mr-2" />
-                      <span>标准输入输出 (stdio)</span>
+                      <span>{{ t('mcp.addNew.transportTypes.stdio') }}</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="sse">
                     <div class="flex items-center">
                       <Globe class="w-4 h-4 mr-2" />
-                      <span>服务器发送事件 (SSE)</span>
+                      <span>{{ t('mcp.addNew.transportTypes.sse') }}</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -551,48 +558,41 @@ const handleSubmit = async () => {
             <!-- stdio 配置 -->
             <div v-if="transportType === 'stdio'" class="space-y-4">
               <div class="grid grid-cols-4 items-center gap-4">
-                <Label class="text-right" for="command">命令</Label>
+                <Label class="text-right" for="command">{{ t('mcp.addNew.form.command') }}</Label>
                 <Input
                   id="command"
                   v-model="formData.stdio.command"
-                  placeholder="例如: npx, node, uvx"
+                  :placeholder="t('mcp.addNew.form.commandPlaceholder')"
                   class="col-span-3"
                 />
               </div>
 
               <div class="grid grid-cols-4 items-start gap-4">
-                <Label class="text-right pt-2" for="args">参数</Label>
+                <Label class="text-right pt-2" for="args">{{ t('mcp.addNew.form.args') }}</Label>
                 <div class="col-span-3">
                   <Textarea
                     id="args"
                     v-model="formData.stdio.args"
-                    placeholder="每行一个参数
-例如:
--y
-@modelcontextprotocol/server-filesystem
-C:/Users/Documents"
+                    :placeholder="t('mcp.addNew.form.argsPlaceholder')"
                     class="min-h-[140px]"
                   />
                   <p class="text-xs text-muted-foreground mt-1">
-                    每行输入一个参数，无需逗号分隔
+                    {{ t('mcp.addNew.form.argsHelp') }}
                   </p>
                 </div>
               </div>
 
               <div class="grid grid-cols-4 items-start gap-4">
-                <Label class="text-right pt-2" for="env">环境变量</Label>
+                <Label class="text-right pt-2" for="env">{{ t('mcp.addNew.form.env') }}</Label>
                 <div class="col-span-3">
                   <Textarea
                     id="env"
                     v-model="formData.stdio.env"
-                    placeholder="每行一个环境变量，格式为 KEY=VALUE
-例如:
-NODE_ENV=production
-DEBUG=true"
+                    :placeholder="t('mcp.addNew.form.envPlaceholder')"
                     class="min-h-[140px]"
                   />
                   <p class="text-xs text-muted-foreground mt-1">
-                    每行一个环境变量，格式为 KEY=VALUE
+                    {{ t('mcp.addNew.form.envHelp') }}
                   </p>
                 </div>
               </div>
@@ -601,40 +601,39 @@ DEBUG=true"
             <!-- sse 配置 -->
             <div v-if="transportType === 'sse'" class="space-y-4">
               <div class="grid grid-cols-4 items-center gap-4">
-                <Label class="text-right" for="url">URL</Label>
+                <Label class="text-right" for="url">{{ t('mcp.addNew.form.url') }}</Label>
                 <Input
                   id="url"
                   v-model="formData.sse.url"
-                  placeholder="例如: https://mcp.example.com/sse"
+                  :placeholder="t('mcp.addNew.form.urlPlaceholder')"
                   class="col-span-3"
                 />
               </div>
 
               <div class="grid grid-cols-4 items-start gap-4">
-                <Label class="text-right pt-2" for="headers">请求头</Label>
+                <Label class="text-right pt-2" for="headers">{{ t('mcp.addNew.form.headers') }}</Label>
                 <div class="col-span-3">
                   <Textarea
                     id="headers"
                     v-model="formData.sse.headers"
-                    placeholder="每行一个请求头，格式为 KEY: VALUE
-例如:
-Authorization: Bearer token123
-Content-Type: application/json"
+                    :placeholder="t('mcp.addNew.form.headersPlaceholder')"
                     class="min-h-[120px]"
                   />
                   <p class="text-xs text-muted-foreground mt-1">
-                    每行一个请求头，格式为 KEY: VALUE
+                    {{ t('mcp.addNew.form.headersHelp') }}
                   </p>
                 </div>
               </div>
             </div>
 
             <div class="grid grid-cols-4 items-center gap-4">
-              <Label class="text-right" for="enabled">启用</Label>
+              <Label class="text-right" for="enabled">{{ t('mcp.addNew.form.enabled') }}</Label>
               <div class="flex items-center space-x-2 col-span-3">
                 <Switch id="enabled" v-model="formData[transportType].enabled" />
                 <Label for="enabled">{{
-                  formData[transportType].enabled ? "已启用" : "已禁用"
+                  formData[transportType].enabled 
+                    ? t('mcp.addNew.form.enabledStatus.enabled') 
+                    : t('mcp.addNew.form.enabledStatus.disabled')
                 }}</Label>
               </div>
             </div>
@@ -643,7 +642,7 @@ Content-Type: application/json"
 
         <DialogFooter>
           <Button type="button" variant="outline" @click="mcpStore.closeAddNewDialog()">
-            取消
+            {{ t('mcp.addNew.buttons.cancel') }}
           </Button>
           <!-- <Button type="button" variant="secondary" class="mr-2"> 测试连接 </Button> -->
           <Button 
@@ -651,10 +650,8 @@ Content-Type: application/json"
             :disabled="!isValid || loading" 
             @click="handleSubmit"
           > 
-            <RefreshCw v-if="loading" class="animate-spin">
-            
-            </RefreshCw>
-            {{ isEditMode ? '更新' : '添加' }} 
+            <RefreshCw v-if="loading" class="animate-spin" />
+            {{ isEditMode ? t('mcp.addNew.buttons.update') : t('mcp.addNew.buttons.add') }}
           </Button>
         </DialogFooter>
       </DialogContent>

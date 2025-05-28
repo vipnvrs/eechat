@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { SquareArrowOutUpRight, PlusCircle, RefreshCw, Edit, Trash2, Play, Square } from "lucide-vue-next"
 import { useI18n } from "vue-i18n"
 import mcpMock from '@/api/mcpMock.json'
@@ -27,12 +27,31 @@ import {
 // 使用MCP store
 const mcpStore = useMcpStore()
 const { toast } = useToast()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// 获取多语言名称的计算属性
+const getDisplayName = (item: any) => {
+  // 中文环境使用ChineseName，其他语言使用Name
+  if (locale.value === 'zh' || locale.value === 'zh-CN') {
+    return item.chineseName || item.ChineseName || item.name || item.Name || item.key
+  } else {
+    return item.name || item.Name || item.chineseName || item.ChineseName || item.key
+  }
+}
+
+// 获取多语言描述的计算属性
+const getDisplayDescription = (item: any) => {
+  if (locale.value === 'zh' || locale.value === 'zh-CN') {
+    return item.AbstractCN || item.Abstract
+  } else {
+    return item.Abstract || item.AbstractCN
+  }
+}
 
 // 分类列表
 const categories = ref([
   {
-    title: '推荐',
+    title: t('mcp.recommendedApps'),
     value: 'recommended'
   },
   ...mcpMock.FiledAgg.Category.map(cat => ({
@@ -64,9 +83,6 @@ const handleInstall = (mcp) => {
   console.log('安装', mcp)
 }
 
-// 移除静态数据，使用store中的数据
-// const installedMcps = ref([...])
-
 // 当前选中的MCP信息
 const selectedMcp = ref(null)
 const showAddNewDialog = ref(false)
@@ -92,13 +108,13 @@ const refreshServers = async () => {
   try {
     await mcpStore.refreshServers()
     toast({
-      title: "刷新成功",
-      description: "MCP服务器列表已更新",
+      title: t('mcp.messages.refreshSuccess'),
+      description: t('mcp.messages.refreshSuccessDesc'),
     })
   } catch (error) {
     toast({
-      title: "刷新失败",
-      description: (error as Error).message || "未知错误",
+      title: t('mcp.messages.refreshFailed'),
+      description: (error as Error).message || t('mcp.messages.unknownError'),
       variant: "destructive",
     })
   }
@@ -125,16 +141,17 @@ const confirmDelete = async () => {
   
   try {
     await mcpStore.deleteMcpServer((mcpToDelete.value as any).key)
+    const displayName = getDisplayName(mcpToDelete.value)
     toast({
-      title: "删除成功",
-      description: `已删除 ${(mcpToDelete.value as any).chineseName || (mcpToDelete.value as any).name || (mcpToDelete.value as any).key}`,
+      title: t('mcp.messages.deleteSuccess'),
+      description: t('mcp.messages.deleteSuccessDesc', { name: displayName }),
     })
     showDeleteDialog.value = false
     mcpToDelete.value = null
   } catch (error) {
     toast({
-      title: "删除失败",
-      description: (error as Error).message || "未知错误",
+      title: t('mcp.messages.deleteFailed'),
+      description: (error as Error).message || t('mcp.messages.unknownError'),
       variant: "destructive",
     })
   }
@@ -156,25 +173,27 @@ const toggleServerStatus = async (mcp) => {
     // 设置当前MCP的loading状态为true
     loadingMcps.value[mcp.key] = true
     
+    const displayName = getDisplayName(mcp)
+    
     if (mcp.status === 'running') {
       await mcpStore.stopMcpServer(mcp.key)
       toast({
-        title: "停止成功",
-        description: `已停止 ${mcp.chineseName || mcp.name || mcp.key}`,
+        title: t('mcp.messages.stopSuccess'),
+        description: t('mcp.messages.stopSuccessDesc', { name: displayName }),
       })
     } else {
       await mcpStore.startMcpServer(mcp.key)
       toast({
-        title: "启动成功",
-        description: `已启动 ${mcp.chineseName || mcp.name || mcp.key}`,
+        title: t('mcp.messages.startSuccess'),
+        description: t('mcp.messages.startSuccessDesc', { name: displayName }),
       })
     }
     // 刷新服务器列表
     await mcpStore.refreshServers()
   } catch (error) {
     toast({
-      title: mcp.status === 'running' ? "停止失败" : "启动失败",
-      description: (error as Error).message || "未知错误",
+      title: mcp.status === 'running' ? t('mcp.messages.stopFailed') : t('mcp.messages.startFailed'),
+      description: (error as Error).message || t('mcp.messages.unknownError'),
       variant: "destructive",
     })
   } finally {
@@ -193,9 +212,9 @@ const opendoc = () => {
     <!-- 修改标题部分 -->
     <div class="flex justify-between items-center">
       <div>
-        <div class="font-bold pt-6 text-2xl">MCP管理</div>
+        <div class="font-bold pt-6 text-2xl">{{ t('mcp.title') }}</div>
         <div class="mt-2 text-sm text-gray-400">
-          管理和安装 MCP 应用，提升 AI 助手的能力
+          {{ t('mcp.subtitle') }}
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -203,7 +222,7 @@ const opendoc = () => {
         <Env></Env>
         <Button variant="outline" @click="opendoc">
           <FileText/>
-          帮助文档
+          {{ t('mcp.helpDoc') }}
         </Button>
       </div>
     </div>
@@ -212,11 +231,11 @@ const opendoc = () => {
     <!-- 调整已安装部分布局 -->
     <div class="mt-6">
       <div class="font-medium mb-3 flex justify-between">
-        <h3>已安装应用</h3>
+        <h3>{{ t('mcp.installedApps') }}</h3>
         <div class="flex items-center space-x-2">
           <Button variant="outline" size="sm" @click="refreshServers" :disabled="mcpStore.loadingServers">
             <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': mcpStore.loadingServers }" />
-            刷新
+            {{ t('mcp.refresh') }}
           </Button>
         </div>
       </div>
@@ -227,7 +246,7 @@ const opendoc = () => {
         <div class="rounded-md border overflow-hidden cursor-pointer hover:border-primary flex flex-col justify-center bg-background min-h-[180px]" @click="handleAddNew">
           <div class="flex flex-col items-center justify-center">
             <PlusCircle class="w-8 h-8 mb-2" />
-            <span class="text-sm">添加新应用</span>
+            <span class="text-sm">{{ t('mcp.addNewApp') }}</span>
           </div>
         </div>
 
@@ -238,14 +257,14 @@ const opendoc = () => {
           class="rounded-md border overflow-hidden bg-background"
         >
           <div class="font-bold p-4 flex justify-between items-center">
-            <span>{{ item.chineseName }}</span>
+            <span>{{ getDisplayName(item) }}</span>
             <Badge :variant="item.status === 'running' ? 'default' : 'secondary'">
-              {{ item.status === 'running' ? '运行中' : '已停止' }}
+              {{ item.status === 'running' ? t('mcp.status.running') : t('mcp.status.stopped') }}
             </Badge>
           </div>
           <Separator></Separator>
           <div class="p-4 relative">
-            <div class="text-sm line-clamp-3 text-zinc-500 min-h-16">{{ item.AbstractCN }}</div>
+            <div class="text-sm line-clamp-3 text-zinc-500 min-h-16">{{ getDisplayDescription(item) }}</div>
             <div class="flex justify-between items-center mt-2">
               <div class="flex items-center">
                 <!-- 启动/停止按钮 -->
@@ -253,7 +272,7 @@ const opendoc = () => {
                   variant="ghost" 
                   size="icon" 
                   @click="toggleServerStatus(item)" 
-                  :title="item.status === 'running' ? '停止服务' : '启动服务'"
+                  :title="item.status === 'running' ? t('mcp.actions.stop') : t('mcp.actions.start')"
                   :disabled="loadingMcps[item.key]"
                 >
                   <!-- 显示loading状态 -->
@@ -269,13 +288,13 @@ const opendoc = () => {
                   variant="ghost" 
                   size="icon" 
                   @click="openAddNewWithMcp(item)" 
-                  title="编辑配置"
+                  :title="t('mcp.actions.edit')"
                   class="hover:bg-primary/10 transition-colors"
                 >
                   <Edit class="w-4 h-4 text-gray-400 group-hover:text-primary" />
                 </Button>
                 <!-- 删除按钮 -->
-                <Button variant="ghost" size="icon" @click="handleDelete(item)" title="删除">
+                <Button variant="ghost" size="icon" @click="handleDelete(item)" :title="t('mcp.actions.delete')">
                   <Trash2 class="w-4 h-4 text-gray-400" />
                 </Button>
               </div>
@@ -285,12 +304,12 @@ const opendoc = () => {
         
         <!-- 显示无数据状态 -->
         <div v-if="mcpStore.installedServers.length === 0 && !mcpStore.loadingServers" class="col-span-4 text-center py-8 text-muted-foreground">
-          暂无已安装的MCP应用，请点击"添加新应用"进行添加
+          {{ t('mcp.noInstalledApps') }}
         </div>
         
         <!-- 显示加载状态 -->
         <div v-if="mcpStore.loadingServers && mcpStore.installedServers.length === 0" class="col-span-4 text-center py-8 text-muted-foreground">
-          正在加载MCP应用列表...
+          {{ t('mcp.loadingApps') }}
         </div>
       </div>
     </div>
@@ -298,9 +317,9 @@ const opendoc = () => {
     <!-- 调整下半部分布局 -->
     <div class=" flex-1 mt-6">
       <div class="font-medium mb-3 flex justify-between">
-        <h3>推荐应用</h3>
+        <h3>{{ t('mcp.recommendedApps') }}</h3>
         <div class="flex items-center space-x-2">
-          <Button variant="outline">查看更多</Button>
+          <Button variant="outline">{{ t('mcp.viewMore') }}</Button>
         </div>
       </div>
         <div class="">
@@ -308,11 +327,11 @@ const opendoc = () => {
             <div v-for="item in filteredMcpList" :key="item.Id" class="rounded-md border overflow-hidden bg-background">
               <!-- 卡片内容保持不变 -->
               <div class="font-bold p-4">
-                {{ item.ChineseName || item.Name }}
+                {{ getDisplayName(item) }}
               </div>
               <Separator></Separator>
               <div class="p-4 relative">
-                <div class="text-sm line-clamp-3 text-zinc-500">{{ item.AbstractCN || item.Abstract }}</div>
+                <div class="text-sm line-clamp-3 text-zinc-500">{{ getDisplayDescription(item) }}</div>
                 <div class="flex justify-between items-center mt-4">
                   <div class="flex items-center">
                     <Badge variant="outline">
@@ -323,7 +342,7 @@ const opendoc = () => {
                     @click="openAddNewWithMcp(item)" 
                     variant="ghost" 
                     size="icon"
-                    title="安装此应用"
+                    :title="t('mcp.actions.install')"
                     class="hover:bg-primary/10 transition-colors"
                   >
                     <SquareArrowOutUpRight class="w-4 h-4 text-gray-400 hover:text-primary"></SquareArrowOutUpRight>
@@ -340,14 +359,14 @@ const opendoc = () => {
   <Dialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>确认删除</DialogTitle>
+        <DialogTitle>{{ t('mcp.dialog.confirmDelete') }}</DialogTitle>
         <DialogDescription>
-          您确定要删除 {{ (mcpToDelete as any)?.chineseName || (mcpToDelete as any)?.name || (mcpToDelete as any)?.key }} 吗？此操作无法撤销。
+          {{ t('mcp.dialog.confirmDeleteDesc', { name: getDisplayName(mcpToDelete) }) }}
         </DialogDescription>
       </DialogHeader>
       <DialogFooter>
-        <Button variant="outline" @click="cancelDelete">取消</Button>
-        <Button variant="destructive" @click="confirmDelete">删除</Button>
+        <Button variant="outline" @click="cancelDelete">{{ t('mcp.dialog.cancel') }}</Button>
+        <Button variant="destructive" @click="confirmDelete">{{ t('mcp.dialog.delete') }}</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

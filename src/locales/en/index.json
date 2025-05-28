@@ -54,11 +54,179 @@
       "title": "Edit Prompt",
       "placeholder": "Enter your prompt here..."
     },
-    "discover":{
+    "discover": {
       "title": "Discover"
     },
     "mcp": {
       "title": "MCP"
+    }
+  },
+  "mcp": {
+    "title": "MCP Management",
+    "subtitle": "Manage and install MCP applications to enhance AI assistant capabilities",
+    "installedApps": "Installed Applications",
+    "recommendedApps": "Recommended Applications",
+    "addNewApp": "Add New Application",
+    "refresh": "Refresh",
+    "viewMore": "View More",
+    "helpDoc": "Help Documentation",
+    "noInstalledApps": "No MCP applications installed yet, please click \"Add New Application\" to add one",
+    "loadingApps": "Loading MCP application list...",
+    "status": {
+      "running": "Running",
+      "stopped": "Stopped"
+    },
+    "actions": {
+      "start": "Start Service",
+      "stop": "Stop Service",
+      "edit": "Edit Configuration",
+      "delete": "Delete",
+      "install": "Install this application"
+    },
+    "messages": {
+      "refreshSuccess": "Refresh Successful",
+      "refreshSuccessDesc": "MCP server list has been updated",
+      "refreshFailed": "Refresh Failed",
+      "startSuccess": "Start Successful",
+      "startSuccessDesc": "Started {name}",
+      "startFailed": "Start Failed",
+      "stopSuccess": "Stop Successful",
+      "stopSuccessDesc": "Stopped {name}",
+      "stopFailed": "Stop Failed",
+      "deleteSuccess": "Delete Successful",
+      "deleteSuccessDesc": "Deleted {name}",
+      "deleteFailed": "Delete Failed",
+      "unknownError": "Unknown Error"
+    },
+    "dialog": {
+      "confirmDelete": "Confirm Delete",
+      "confirmDeleteDesc": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "addNew": {
+      "title": {
+        "add": "Add New MCP Application",
+        "edit": "Edit MCP Application"
+      },
+      "form": {
+        "serverKey": "Server Key",
+        "serverKeyPlaceholder": "e.g.: filesystem, fetch",
+        "transportType": "Transport Type",
+        "transportTypePlaceholder": "Select transport type",
+        "command": "Command",
+        "commandPlaceholder": "e.g.: npx, node, uvx",
+        "args": "Arguments",
+        "argsPlaceholder": "One argument per line\ne.g.:\n-y\n@modelcontextprotocol/server-filesystem\nC:/Users/Documents",
+        "argsHelp": "Enter one argument per line, no comma separation needed",
+        "env": "Environment Variables",
+        "envPlaceholder": "One environment variable per line, format: KEY=VALUE\ne.g.:\nNODE_ENV=production\nDEBUG=true",
+        "envHelp": "One environment variable per line, format: KEY=VALUE",
+        "url": "URL",
+        "urlPlaceholder": "e.g.: https://mcp.example.com/sse",
+        "headers": "Headers",
+        "headersPlaceholder": "One header per line, format: KEY: VALUE\ne.g.:\nAuthorization: Bearer token123\nContent-Type: application/json",
+        "headersHelp": "One header per line, format: KEY: VALUE",
+        "enabled": "Enabled",
+        "enabledStatus": {
+          "enabled": "Enabled",
+          "disabled": "Disabled"
+        }
+      },
+      "transportTypes": {
+        "stdio": "Standard Input/Output (stdio)",
+        "sse": "Server-Sent Events (SSE)"
+      },
+      "readme": {
+        "urlPlaceholder": "https://github.com/repo/project/README.md",
+        "fetch": "Fetch",
+        "fetching": "Fetching...",
+        "newMcpService": "New MCP"
+      },
+      "buttons": {
+        "autoFill": "AI Auto Fill (Beta)",
+        "cancel": "Cancel",
+        "add": "Add",
+        "update": "Update",
+        "testConnection": "Test Connection"
+      },
+      "validation": {
+        "serverKeyRequired": "Server key cannot be empty",
+        "commandRequired": "Command cannot be empty",
+        "urlRequired": "URL cannot be empty",
+        "urlEmpty": "URL cannot be empty",
+        "urlEmptyDesc": "Please enter a valid README URL"
+      },
+      "messages": {
+        "aiAnalyzing": "AI Analyzing",
+        "aiAnalyzingDesc": "Analyzing MCP information and auto-filling form...",
+        "fillComplete": "Fill Complete",
+        "fillCompleteDesc": "AI has completed form auto-fill, please review and modify",
+        "fetchSuccess": "Fetch Successful",
+        "fetchSuccessDesc": "README content has been successfully fetched",
+        "fetchFailed": "Fetch Failed",
+        "fetchFailedDesc": "Unable to fetch README content, please check if URL is correct",
+        "validationFailed": "Validation Failed",
+        "addSuccess": "Add Successful",
+        "addSuccessDesc": "MCP service {serverKey} has been added",
+        "addFailed": "Add Failed",
+        "updateSuccess": "Update Successful",
+        "updateSuccessDesc": "MCP service {serverKey} has been updated",
+        "updateFailed": "Update Failed",
+        "unknownError": "Unknown Error"
+      }
+    },
+    "config": {
+      "title": "MCP Configuration File",
+      "button": "Config File",
+      "loading": "Loading...",
+      "filePath": "Configuration File Path",
+      "buttons": {
+        "openDirectory": "Open Directory",
+        "reset": "Reset",
+        "format": "Format",
+        "save": "Save",
+        "saving": "Saving..."
+      },
+      "messages": {
+        "pathFailed": "Path Retrieval Failed",
+        "pathFailedDesc": "Unable to get configuration file path",
+        "loadFailed": "Load Failed",
+        "loadFailedDesc": "Unable to load MCP configuration file",
+        "formatError": "Format Error",
+        "formatErrorDesc": "JSON format is incorrect, unable to format",
+        "formatErrorSave": "JSON format is incorrect, please check and try again",
+        "saveSuccess": "Save successful, restarting service",
+        "saveSuccessDesc": "MCP configuration file has been updated",
+        "restartSuccess": "Service restart successful",
+        "restartFailed": "Service restart failed",
+        "saveFailed": "Save Failed",
+        "saveFailedDesc": "Unable to save MCP configuration file",
+        "unknownError": "Unknown Error"
+      }
+    },
+    "env": {
+      "title": "Runtime Environment",
+      "dialogTitle": "Runtime Environment Detection",
+      "status": {
+        "installed": "Installed",
+        "notInstalled": "Not Installed"
+      },
+      "actions": {
+        "download": "Download",
+        "downloading": "Downloading...",
+        "openDirectory": "Open Directory"
+      },
+      "tools": {
+        "bun": {
+          "description": "JavaScript runtime and toolchain for executing Node.js related tasks"
+        },
+        "uv": {
+          "description": "Python package manager and virtual environment tool for executing Python related tasks"
+        }
+      },
+      "installDirectory": "Install Directory:",
+      "manualInstallTip": "Tip: You can manually download uninstalled tools ({tools}) and place them in the above directory"
     }
   },
   "rag": {

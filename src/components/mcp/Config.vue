@@ -14,14 +14,14 @@ import { useToast } from '@/components/ui/toast/use-toast'
 import { Toaster } from '@/components/ui/toast'
 import MonacoEditor from "@/components/common/MonacoEditor.vue"
 import { useMcpStore } from "@/stores/mcp"
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const mcpStore = useMcpStore()
-
-// 正确获取 toast 函数
-const { toast } = useToast() // 使用解构赋值获取 toast 函数
+const { toast } = useToast()
 
 const configPath = ref('')
-const configFilePath = ref('') // 新增完整文件路径变量
+const configFilePath = ref('')
 const configContent = ref('')
 const originalContent = ref('')
 const dialogOpen = ref(false)
@@ -34,14 +34,13 @@ const getConfigPath = async () => {
   try {
     const paths = await window.ipcRenderer.invoke('get-app-paths')
     configPath.value = paths.config
-    // 获取完整的配置文件路径
     configFilePath.value = await window.ipcRenderer.invoke('get-mcp-config-path')
     return paths.config
   } catch (error) {
     console.error('获取配置路径失败:', error)
     toast({
-      title: "路径获取失败",
-      description: "无法获取配置文件路径",
+      title: t('mcp.config.messages.pathFailed'),
+      description: t('mcp.config.messages.pathFailedDesc'),
       variant: "destructive",
     })
   }
@@ -57,10 +56,9 @@ const loadConfigFile = async () => {
     originalContent.value = content
   } catch (error) {
     console.error('加载配置文件失败:', error)
-    // 修改 toast 调用方式
-    toast({  // 直接调用 toast，不需要 toast.toast
-      title: "加载失败",
-      description: "无法加载MCP配置文件",
+    toast({
+      title: t('mcp.config.messages.loadFailed'),
+      description: t('mcp.config.messages.loadFailedDesc'),
       variant: "destructive",
     })
   } finally {
@@ -77,10 +75,9 @@ const formatJson = () => {
       editorRef.value.formatCode()
     }
   } catch (e) {
-    // 修改 toast 调用方式
-    toast({  // 直接调用 toast，不需要 toast.toast
-      title: "格式错误",
-      description: "JSON格式不正确，无法格式化",
+    toast({
+      title: t('mcp.config.messages.formatError'),
+      description: t('mcp.config.messages.formatErrorDesc'),
       variant: "destructive",
     })
   }
@@ -95,10 +92,9 @@ const saveConfigFile = async () => {
     try {
       JSON.parse(configContent.value)
     } catch (e) {
-      // 修改 toast 调用方式
-      toast({  // 直接调用 toast，不需要 toast.toast
-        title: "格式错误",
-        description: "JSON格式不正确，请检查后重试",
+      toast({
+        title: t('mcp.config.messages.formatError'),
+        description: t('mcp.config.messages.formatErrorSave'),
         variant: "destructive",
       })
       saving.value = false
@@ -110,30 +106,29 @@ const saveConfigFile = async () => {
     
     try {
       toast({
-        title: "保存成功，正在重启服务",
-        description: "MCP配置文件已更新",
+        title: t('mcp.config.messages.saveSuccess'),
+        description: t('mcp.config.messages.saveSuccessDesc'),
       })
       const res = await mcpStore.restartServer()
       const desStr = res.details.failedServers.map(server => `${server.key}: ${server.error}`).join('，  \n')
       mcpStore.fetchTools()
       toast({
         title: res.message,
-        description: desStr ? desStr : '重启服务成功',
+        description: desStr ? desStr : t('mcp.config.messages.restartSuccess'),
       })
       dialogOpen.value = false
     } catch (error) {
-      toast({  // 直接调用 toast，不需要 toast.toast
-        title: "重启服务失败",
-        description: error.message || "重启服务失败",
+      toast({
+        title: t('mcp.config.messages.restartFailed'),
+        description: error.message || t('mcp.config.messages.restartFailed'),
         variant: "destructive",
       })
     }
   } catch (error) {
     console.error('保存配置文件失败:', error)
-    // 修改 toast 调用方式
-    toast({  // 直接调用 toast，不需要 toast.toast
-      title: "保存失败",
-      description: error.message || "无法保存MCP配置文件",
+    toast({
+      title: t('mcp.config.messages.saveFailed'),
+      description: error.message || t('mcp.config.messages.saveFailedDesc'),
       variant: "destructive",
     })
   } finally {
@@ -150,7 +145,6 @@ const resetConfig = () => {
 const handleDialogOpen = (open) => {
   dialogOpen.value = open
   if (open) {
-    // 对话框打开时加载配置
     loadConfigFile()
   }
 }
@@ -170,21 +164,20 @@ onMounted(async () => {
     <DialogTrigger asChild>
       <Button>
         <Settings />
-        配置文件
+        {{ t('mcp.config.button') }}
       </Button>
     </DialogTrigger>
     <DialogContent class="sm:max-w-[700px]">
       <DialogHeader>
-        <DialogTitle>MCP 配置文件</DialogTitle>
+        <DialogTitle>{{ t('mcp.config.title') }}</DialogTitle>
       </DialogHeader>
       <div class="grid gap-4 py-4">
         <div v-if="loading" class="flex justify-center items-center py-8">
           <RefreshCw class="w-6 h-6 animate-spin" />
-          <span class="ml-2">加载中...</span>
+          <span class="ml-2">{{ t('mcp.config.loading') }}</span>
         </div>
         <div v-else>
           <div class="relative rounded overflow-hidden">
-            <!-- 使用 Monaco Editor 组件 -->
             <MonacoEditor
               ref="editorRef"
               v-model="configContent"
@@ -199,32 +192,31 @@ onMounted(async () => {
             />
           </div>
         </div>
-      <div class="flex items-center justify-between mt-4 space-x-4">
-        <div>
-          <span class="text-sm text-muted-foreground break-all">{{ configFilePath }}</span>
+        <div class="flex items-center justify-between mt-4 space-x-4">
+          <div>
+            <span class="text-sm text-muted-foreground break-all">{{ configFilePath }}</span>
+          </div>
+          <div class="flex space-x-2">
+            <Button variant="outline" size="sm" @click="openConfigDirectory">
+              {{ t('mcp.config.buttons.openDirectory') }}
+            </Button>
+          </div>
         </div>
-        <div class="flex space-x-2">
-          <Button variant="outline" size="sm" @click="openConfigDirectory">
-            打开目录
-          </Button>
-        </div>
-      </div>
       </div>
       <DialogFooter>
         <Button variant="outline" @click="resetConfig" :disabled="loading || saving">
-          重置
+          {{ t('mcp.config.buttons.reset') }}
         </Button>
-          <Button variant="outline" @click="formatJson" :disabled="loading || saving">
-            格式化
-          </Button>
+        <Button variant="outline" @click="formatJson" :disabled="loading || saving">
+          {{ t('mcp.config.buttons.format') }}
+        </Button>
         <Button @click="saveConfigFile" :disabled="loading || saving">
           <Save v-if="!saving" class="w-4 h-4" />
           <RefreshCw v-else class="w-4 h-4 animate-spin" />
-          {{ saving ? '保存中...' : '保存' }}
+          {{ saving ? t('mcp.config.buttons.saving') : t('mcp.config.buttons.save') }}
         </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
-  <!-- 添加 Toaster 组件到模板根级别 -->
   <Toaster />
 </template>

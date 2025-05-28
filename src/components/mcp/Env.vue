@@ -8,7 +8,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const binPath = ref('')
 const dialogOpen = ref(false)
@@ -27,17 +30,29 @@ const tools = ref([
     name: 'bun', 
     installed: false, 
     downloading: false,
-    description: 'JavaScript 运行时和工具链，用于执行 Node.js 相关任务',
     filename: ''
   },
   { 
     name: 'uv', 
     installed: false, 
     downloading: false,
-    description: 'Python 包管理器和虚拟环境工具，用于执行 Python 相关任务',
     filename: ''
   },
 ])
+
+// 计算工具描述
+const getToolDescription = (toolName) => {
+  return t(`mcp.env.tools.${toolName}.description`)
+}
+
+// 计算未安装工具的提示文本
+const manualInstallTip = computed(() => {
+  const uninstalledTools = tools.value
+    .filter(t => !t.installed)
+    .map(t => t.filename)
+    .join('、')
+  return t('mcp.env.manualInstallTip', { tools: uninstalledTools })
+})
 
 // 获取工具文件名
 const getToolFilename = async (tool) => {
@@ -101,7 +116,7 @@ const downloadTool = async (tool) => {
     <DialogTrigger asChild>
       <Button variant="outline">
         <Terminal />
-        运行环境
+        {{ t('mcp.env.title') }}
         <AlertCircle 
           v-if="tools.some(t => !t.installed)" 
           class=" text-red-500" 
@@ -110,7 +125,7 @@ const downloadTool = async (tool) => {
     </DialogTrigger>
     <DialogContent class="sm:max-w-[425px]">
       <DialogHeader>
-        <DialogTitle>运行环境检测</DialogTitle>
+        <DialogTitle>{{ t('mcp.env.dialogTitle') }}</DialogTitle>
       </DialogHeader>
       <div class="grid gap-4 py-4">
         <div v-for="tool in tools" :key="tool.name" class="flex flex-col gap-1 px-4">
@@ -121,7 +136,7 @@ const downloadTool = async (tool) => {
             </div>
             <div class="flex items-center gap-2 text-sm">
               <span :class="tool.installed ? 'text-green-500' : 'text-red-500'">
-                {{ tool.installed ? '已安装' : '未安装' }}
+                {{ tool.installed ? t('mcp.env.status.installed') : t('mcp.env.status.notInstalled') }}
               </span>
               <Button 
                 v-if="!tool.installed"
@@ -132,24 +147,24 @@ const downloadTool = async (tool) => {
               >
                 <Download v-if="!tool.downloading" class="w-4 h-4 mr-1" />
                 <RefreshCw v-else class="animate-spin"></RefreshCw>
-                {{ tool.downloading ? '下载中...' : '下载' }}
+                {{ tool.downloading ? t('mcp.env.actions.downloading') : t('mcp.env.actions.download') }}
               </Button>
             </div>
           </div>
-          <p class="text-sm text-muted-foreground">{{ tool.description }}</p>
+          <p class="text-sm text-muted-foreground">{{ getToolDescription(tool.name) }}</p>
         </div>
 
         <div class="px-4 pt-2 border-t">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">安装目录：</span>
+            <span class="text-sm text-muted-foreground">{{ t('mcp.env.installDirectory') }}</span>
             <Button variant="outline" size="sm" @click="openBinDirectory">
               <FileText class="w-4 h-4 mr-1" />
-              打开目录
+              {{ t('mcp.env.actions.openDirectory') }}
             </Button>
           </div>
           <p class="text-sm mt-1 text-muted-foreground break-all">{{ binPath }}</p>
           <p v-if="tools.some(t => !t.installed)" class="text-xs mt-1 text-muted-foreground">
-            提示：可将未安装的工具（{{ tools.filter(t => !t.installed).map(t => t.filename).join('、') }}）手动下载并放置到上述目录中
+            {{ manualInstallTip }}
           </p>
         </div>
       </div>
