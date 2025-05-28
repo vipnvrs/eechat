@@ -40,11 +40,21 @@ if (os.release().startsWith('6.1')) app.disableHardwareAcceleration()
 // Set application name for Windows 10+ notifications
 if (process.platform === 'win32') app.setAppUserModelId(app.getName())
 
-// Ensure single instance
-if (!app.requestSingleInstanceLock()) {
-  app.quit()
-  process.exit(0)
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+  let cmd
+  if (process.platform === 'win32') {
+    cmd = 'taskkill /F /IM eechat.exe'
+    spawn('cmd.exe', ['/c', cmd], { detached: true, stdio: 'ignore' })
+  } else if (process.platform === 'darwin') {
+    cmd = 'pkill -9 eechat'
+    spawn('bash', ['-c', cmd], { detached: true, stdio: 'ignore' })
+  } else if (process.platform === 'linux') {
+    cmd = 'pkill -9 eechat'
+    spawn('bash', ['-c', cmd], { detached: true, stdio: 'ignore' })
+  }
 }
+
 app.commandLine.appendSwitch('enable-features', 'WebSpeechAPI')
 
 let win: BrowserWindow | null = null
