@@ -4,6 +4,9 @@
   "appId": "ee.chat.na",
   "asar": true,
   "productName": "eechat",
+  "buildDependenciesFromSource": false,
+  "nodeGypRebuild": false,
+  "npmRebuild": false,
   "directories": {
     "output": "release/${version}"
   },
