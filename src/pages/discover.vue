@@ -17,14 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { ref, markRaw, onMounted, computed } from "vue"
+import { ref, markRaw, onMounted, computed, watch } from "vue"
 import { SquareArrowOutUpRight } from "lucide-vue-next"
 import { useAssistantStore } from '@/stores/assistant'
 import { useI18n } from "vue-i18n"
 // 导入新定义的类型
 import { DiscoverItem, CategoryOption } from '@/types/discover'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const activeMenu = ref({
   label: t("settings.modelSelect.localModel"),
@@ -38,120 +38,148 @@ const dataList = ref<DiscoverItem[]>([])
 const isLoading = ref(true)
 
 // 缓存键名
-const CACHE_KEY = 'promot_data_cache'
-const CACHE_TIMESTAMP_KEY = 'promot_data_timestamp'
+const getCacheKey = (lang: string) => `promot_data_cache_${lang}`
+const getCacheTimestampKey = (lang: string) => `promot_data_timestamp_${lang}`
 // 缓存过期时间（毫秒），这里设置为1小时
 const CACHE_EXPIRY = 60 * 60 * 1000
 
 // 在组件挂载时加载JSON数据
 onMounted(async () => {
+  await loadDataBasedOnLocale()
+})
+
+watch(locale, async (newLocale, oldLocale) => {
+  if (newLocale !== oldLocale) {
+    isLoading.value = true
+    await loadDataBasedOnLocale()
+    isLoading.value = false
+  }
+})
+
+const loadDataBasedOnLocale = async () => {
+  const lang = locale.value
+  const currentCacheKey = getCacheKey(lang)
+  const currentCacheTimestampKey = getCacheTimestampKey(lang)
+
   // 首先尝试从缓存加载数据
-  const cachedData = localStorage.getItem(CACHE_KEY)
-  const cachedTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY)
-  
+  const cachedData = localStorage.getItem(currentCacheKey)
+  const cachedTimestamp = localStorage.getItem(currentCacheTimestampKey)
+
   // 检查缓存是否存在且未过期
   if (cachedData && cachedTimestamp) {
     const timestamp = parseInt(cachedTimestamp)
     const now = Date.now()
-    
+
     // 如果缓存未过期，直接使用缓存数据
     if (now - timestamp < CACHE_EXPIRY) {
       try {
         dataList.value = JSON.parse(cachedData)
-        console.log('成功从缓存加载数据')
+        console.log(`成功从缓存加载数据 (${lang})`)
         isLoading.value = false
-        
         // 在后台更新缓存
-        refreshCacheInBackground()
+        refreshCacheInBackground(lang)
         return
       } catch (error) {
-        console.error('解析缓存数据失败:', error)
+        console.error(`解析缓存数据失败 (${lang}):`, error)
         // 继续尝试从远程或本地加载
       }
     }
   }
-  
+
   // 如果没有有效缓存，则从远程或本地加载
-  await loadData()
+  await loadData(lang)
   isLoading.value = false
-})
+}
 
 // 后台刷新缓存
-const refreshCacheInBackground = async () => {
+const refreshCacheInBackground = async (lang: string) => {
+  const remoteUrl = lang === 'en-US' ? 'https://download.9tharts.com/assets/promot_en-US.json' : 'https://download.9tharts.com/assets/promot.json'
+  const currentCacheKey = getCacheKey(lang)
+  const currentCacheTimestampKey = getCacheTimestampKey(lang)
   try {
     // 尝试从远程URL获取数据
-    const response = await fetch('https://download.9tharts.com/assets/promot.json')
+    const response = await fetch(remoteUrl)
     if (response.ok) {
       const data = await response.json()
       // 更新缓存
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data))
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
-      console.log('后台更新缓存成功')
+      localStorage.setItem(currentCacheKey, JSON.stringify(data))
+      localStorage.setItem(currentCacheTimestampKey, Date.now().toString())
+      console.log(`后台更新缓存成功 (${lang})`)
     }
   } catch (error) {
-    console.error('后台更新缓存失败:', error)
+    console.error(`后台更新缓存失败 (${lang}):`, error)
   }
 }
 
 // 提取数据加载逻辑为单独的函数
-const loadData = async () => {
+const loadData = async (lang: string) => {
+  const remoteUrl = lang === 'en' ? 'https://download.9tharts.com/assets/promot_en.json' : 'https://download.9tharts.com/assets/promot.json'
+  const localUrl = lang === 'en' ? '/promot_en.json' : '/promot.json'
+  const currentCacheKey = getCacheKey(lang)
+  const currentCacheTimestampKey = getCacheTimestampKey(lang)
+
   try {
     // 首先尝试从远程URL获取数据
-    const response = await fetch('https://download.9tharts.com/assets/promot.json')
+    const response = await fetch(remoteUrl)
     if (response.ok) {
       const data = await response.json()
       dataList.value = data
-      console.log('成功从远程加载数据')
-      
+      console.log(`成功从远程加载数据 (${lang})`)
+
       // 缓存数据
-      localStorage.setItem(CACHE_KEY, JSON.stringify(data))
-      localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString())
-      console.log('数据已缓存到本地')
+      localStorage.setItem(currentCacheKey, JSON.stringify(data))
+      localStorage.setItem(currentCacheTimestampKey, Date.now().toString())
+      console.log(`数据已缓存到本地 (${lang})`)
     } else {
-      throw new Error('远程数据获取失败')
+      throw new Error(`远程数据获取失败 (${lang})`)
     }
   } catch (error) {
-    console.error('远程数据获取失败，尝试加载本地数据:', error)
+    console.error(`远程数据获取失败，尝试加载本地数据 (${lang}):`, error)
     try {
       // 远程获取失败，尝试从本地获取
-      const localResponse = await fetch('/promot.json')
+      const localResponse = await fetch(localUrl)
       const localData = await localResponse.json()
       dataList.value = localData
-      console.log('成功从本地文件加载数据')
+      console.log(`成功从本地文件加载数据 (${lang})`)
     } catch (localError) {
-      console.error('本地数据加载也失败:', localError)
+      console.error(`本地数据加载也失败 (${lang}):`, localError)
     }
   }
 }
 
 // 提取数据过滤逻辑为单独的函数
 const filterData = async (values) => {
+  const lang = locale.value
+  const remoteUrl = lang === 'en' ? 'https://download.9tharts.com/assets/promot_en.json' : 'https://download.9tharts.com/assets/promot.json'
+  const localUrl = lang === 'en' ? '/promot_en.json' : '/promot.json'
+  const currentCacheKey = getCacheKey(lang)
+
   try {
     let data = []
     // 首先尝试从缓存获取数据
-    const cachedData = localStorage.getItem(CACHE_KEY)
+    const cachedData = localStorage.getItem(currentCacheKey)
     if (cachedData) {
       try {
         data = JSON.parse(cachedData)
-        console.log('使用缓存数据进行过滤')
+        console.log(`使用缓存数据进行过滤 (${lang})`)
       } catch (error) {
-        console.error('解析缓存数据失败:', error)
+        console.error(`解析缓存数据失败 (${lang}):`, error)
         // 如果缓存解析失败，继续尝试从远程或本地加载
       }
     }
-    
+
     // 如果没有缓存数据，则从远程或本地加载
     if (data.length === 0) {
       try {
-        const response = await fetch('https://download.9tharts.com/assets/promot.json')
+        const response = await fetch(remoteUrl)
         if (response.ok) {
           data = await response.json()
         } else {
-          throw new Error('远程数据获取失败')
+          throw new Error(`远程数据获取失败 (${lang})`)
         }
       } catch (error) {
-        console.error('远程数据获取失败，尝试加载本地数据:', error)
-        const localResponse = await fetch('/promot.json')
+        console.error(`远程数据获取失败，尝试加载本地数据 (${lang}):`, error)
+        const localResponse = await fetch(localUrl)
         data = await localResponse.json()
       }
     }
