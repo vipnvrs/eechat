@@ -609,7 +609,7 @@ export const proxyApi = {
   },
   
   // 更新代理配置
-  async updateProxyConfig(config: { http?: string, https?: string, enabled?: boolean }) {
+  async updateProxyConfig(config: { host: string, port: number, username?: string, password?: string }) {
     return request.post('/api/proxy/config', config)
   },
   

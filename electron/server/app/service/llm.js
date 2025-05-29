@@ -2,6 +2,7 @@ const { stat } = require('fs')
 const BaseLLMService = require('./llm/base')
 const DeepseekService = require('./llm/deepseek')
 const CommonService = require('./llm/common')
+const GeminiService = require('./llm/gemini')
 
 class LLMService extends BaseLLMService {
   constructor(ctx) {
@@ -11,6 +12,7 @@ class LLMService extends BaseLLMService {
       // anthropic: new AnthropicService(ctx),
       // deepseek: new DeepseekService(ctx),
       common: new CommonService(ctx),
+      gemini: new GeminiService(ctx),
     }
   }
 
@@ -145,7 +147,7 @@ class LLMService extends BaseLLMService {
         if(provider) {
           provider.state = c_provider.state
           provider.api_key = c_provider.api_key
-          provider.base_url = c_provider.base_url
+          provider.api_url = c_provider.base_url
           provider.type = 'api'
           provider.from = 'config'
           provider.description = ''

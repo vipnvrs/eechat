@@ -13,11 +13,13 @@ const { t } = useI18n()
 const { toast } = useToast()
 const loading = ref(false)
 
-// 代理配置
+// SOCKS代理配置
 const proxyConfig = reactive({
   enabled: false,
-  http: '',
-  https: ''
+  host: '127.0.0.1',
+  port: 7897,
+  username: '',
+  password: ''
 })
 
 // 获取代理配置
@@ -25,9 +27,7 @@ const getProxyConfig = async () => {
   try {
     loading.value = true
     const config = await proxyApi.getProxyConfig()
-    proxyConfig.enabled = config.enabled
-    proxyConfig.http = config.http
-    proxyConfig.https = config.https
+    Object.assign(proxyConfig, config)
   } catch (error: any) {
     toast({
       title: t('settings.proxy.getConfigFailed', '获取代理配置失败'),
@@ -44,12 +44,14 @@ const updateProxyConfig = async () => {
   try {
     loading.value = true
     await proxyApi.updateProxyConfig({
-      http: proxyConfig.http,
-      https: proxyConfig.https
+      host: proxyConfig.host,
+      port: proxyConfig.port,
+      username: proxyConfig.username,
+      password: proxyConfig.password
     })
     toast({
       title: t('settings.proxy.updateSuccess', '更新代理配置成功'),
-      description: t('settings.proxy.updateSuccessDesc', '代理配置已成功更新')
+      description: t('settings.proxy.updateSuccessDesc', '代理配置已成功更新并立即生效')
     })
   } catch (error: any) {
     toast({
@@ -103,16 +105,16 @@ onMounted(() => {
 <template>
   <div class="h-full space-y-6">
     <div class="text-gray-500 text-sm">
-      {{ t('settings.proxy.title', '代理设置') }}
+      {{ t('settings.proxy.title', 'SOCKS代理设置') }}
     </div>
     
     <div class="space-y-4">
       <!-- 代理开关 -->
       <div class="flex items-center justify-between">
         <div>
-          <div class="text-sm font-medium">{{ t('settings.proxy.enableProxy', '启用代理') }}</div>
+          <div class="text-sm font-medium">{{ t('settings.proxy.enableProxy', '启用SOCKS代理') }}</div>
           <div class="text-xs text-muted-foreground">
-            {{ t('settings.proxy.enableProxyDesc', '启用后，应用将通过代理服务器连接网络') }}
+            {{ t('settings.proxy.enableProxyDesc', '启用后，应用将通过SOCKS代理服务器连接网络') }}
           </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -125,23 +127,45 @@ onMounted(() => {
         </div>
       </div>
       
-      <!-- HTTP代理 -->
+      <!-- 代理服务器地址 -->
       <div class="space-y-2">
-        <Label for="http-proxy">{{ t('settings.proxy.httpProxy', 'HTTP代理') }}</Label>
+        <Label for="proxy-host">{{ t('settings.proxy.socksAddress', '代理服务器地址') }}</Label>
         <Input 
-          id="http-proxy" 
-          v-model="proxyConfig.http" 
-          :placeholder="t('settings.proxy.proxyPlaceholder', '例如: http://127.0.0.1:7890')"
+          id="proxy-host" 
+          v-model="proxyConfig.host" 
+          :placeholder="t('settings.proxy.proxyPlaceholder', '例如: 127.0.0.1')"
         />
       </div>
       
-      <!-- HTTPS代理 -->
+      <!-- 代理端口 -->
       <div class="space-y-2">
-        <Label for="https-proxy">{{ t('settings.proxy.httpsProxy', 'HTTPS代理') }}</Label>
+        <Label for="proxy-port">{{ t('settings.proxy.socksPort', '代理端口') }}</Label>
         <Input 
-          id="https-proxy" 
-          v-model="proxyConfig.https" 
-          :placeholder="t('settings.proxy.proxyPlaceholder', '例如: http://127.0.0.1:7890')"
+          id="proxy-port" 
+          v-model.number="proxyConfig.port" 
+          type="number"
+          :placeholder="t('settings.proxy.portPlaceholder', '例如: 7897')"
+        />
+      </div>
+      
+      <!-- 用户名（可选） -->
+      <div class="space-y-2">
+        <Label for="proxy-username">{{ t('settings.proxy.socksUsername', '用户名（可选）') }}</Label>
+        <Input 
+          id="proxy-username" 
+          v-model="proxyConfig.username" 
+          :placeholder="t('settings.proxy.usernamePlaceholder', '如果代理需要认证请填写')"
+        />
+      </div>
+      
+      <!-- 密码（可选） -->
+      <div class="space-y-2">
+        <Label for="proxy-password">{{ t('settings.proxy.socksPassword', '密码（可选）') }}</Label>
+        <Input 
+          id="proxy-password" 
+          v-model="proxyConfig.password" 
+          type="password"
+          :placeholder="t('settings.proxy.passwordPlaceholder', '如果代理需要认证请填写')"
         />
       </div>
       

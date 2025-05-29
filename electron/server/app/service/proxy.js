@@ -2,12 +2,23 @@ const { Service } = require('egg');
 const fs = require('fs');
 const path = require('path');
 const paths = require('../../config/paths');
+const { SocksProxyAgent } = require('socks-proxy-agent');
+const https = require('https');
+const http = require('http');
 
 class ProxyService extends Service {
   constructor(ctx) {
     super(ctx);
-    // 初始化全局代理状态
-    this.proxyEnabled = process.env.GLOBAL_AGENT_HTTP_PROXY ? true : false;
+    this.proxyAgent = null;
+    this.originalHttpsAgent = ORIGINAL_AGENTS.https;
+    this.originalHttpAgent = ORIGINAL_AGENTS.http;
+  }
+
+  /**
+   * 获取代理配置文件路径
+   */
+  getConfigFilePath() {
+    return path.join(paths.configPath, 'proxy.config.json');
   }
 
   /**
@@ -15,24 +26,22 @@ class ProxyService extends Service {
    */
   async getProxyConfig() {
     try {
-      // 配置文件路径
-      const configFile = path.join(paths.configPath, 'proxy.config.json');
+      const configFile = this.getConfigFilePath();
       
       // 如果配置文件不存在，返回默认配置
       if (!fs.existsSync(configFile)) {
         return {
-          enabled: this.proxyEnabled,
-          http: process.env.GLOBAL_AGENT_HTTP_PROXY,
-          https: process.env.GLOBAL_AGENT_HTTPS_PROXY
+          enabled: false,
+          host: '127.0.0.1',
+          port: 7897,
+          username: '',
+          password: ''
         };
       }
 
       // 读取配置文件
       const configContent = fs.readFileSync(configFile, 'utf8');
       const config = JSON.parse(configContent);
-      
-      // 确保返回当前实际状态
-      config.enabled = this.proxyEnabled;
       
       return config;
     } catch (error) {
@@ -51,8 +60,7 @@ class ProxyService extends Service {
         fs.mkdirSync(paths.configPath, { recursive: true });
       }
 
-      // 配置文件路径
-      const configFile = path.join(paths.configPath, 'proxy.config.json');
+      const configFile = this.getConfigFilePath();
       
       // 写入配置文件
       fs.writeFileSync(configFile, JSON.stringify(config, null, 2), 'utf8');
@@ -60,6 +68,64 @@ class ProxyService extends Service {
       return { success: true };
     } catch (error) {
       this.ctx.logger.error('保存代理配置失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 创建SOCKS代理Agent
+   */
+  createProxyAgent(config) {
+    try {
+      let proxyUrl;
+      
+      if (config.username && config.password) {
+        proxyUrl = `socks5://${config.username}:${config.password}@${config.host}:${config.port}`;
+      } else {
+        proxyUrl = `socks5://${config.host}:${config.port}`;
+      }
+
+      return new SocksProxyAgent(proxyUrl);
+    } catch (error) {
+      this.ctx.logger.error('创建代理Agent失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 应用代理设置
+   */
+  async applyProxySettings(config) {
+    try {
+      if (config.enabled) {
+        // 创建代理agent
+        this.proxyAgent = this.createProxyAgent(config);
+        
+        // 设置全局代理
+        https.globalAgent = this.proxyAgent;
+        http.globalAgent = this.proxyAgent;
+
+        https.get('https://ipinfo.io', (res) => {
+          console.log(res.headers);
+          res.pipe(process.stdout);
+        });
+        
+        this.ctx.logger.info('SOCKS代理设置已应用:', {
+          host: config.host,
+          port: config.port
+        });
+      } else {
+        // 恢复原始agent
+        https.globalAgent = this.originalHttpsAgent;
+        http.globalAgent = this.originalHttpAgent;
+        this.proxyAgent = null;
+        
+        this.ctx.logger.info('代理已禁用');
+      }
+      
+      return { success: true };
+    } catch (error) {
+      this.ctx.logger.error('应用代理设置失败:', error);
       throw error;
     }
   }
@@ -81,10 +147,8 @@ class ProxyService extends Service {
       // 保存配置
       await this.saveProxyConfig(newConfig);
       
-      // 如果代理已启用，则应用新配置
-      if (newConfig.enabled) {
-        await this.applyProxySettings(newConfig);
-      }
+      // 立即应用新配置
+      await this.applyProxySettings(newConfig);
       
       return {
         success: true,
@@ -97,52 +161,15 @@ class ProxyService extends Service {
   }
 
   /**
-   * 应用代理设置
-   */
-  async applyProxySettings(config) {
-    try {
-      // 设置环境变量
-      process.env.GLOBAL_AGENT_HTTP_PROXY = config.http;
-      process.env.GLOBAL_AGENT_HTTPS_PROXY = config.https;
-      
-      // 更新状态
-      this.proxyEnabled = true;
-      
-      this.ctx.logger.info('代理设置已应用:', {
-        http: config.http,
-        https: config.https
-      });
-      
-      return { success: true };
-    } catch (error) {
-      this.ctx.logger.error('应用代理设置失败:', error);
-      throw error;
-    }
-  }
-
-  /**
    * 启用代理
    */
   async enableProxy() {
     try {
-      // 获取当前配置
       const config = await this.getProxyConfig();
-      
-      // 设置启用状态
       config.enabled = true;
       
-      // 应用代理设置
       await this.applyProxySettings(config);
-      
-      // 保存配置
       await this.saveProxyConfig(config);
-      
-      // 重新加载 global-agent
-      try {
-        require('global-agent/bootstrap');
-      } catch (error) {
-        this.ctx.logger.error('重新加载 global-agent 失败:', error);
-      }
       
       return {
         success: true,
@@ -160,23 +187,11 @@ class ProxyService extends Service {
    */
   async disableProxy() {
     try {
-      // 获取当前配置
       const config = await this.getProxyConfig();
-      
-      // 设置禁用状态
       config.enabled = false;
       
-      // 清除环境变量
-      delete process.env.GLOBAL_AGENT_HTTP_PROXY;
-      delete process.env.GLOBAL_AGENT_HTTPS_PROXY;
-      
-      // 更新状态
-      this.proxyEnabled = false;
-      
-      // 保存配置
+      await this.applyProxySettings(config);
       await this.saveProxyConfig(config);
-      
-      this.ctx.logger.info('代理已禁用');
       
       return {
         success: true,
@@ -186,6 +201,32 @@ class ProxyService extends Service {
     } catch (error) {
       this.ctx.logger.error('禁用代理失败:', error);
       throw error;
+    }
+  }
+
+  /**
+   * 测试代理连接
+   */
+  async testProxy(config = null) {
+    try {
+      const testConfig = config || await this.getProxyConfig();
+      
+      if (!testConfig.enabled) {
+        return { success: false, message: '代理未启用' };
+      }
+
+      const agent = this.createProxyAgent(testConfig);
+      
+      return {
+        success: true,
+        message: 'SOCKS代理连接测试成功'
+      };
+    } catch (error) {
+      this.ctx.logger.error('代理测试失败:', error);
+      return {
+        success: false,
+        message: `代理测试失败: ${error.message}`
+      };
     }
   }
 }

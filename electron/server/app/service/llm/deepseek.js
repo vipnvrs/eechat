@@ -11,7 +11,7 @@ class DeepseekService extends BaseLLMService {
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),
       apiKey: config.apiKey,
-      baseURL: config.baseUrl || 'https://api.deepseek.com/v1',
+      baseURL: config.baseUrl,
     })
   }
 

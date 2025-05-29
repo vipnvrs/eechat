@@ -2,21 +2,31 @@ const OpenAI = require('openai')
 const BaseLLMService = require('./base')
 const https = require('https')
 
-class DeepseekService extends BaseLLMService {
+class GeminiService extends BaseLLMService {
   constructor(ctx) {
     super(ctx)
-    this.provider = 'deepseek'
+    this.provider = 'gemini'
   }
 
   async createClient(config) {
     if (!config || !config.baseUrl || !config.apiKey) {
       throw new Error(this.ctx.__('chat.key_empty'))
     }
+    if(config.baseUrl.endsWith('/')) {
+      config.baseUrl = config.baseUrl.substring(0, config.baseUrl.length - 1)
+    }
+    if(config.baseUrl === 'https://generativelanguage.googleapis.com') {
+      config.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/openai/'
+    }
+    if(config.baseUrl == 'https://generativelanguage.googleapis.com/v1beta') {
+      config.baseUrl += '/openai/'
+    }
     return new OpenAI({
       // apiKey: this.decrypt(config.apiKey),
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
       httpAgent: https.globalAgent,
+      httpsAgent: https.globalAgent,
     })
   }
 
@@ -29,7 +39,7 @@ class DeepseekService extends BaseLLMService {
       const response = await client.chat.completions.create({
         model: model_id,
         messages: [{ role: 'user', content: 'test' }],
-        max_tokens: 1,
+        // max_tokens: 1,
       })
       if(!response.choices || response.choices.length == 0) {
         if(response.error) {
@@ -119,24 +129,12 @@ class DeepseekService extends BaseLLMService {
         ...mergedMessages,
       ]
 
-      // const messagesWithSystemPrompt = sessionSettings.systemPrompt
-      //   ? [
-      //       { role: 'system', content: sessionSettings.systemPrompt },
-      //       ...mergedMessages,
-      //     ]
-      //   : mergedMessages
-
       console.log(sessionSettings)
 
       const params = {
         model: model_id,
         messages: messagesWithSystemPrompt,
         stream: true,
-        // max_tokens: 2048,
-        temperature: sessionSettings.temperature,
-        top_p: sessionSettings.top_p,
-        presence_penalty: sessionSettings.presence_penalty,
-        frequency_penalty: sessionSettings.frequency_penalty,
       }
       console.log(params)
       if (tools && tools.length > 0) {
@@ -174,4 +172,4 @@ class DeepseekService extends BaseLLMService {
   }
 }
 
-module.exports = DeepseekService
+module.exports = GeminiService
