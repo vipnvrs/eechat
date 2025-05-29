@@ -117,7 +117,7 @@
         "command": "Command",
         "commandPlaceholder": "e.g.: npx, node, uvx",
         "args": "Arguments",
-        "argsPlaceholder": "One argument per line\ne.g.:\n-y\n@modelcontextprotocol/server-filesystem\nC:/Users/Documents",
+        "argsPlaceholder": "One argument per line\ne.g.:\n-y\n{'@'}modelcontextprotocol/server-filesystem\nC:/Users/Documents",
         "argsHelp": "Enter one argument per line, no comma separation needed",
         "env": "Environment Variables",
         "envPlaceholder": "One environment variable per line, format: KEY=VALUE\ne.g.:\nNODE_ENV=production\nDEBUG=true",

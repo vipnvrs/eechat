@@ -25,7 +25,7 @@ export default defineConfig(({ command }) => {
     },
     plugins: [
       vue(),
-      VitePWA({ registerType: 'autoUpdate' }),
+      // VitePWA({ registerType: 'autoUpdate' }),
       electron({
         main: {
           // Shortcut of `build.lib.entry`
