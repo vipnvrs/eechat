@@ -12,5 +12,9 @@
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",
   "i18n-ally.displayLanguage": "zh",
-  "i18n-ally.enabledFrameworks": ["vue-i18n"]
+  "i18n-ally.enabledFrameworks": [
+    "vue-i18n"
+  ],
+  "IDX.aI.enableInlineCompletion": true,
+  "IDX.aI.enableCodebaseIndexing": true
 }

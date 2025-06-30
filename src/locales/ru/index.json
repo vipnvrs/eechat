@@ -1,0 +1,535 @@
+{
+  "common": {
+    "ok": "ОК",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "timeGroup": {
+      "today": "Сегодня",
+      "yesterday": "Вчера",
+      "within7days": "Последние 7 дней",
+      "within30days": "Последние 30 дней",
+      "monthFormat": "MMMM",
+      "yearMonthFormat": "MMMM YYYY"
+    }
+  },
+  "chat": {
+    "scrollToBottom": "Прокрутить вниз",
+    "newChat": "Чат",
+    "send": "Отправить",
+    "typing": "Печатает...",
+    "thinking": "Думает...",
+    "clearConversation": "Очистить диалог",
+    "exportConversation": "Экспортировать диалог",
+    "inputPlaceholder": "Введите сообщение, нажмите Enter для отправки, Shift + Enter для новой строки",
+    "settings": {
+      "title": "Настройки",
+      "chatName": "Название чата",
+      "systemPrompt": "Системный промпт",
+      "rolePrompt": "Настройка роли",
+      "creativity": "Креативность",
+      "openness": "Открытость",
+      "expressiveness": "Выразительность",
+      "vocabulary": "Словарь",
+      "saveSettings": "Сохранить настройки",
+      "saveSuccess": "Настройки сохранены"
+    },
+    "sidebar": {
+      "chat": "Чат",
+      "confirmDelete": "Подтвердить удаление чата?",
+      "confirmDeleteDesc": "Это действие удалит чат \"{title}\", это действие необратимо.",
+      "deleting": "Удаление...",
+      "confirmDeleteBtn": "Подтвердить удаление",
+      "newChat": "Новый чат",
+      "deleteSuccess": "Чат успешно удален",
+      "deleteSuccessDesc": "Чат \"{title}\" удален",
+      "deleteFailed": "Ошибка удаления",
+      "unknownError": "Неизвестная ошибка"
+    },
+    "promptEditor": {
+      "title": "Редактировать промпт",
+      "placeholder": "Введите промпт здесь..."
+    },
+    "discover": {
+      "title": "Обзор"
+    },
+    "mcp": {
+      "title": "MCP"
+    }
+  },
+  "mcp": {
+    "title": "Управление MCP",
+    "subtitle": "Управляйте и устанавливайте приложения MCP для расширения возможностей AI-помощника",
+    "installedApps": "Установленные приложения",
+    "recommendedApps": "Рекомендуемые приложения",
+    "addNewApp": "Добавить новое приложение",
+    "refresh": "Обновить",
+    "viewMore": "Посмотреть больше",
+    "helpDoc": "Справка",
+    "noInstalledApps": "Приложения MCP еще не установлены, нажмите \"Добавить новое приложение\", чтобы добавить",
+    "loadingApps": "Загрузка списка приложений MCP...",
+    "status": {
+      "running": "Запущено",
+      "stopped": "Остановлено"
+    },
+    "actions": {
+      "start": "Запустить сервис",
+      "stop": "Остановить сервис",
+      "edit": "Изменить конфигурацию",
+      "delete": "Удалить",
+      "install": "Установить это приложение"
+    },
+    "messages": {
+      "refreshSuccess": "Обновлено успешно",
+      "refreshSuccessDesc": "Список серверов MCP обновлен",
+      "refreshFailed": "Ошибка обновления",
+      "startSuccess": "Запущено успешно",
+      "startSuccessDesc": "Запущено {name}",
+      "startFailed": "Ошибка запуска",
+      "stopSuccess": "Остановлено успешно",
+      "stopSuccessDesc": "Остановлено {name}",
+      "stopFailed": "Ошибка остановки",
+      "deleteSuccess": "Удалено успешно",
+      "deleteSuccessDesc": "Удалено {name}",
+      "deleteFailed": "Ошибка удаления",
+      "unknownError": "Неизвестная ошибка"
+    },
+    "dialog": {
+      "confirmDelete": "Подтвердить удаление",
+      "confirmDeleteDesc": "Вы уверены, что хотите удалить {name}? Это действие невозможно отменить.",
+      "cancel": "Отмена",
+      "delete": "Удалить"
+    },
+    "addNew": {
+      "title": {
+        "add": "Добавить новое приложение MCP",
+        "edit": "Редактировать приложение MCP"
+      },
+      "form": {
+        "serverKey": "Ключ сервера",
+        "serverKeyPlaceholder": "например: filesystem, fetch",
+        "transportType": "Тип транспорта",
+        "transportTypePlaceholder": "Выберите тип транспорта",
+        "command": "Команда",
+        "commandPlaceholder": "например: npx, node, uvx",
+        "args": "Аргументы",
+        "argsPlaceholder": "Один аргумент на строку\\nнапример:\\n-y\\n{'@'}modelcontextprotocol/server-filesystem\\nC:/Users/Documents",
+        "argsHelp": "Введите один аргумент на строку, запятые не нужны",
+        "env": "Переменные окружения",
+        "envPlaceholder": "Одна переменная окружения на строку, формат: KEY=VALUE\\nнапример:\\nNODE_ENV=production\\nDEBUG=true",
+        "envHelp": "Одна переменная окружения на строку, формат: KEY=VALUE",
+        "url": "URL",
+        "urlPlaceholder": "например: https://mcp.example.com/sse",
+        "headers": "Заголовки",
+        "headersPlaceholder": "Один заголовок на строку, формат: KEY: VALUE\\nнапример:\\nAuthorization: Bearer token123\\nContent-Type: application/json",
+        "headersHelp": "Один заголовок на строку, формат: KEY: VALUE",
+        "enabled": "Включено",
+        "enabledStatus": {
+          "enabled": "Включено",
+          "disabled": "Отключено"
+        }
+      },
+      "transportTypes": {
+        "stdio": "Стандартный ввод/вывод (stdio)",
+        "sse": "Серверные события (SSE)"
+      },
+      "readme": {
+        "urlPlaceholder": "https://github.com/repo/project/README.md",
+        "fetch": "Загрузить",
+        "fetching": "Загрузка...",
+        "newMcpService": "Новый MCP"
+      },
+      "buttons": {
+        "autoFill": "Автозаполнение AI (бета)",
+        "cancel": "Отмена",
+        "add": "Добавить",
+        "update": "Обновить",
+        "testConnection": "Проверить соединение"
+      },
+      "validation": {
+        "serverKeyRequired": "Ключ сервера не может быть пустым",
+        "commandRequired": "Команда не может быть пустой",
+        "urlRequired": "URL не может быть пустым",
+        "urlEmpty": "URL не может быть пустым",
+        "urlEmptyDesc": "Пожалуйста, введите правильный URL README"
+      },
+      "messages": {
+        "aiAnalyzing": "AI анализирует",
+        "aiAnalyzingDesc": "Анализ информации MCP и автозаполнение формы...",
+        "fillComplete": "Заполнение завершено",
+        "fillCompleteDesc": "AI завершил автозаполнение формы, пожалуйста, просмотрите и измените",
+        "fetchSuccess": "Загрузка успешна",
+        "fetchSuccessDesc": "Содержимое README успешно загружено",
+        "fetchFailed": "Ошибка загрузки",
+        "fetchFailedDesc": "Не удалось загрузить содержимое README, пожалуйста, проверьте правильность URL",
+        "validationFailed": "Ошибка валидации",
+        "addSuccess": "Добавлено успешно",
+        "addSuccessDesc": "Сервис MCP {serverKey} добавлен",
+        "addFailed": "Ошибка добавления",
+        "updateSuccess": "Обновлено успешно",
+        "updateSuccessDesc": "Сервис MCP {serverKey} обновлен",
+        "updateFailed": "Ошибка обновления",
+        "unknownError": "Неизвестная ошибка"
+      }
+    },
+    "config": {
+      "title": "Файл конфигурации MCP",
+      "button": "Файл конфигурации",
+      "loading": "Загрузка...",
+      "filePath": "Путь к файлу конфигурации",
+      "buttons": {
+        "openDirectory": "Открыть директорию",
+        "reset": "Сбросить",
+        "format": "Форматировать",
+        "save": "Сохранить",
+        "saving": "Сохранение..."
+      },
+      "messages": {
+        "pathFailed": "Не удалось получить путь",
+        "pathFailedDesc": "Не удалось получить путь к файлу конфигурации",
+        "loadFailed": "Ошибка загрузки",
+        "loadFailedDesc": "Не удалось загрузить файл конфигурации MCP",
+        "formatError": "Ошибка форматирования",
+        "formatErrorDesc": "Неправильный формат JSON, невозможно отформатировать",
+        "formatErrorSave": "Неправильный формат JSON, проверьте и попробуйте снова",
+        "saveSuccess": "Сохранено успешно, перезапуск сервиса",
+        "saveSuccessDesc": "Файл конфигурации MCP обновлен",
+        "restartSuccess": "Сервис перезапущен успешно",
+        "restartFailed": "Ошибка перезапуска сервиса",
+        "saveFailed": "Ошибка сохранения",
+        "saveFailedDesc": "Не удалось сохранить файл конфигурации MCP",
+        "unknownError": "Неизвестная ошибка"
+      }
+    },
+    "env": {
+      "title": "Среда выполнения",
+      "dialogTitle": "Обнаружение среды выполнения",
+      "status": {
+        "installed": "Установлено",
+        "notInstalled": "Не установлено"
+      },
+      "actions": {
+        "download": "Скачать",
+        "downloading": "Загрузка...",
+        "openDirectory": "Открыть директорию"
+      },
+      "tools": {
+        "bun": {
+          "description": "Среда выполнения JavaScript и инструментарий для выполнения задач, связанных с Node.js"
+        },
+        "uv": {
+          "description": "Менеджер пакетов Python и инструмент виртуального окружения для выполнения задач, связанных с Python"
+        }
+      },
+      "installDirectory": "Директория установки:",
+      "manualInstallTip": "Совет: Вы можете вручную скачать неустановленные инструменты ({tools}) и поместить их в указанную выше директорию"
+    }
+  },
+  "rag": {
+    "title": "База знаний",
+    "sidebar": {
+      "title": "RAG",
+      "create": "Создать",
+      "knowledgeBases": "Базы знаний",
+      "noKnowledgeBases": "Нет баз знаний",
+      "description": "Описание",
+      "isDefault": "База знаний по умолчанию",
+      "createBaseDesc": "Создать новую базу знаний",
+      "documents": "Документы",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "setDefault": "Сделать по умолчанию",
+      "chunkMethod": "Метод разбиения",
+      "selectChunkMethod": "Выберите метод разбиения",
+      "chunkSize": "Размер блока",
+      "chunkSizeDesc": "Больший размер блока дает более точные векторы, но потребляет больше ресурсов",
+      "chunkOverlap": "Перекрытие блоков",
+      "chunkOverlapDesc": "Большее перекрытие блоков дает более точные векторы, но потребляет больше ресурсов",
+      "embeddingModel": "Модель встраивания",
+      "embeddingModelType": "Тип модели",
+      "selectEmbeddingModel": "Выберите модель встраивания",
+      "selectEmbeddingModelType": "Выберите тип модели",
+      "embeddingModelDesc": "Модели встраивания преобразуют текст в векторы",
+      "embeddingDimension": "Размерность встраивания",
+      "selectEmbeddingDimension": "Выберите размерность встраивания",
+      "embeddingDimensionDesc": "Большая размерность дает более точные векторы, но потребляет больше ресурсов",
+      "textUnderstandingModel": "Модель понимания текста",
+      "selectTextModel": "Выберите текстовую модель",
+      "imageUnderstandingModel": "Модель понимания изображений",
+      "selectImageModel": "Выберите модель изображений",
+      "rerankEnabled": "Включить переранжирование",
+      "selectRerankModel": "Выберите модель переранжирования",
+      "rerankModel": "Модель переранжирования",
+      "rerankModelDesc": "Модели переранжирования сортируют результаты поиска",
+      "moreConfig": "Дополнительная конфигурация"
+    },
+    "document": {
+      "name": "Название документа",
+      "dataCount": "Количество данных",
+      "status": "Статус",
+      "statusReady": "Готов",
+      "statusIndexing": "Обработка",
+      "statusFailed": "Ошибка",
+      "statusPending": "Ожидание",
+      "statusUnknown": "Неизвестно",
+      "enabled": "Включено",
+      "createdAt": "Создано",
+      "actions": "Действия",
+      "documentList": "Список документов",
+      "modelConfig": "Конфигурация модели",
+      "help": "Справка",
+      "unsupportedFileType": "Неподдерживаемый тип файла",
+      "unsupportedFileTypeDesc": "Пожалуйста, загрузите документы следующих типов файлов: {fileTypes}",
+      "dragAndDrop": "Перетащите файлы или папки",
+      "supportedFormats": "Поддерживаемые форматы файлов",
+      "noBaseSelected": "Сначала выберите базу знаний",
+      "pleaseSelectBase": "Сначала выберите базу знаний",
+      "uploadSuccess": "Загрузка успешна",
+      "uploadSuccessDesc": "Успешно загружено {count} элементов данных",
+      "uploadFailed": "Ошибка загрузки",
+      "uploadFailedDesc": "Не удалось загрузить {count} элементов данных",
+      "uploadDocument": "Загрузить документ",
+      "uploadDocumentDesc": "После загрузки система автоматически преобразует документы в векторы и сохранит их в базе данных",
+      "browseFiles": "Обзор файлов",
+      "upload": "Загрузить",
+      "uploading": "Загрузка...",
+      "uploadingDesc": "Загрузка документов, пожалуйста, подождите",
+      "chunks": "Блоки документа",
+      "chunksDesc": "Посмотреть все сегменты, на которые был разделен документ",
+      "chunkIndex": "Индекс блока",
+      "metadata": "Метаданные",
+      "noChunks": "У этого документа нет данных блоков",
+      "fetchChunksFailed": "Не удалось получить блоки",
+      "chunksEmpty": "Данные блоков пусты",
+      "chunksEmptyDesc": "Этот документ, возможно, еще не завершил обработку"
+    }
+  },
+  "discover": {
+    "title": "Обзор",
+    "searchPlaceholder": "Введите для поиска...",
+    "mine": "Мои",
+    "assistant": "Помощник",
+    "pageTitle": "Изучите премиальные AI-агенты",
+    "pageDescription": "Используйте эти шаблонные приложения или настройте свои собственные на основе шаблонов.",
+    "categories": {
+      "translation": "Перевод",
+      "all": "Все",
+      "academic": "Академический",
+      "copywriting": "Копирайтинг",
+      "design": "Дизайн",
+      "commercial": "Коммерческий",
+      "programming": "Программирование",
+      "technology": "Технологии",
+      "music": "Музыка",
+      "openSource": "Открытый исходный код",
+      "financial": "Финансы",
+      "medical": "Медицина",
+      "legal": "Юриспруденция",
+      "education": "Образование",
+      "entertainment": "Развлечения",
+      "government": "Государство",
+      "other": "Прочее"
+    },
+    "assistants": {
+      "frenchTranslator": {
+        "title": "Помощник по французскому переводу",
+        "description": "Дружелюбный, профессиональный и эмпатичный AI-помощник по французскому переводу",
+        "type": "Перевод",
+        "tags": ["Перевод", "Юмор", "Культура"]
+      },
+      "codeHelper": {
+        "title": "Помощник по коду",
+        "description": "Профессиональный помощник по программированию, владеющий несколькими языками программирования и фреймворками",
+        "type": "Программирование",
+        "tags": ["Программирование", "Отладка", "Объяснение"]
+      },
+      "englishWriting": {
+        "title": "Тренер по английскому письму",
+        "description": "Предоставляет профессиональные рекомендации и предложения по редактированию для письма на английском",
+        "type": "Образование",
+        "tags": ["Письмо", "Английский", "Образование"]
+      },
+      "mentalHealth": {
+        "title": "Консультант по психическому здоровью",
+        "description": "AI-помощник, предоставляющий эмоциональную поддержку и советы по психическому здоровью",
+        "type": "Здоровье",
+        "tags": ["Психическое", "Эмоциональное", "Здоровье"]
+      },
+      "creativeWriting": {
+        "title": "Помощник по креативному письму",
+        "description": "Вдохновляет, помогает создавать романы, поэзию и различный креативный контент",
+        "type": "Письмо",
+        "tags": ["Креатив", "Письмо", "Вдохновение"]
+      },
+      "dataAnalysis": {
+        "title": "Эксперт по анализу данных",
+        "description": "Профессиональный помощник по анализу данных, статистике и визуализации",
+        "type": "Данные",
+        "tags": ["Данные", "Анализ", "Статистика"]
+      },
+      "travelPlanner": {
+        "title": "Планировщик путешествий",
+        "description": "Помогает планировать маршруты путешествий, рекомендовать достопримечательности и давать советы по путешествиям",
+        "type": "Образ жизни",
+        "tags": ["Путешествия", "Планирование", "Советы"]
+      },
+      "dietitian": {
+        "title": "Консультант по здоровому питанию",
+        "description": "Предоставляет сбалансированные диетические советы и здоровые рецепты",
+        "type": "Здоровье",
+        "tags": ["Диета", "Здоровье", "Питание"]
+      },
+      "japaneseCoach": {
+        "title": "Тренер по изучению японского",
+        "description": "Профессиональное руководство по изучению японского и партнер по практике",
+        "type": "Образование",
+        "tags": ["Японский", "Изучение", "Язык"]
+      }
+    }
+  },
+  "settings": {
+    "modelFilter": {
+      "popular": "Популярные",
+      "installed": "Установленные",
+      "searchPlaceholder": "deepseek..."
+    },
+    "title": "Настройки",
+    "language": "Язык",
+    "theme": "Тема",
+    "apiSettings": "Настройки API",
+    "modelSettings": "Настройки модели",
+    "configureInterface": "Настройте свой интерфейс",
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Темная",
+    "modelSelect": {
+      "selectModel": "Выберите модель",
+      "noLocalModel": "Локальная модель не найдена",
+      "configureModel": "Настроить",
+      "clickToConfig": "Нажмите, чтобы настроить модель",
+      "localModel": "Локальная модель"
+    },
+    "apiModel": {
+      "modelProvider": "Провайдер",
+      "connectionSuccess": "Соединение успешно",
+      "connectionSuccessDesc": "Успешное подключение к API",
+      "connectionFailed": "Соединение не удалось",
+      "testConnection": "Проверить соединение",
+      "testing": "Проверка...",
+      "enableProvider": "Включить этого провайдера в чате",
+      "modelConfig": "Конфигурация модели",
+      "apiKey": "Ключ API",
+      "apiUrl": "URL API",
+      "connectivityCheck": "Проверка подключения",
+      "selectModelToTest": "Выберите модель для проверки подключения",
+      "availableModels": "Доступные модели",
+      "enableModel": "Включить эту модель в чате"
+    },
+    "localModel": {
+      "serviceNotResponding": "Сервис не отвечает",
+      "serviceRunningNormal": "Локальный сервис работает нормально",
+      "installModelManager": "Установить менеджер моделей",
+      "startModelManager": "Запустить менеджер моделей",
+      "stopModelManager": "Остановить менеджер моделей",
+      "refreshStatus": "Обновить статус",
+      "modelManagement": "Управление моделями",
+      "moreModels": "Больше моделей?",
+      "installed": "Установлено",
+      "confirmDeleteDesc": "Это действие удалит модель {model}, вам потребуется скачать ее снова, чтобы использовать.",
+      "deleting": "Удаление...",
+      "confirmDelete": "Подтвердить удаление",
+      "downloadOllama": "Скачать и установить Ollama",
+      "downloadOllamaDesc": "Нажмите 'Подтвердить', чтобы открыть браузер и скачать Ollama. Пожалуйста, перезапустите программу после установки, чтобы проверить статус установки.",
+      "downloadNow": "Скачать сейчас",
+      "installSuccess": "Установка {model} успешна",
+      "installSuccessDesc": "Модель успешно установлена. Теперь вы можете ее использовать.",
+      "serviceNotRunning": "Менеджер моделей не запущен",
+      "serviceNotInstalled": "Менеджер моделей не установлен",
+      "syncModel": "Синхронизировать модели Ollama",
+      "syncModelSuccess": "Синхронизация моделей успешна",
+      "syncModelSuccessDesc": "Модели успешно синхронизированы. Теперь вы можете их использовать.",
+      "syncModelFailed": "Синхронизация моделей не удалась",
+      "syncModelFailedDesc": "Синхронизация моделей не удалась. Проверьте подключение к сети."
+    },
+    "sidebar": {
+      "models": "Модели",
+      "localModel": "Локальная модель",
+      "apiModel": "Настройка API моделей",
+      "general": "Основные",
+      "interface": "Интерфейс",
+      "about": "О программе",
+      "data": "Данные",
+      "proxy": "Настройки прокси",
+      "playground": "Песочница",
+      "voice": "Голос",
+      "tts": "Преобразование текста в речь"
+    },
+    "tts": {
+      "title": "Настройки преобразования текста в речь",
+      "voice": "Голос",
+      "refresh": "Обновить",
+      "currentLanguageVoices": "Голоса для текущего языка",
+      "selectVoice": "Выберите голос",
+      "testTextTitle": "Тестовый текст",
+      "testText": "eechat великолепен, мне нравится!"
+    },
+    "proxy": {
+      "title": "Настройки прокси",
+      "enableProxy": "Включить прокси",
+      "enableProxyDesc": "При включении приложение будет подключаться к сети через прокси-сервер",
+      "httpProxy": "HTTP Прокси",
+      "httpsProxy": "HTTPS Прокси",
+      "socksAddress": "Адрес Socks",
+      "socksPort": "Порт Socks",
+      "portPlaceholder": "например, 7890",
+      "socksUsername": "Имя пользователя (необязательно)",
+      "socksPassword": "Пароль (необязательно)",
+      "usernamePlaceholder": "Если прокси требует аутентификации, заполните это поле",
+      "passwordPlaceholder": "Если прокси требует аутентификации, заполните это поле",
+      "proxyPlaceholder": "например, 127.0.0.1",
+      "getConfigFailed": "Не удалось получить конфигурацию прокси",
+      "updateSuccess": "Конфигурация прокси обновлена",
+      "updateSuccessDesc": "Конфигурация прокси успешно обновлена",
+      "updateFailed": "Не удалось обновить конфигурацию прокси",
+      "enableSuccess": "Прокси включен",
+      "enableSuccessDesc": "Прокси успешно включен",
+      "enableFailed": "Не удалось включить прокси",
+      "disableSuccess": "Прокси отключен",
+      "disableSuccessDesc": "Прокси успешно отключен",
+      "disableFailed": "Не удалось отключить прокси"
+    },
+    "models": {
+      "localModel": "Локальная модель",
+      "apiModel": "Настройка API моделей"
+    },
+    "data": {
+      "title": "Управление данными",
+      "config": {
+        "title": "Конфигурация данных",
+        "description": "Настройка системных файлов"
+      },
+      "database": {
+        "title": "База данных",
+        "description": "Вы можете создавать резервные копии/восстанавливать содержимое чатов через эту директорию"
+      },
+      "executable": {
+        "title": "Исполняемые файлы",
+        "description": "Для сред выполнения, таких как bun/uv, вручную добавьте в эту директорию, если загрузка не удалась"
+      },
+      "logs": {
+        "title": "Системные логи",
+        "description": "Запись логов работы системы"
+      },
+      "openDirectory": "Открыть"
+    },
+    "about": {
+      "description": "Простой и удобный в использовании, локально развернутый инструмент LLM.",
+      "star": "Поставить звезду",
+      "accelerate": "Ускорить разработку"
+    }
+  }
+}
